@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  AUTH_PROTOCOL: none
+  BIND_HOST: 0.0.0.0
+  BIND_PORT: '9001'
+  DB_MIGRATE: 'true'
+  DEVICE_REGISTRY_DB_URL: jdbc:mariadb://mysql:3306/device_registry
+  DEVICE_REGISTRY_DB_USER: device_registry
+  ENV_PREFIX: ce_
+  INFLUXDB_HOST: influx.k8s
+  INFLUXDB_PORT: '8086'
+  INFLUXDB_URI: http://influx.k8s:8086
+  JAVA_OPTS: "-Xmx800m"
+  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
+  KAFKA_HOST: kafka-0:9092
+  KAFKA_TOPIC_SUFFIX: ce
+  MESSAGING_MODE: kafka
+  METRICS_DB: services
+metadata:
+  name: device-registry-config
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: device-registry
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: device-registry
+    spec:
+      containers:
+      - image: advancedtelematic/sota-device_registry:0.3.23
+        name: device-registry
+        envFrom:
+        - configMapRef:
+            name: device-registry-config
+        - secretRef:
+            name: device-registry-secret
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+          name: dev-reg0
+        args:
+        resources:
+          requests:
+            cpu: '0.2'
+            memory: 1048Mi
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          httpGet:
+            port: 9001
+            path: "/health"
+      imagePullSecrets:
+      - name: atsk8sregistrykey
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: device-registry
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: device-registry.external.kube.atsgarage.com
+    http:
+      paths:
+      - backend:
+          serviceName: device-registry
+          servicePort: 80
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+data:
+  DEVICE_REGISTRY_DB_PASSWORD: ${DEVICE_REGISTRY_DB_PASSWORD}
+metadata:
+  name: device-registry-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: device-registry
+spec:
+  ports:
+  - port: 80
+    targetPort: 9001
+    protocol: TCP
+    name: dev-reg0
+  selector:
+    app: device-registry

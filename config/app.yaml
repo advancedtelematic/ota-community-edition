@@ -1,0 +1,118 @@
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  AUTH_PROTOCOL: none
+  AUTH_VERIFICATION: none
+  BIND_HOST: 0.0.0.1
+  BIND_PORT: '9001'
+  CAMPAIGNER_HOST: campaigner
+  CAMPAIGNER_PORT: '80'
+  DEVICE_GATEWAY_PORT: '8000'
+  DEVICE_REGISTRY_HOST: device-registry
+  DEVICE_REGISTRY_PORT: '80'
+  DIRECTOR_HOST: director
+  DIRECTOR_PORT: '80'
+  ENV_PREFIX: ce_
+  INFLUXDB_HOST: influx.k8s
+  INFLUXDB_PORT: '8086'
+  INFLUXDB_URI: http://influx.k8s:8086
+  JAVA_OPTS: ''
+  KAFKA_HOST: kafka-0:9092
+  KAFKA_TOPIC_SUFFIX: ce
+  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
+  MESSAGING_MODE: kafka
+  METRICS_DB: services
+  OIDC_LOGIN_ACTION: com.advancedtelematic.auth.oidc.LoginAction
+  OIDC_NS_PROVIDER: com.advancedtelematic.auth.oidc.ConfiguredNamespace
+  OIDC_TOKEN_EXCHANGE: com.advancedtelematic.auth.NoExchange
+  OIDC_TOKEN_VERIFICATION: com.advancedtelematic.auth.oidc.TokenValidityCheck
+  PACKAGES_VERSION_FORMAT: ".+"
+  PLAY_HTTP_SESSION_SECURE: 'false'
+  SOTA_CORE_HOST: sota-core
+  SOTA_CORE_PORT: '80'
+  TOGGLE_AUTO_FEATURE_ACTIVATION: 'false'
+  TOGGLE_USER_PROFILE_MENU: 'false'
+  TUF_REPOSERVER_HOST: tuf-reposerver
+  TUF_REPOSERVER_PORT: '80'
+  WS_HOST: web-events.external.kube.atsgarage.com
+  WS_PORT: '80'
+  WS_SCHEME: ws
+metadata:
+  name: app-config
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - image: advancedtelematic/ota-plus-web:0.5.0-15-gecc0d2e
+        name: app
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secret
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+          name: app0
+        args:
+        - "-Dhttp.port=9001"
+        - "-Dwebsrc.atsgarage=ws://*.atsgarage.com:80"
+        resources:
+          requests:
+            cpu: '0.2'
+            memory: 1024Mi
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          httpGet:
+            port: 9001
+            path: "/health"
+      imagePullSecrets:
+      - name: atsk8sregistrykey
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: app
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: app.external.kube.atsgarage.com
+    http:
+      paths:
+      - backend:
+          serviceName: app
+          servicePort: 80
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+data:
+  PLAY_CRYPTO_SECRET: ${APP_PLAY_CRYPTO_SECRET}
+metadata:
+  name: app-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app
+spec:
+  ports:
+  - port: 80
+    targetPort: 9001
+    protocol: TCP
+    name: app0
+  selector:
+    app: app

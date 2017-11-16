@@ -1,0 +1,93 @@
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  AUTH_PROTOCOL: none
+  AUTH_VERIFICATION: none
+  BIND_HOST: 0.0.0.0
+  BIND_PORT: '9001'
+  ENV_PREFIX: ce_
+  INFLUXDB_HOST: influx.k8s
+  INFLUXDB_PORT: '8086'
+  INFLUXDB_URI: http://influx.k8s:8086
+  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
+  KAFKA_HOST: kafka-0:9092
+  KAFKA_TOPIC_SUFFIX: ce
+  METRICS_DB: services
+  PACKAGES_VERSION_FORMAT: ".+"
+metadata:
+  name: web-events-config
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: web-events
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: web-events
+    spec:
+      containers:
+      - image: advancedtelematic/web-events:0.0.7
+        name: web-events
+        envFrom:
+        - configMapRef:
+            name: web-events-config
+        - secretRef:
+            name: web-events-secret
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+          name: web-events0
+        args:
+        resources:
+          requests:
+            cpu: '0.2'
+            memory: 1048Mi
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          httpGet:
+            port: 9001
+            path: "/health"
+      imagePullSecrets:
+      - name: atsk8sregistrykey
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-events
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: web-events.external.kube.atsgarage.com
+    http:
+      paths:
+      - backend:
+          serviceName: web-events
+          servicePort: 80
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+data:
+  JWT_SECRET: ${WEB_EVENTS_JWT_SECRET}
+metadata:
+  name: web-events-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-events
+spec:
+  ports:
+  - port: 80
+    targetPort: 9001
+    protocol: TCP
+    name: web-events0
+  selector:
+    app: web-events

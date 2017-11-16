@@ -1,0 +1,99 @@
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  BIND_PORT: '9001'
+  DB_MIGRATE: 'true'
+  DB_URL: jdbc:mariadb://mysql:3306/director
+  DB_USER: director
+  ENV_PREFIX: ce_
+  INFLUXDB_HOST: influx.k8s
+  INFLUXDB_PORT: '8086'
+  JAVA_OPTS: "-Xmx800m"
+  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
+  KAFKA_HOST: kafka-0:9092
+  KAFKA_TOPIC_SUFFIX: ce
+  METRICS_DB: services
+  SOTA_CORE_HOST: sota-core
+  SOTA_CORE_PORT: '80'
+  TUF_KEYSERVER_HOST: tuf-keyserver
+  TUF_KEYSERVER_PORT: '80'
+  TUF_REPOSERVER_HOST: tuf-reposerver
+  TUF_REPOSERVER_PORT: '80'
+  INFLUXDB_URI: http://influx.k8s:8086
+metadata:
+  name: director-config
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: director
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: director
+    spec:
+      containers:
+      - image: advancedtelematic/director:0.2.0-1-gdae1759
+        name: director
+        envFrom:
+        - configMapRef:
+            name: director-config
+        - secretRef:
+            name: director-secret
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+          name: director0
+        args:
+        resources:
+          requests:
+            cpu: '0.2'
+            memory: 1024Mi
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          httpGet:
+            port: 9001
+            path: "/health"
+      imagePullSecrets:
+      - name: atsk8sregistrykey
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: director
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: director.external.kube.atsgarage.com
+    http:
+      paths:
+      - backend:
+          serviceName: director
+          servicePort: 80
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+data:
+  DB_PASSWORD: ${DIRECTOR_DB_PASSWORD}
+metadata:
+  name: director-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: director
+spec:
+  ports:
+  - port: 80
+    targetPort: 9001
+    protocol: TCP
+    name: director0
+  selector:
+    app: director

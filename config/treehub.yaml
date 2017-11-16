@@ -1,76 +1,26 @@
 ---
 apiVersion: v1
 kind: ConfigMap
-metadata:
-  name: treehub-config
 data:
   AUTH_PROTOCOL: none
   BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://mysql:3306/treehub
+  DB_URL: jdbc:mariadb://ota-mysql:3306/treehub
   DB_USER: treehub
-  DEVICE_REGISTRY_HOST: device-registry
-  DEVICE_REGISTRY_PORT: '80'
-  JAVA_OPTS: "-Xmx900m"
-  KAFKA_HOST: kafka-0:9092
-  KAFKA_TOPIC_SUFFIX: ce
-  MESSAGING_MODE: kafka
-  REPORT_METRICS: "false"
+  DB_PASSWORD: treehub
+  JAVA_OPTS: "-Xmx500m"
+  KAFKA_HOST: kafka:9092
+  KAFKA_TOPIC_SUFFIX: staging
+  MESSAGING_MODE: test
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
-  TREEHUB_AWS_BUCKET_ID: ats-k8s-treehub
-  TREEHUB_AWS_REGION: eu-central-1
-  TREEHUB_HOSTNAME: http://example.com/api/v2/mydevice
-  TREEHUB_STORAGE: s3
-  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
----
-apiVersion: apps/v1beta1
-kind: Deployment
+  TREEHUB_HOSTNAME: http://treehub/api/v2/mydevice
+  TREEHUB_LOCAL_STORE_PATH: "/treehub-objects"
+  TREEHUB_STORAGE: local
+  REPORT_METRICS: "false"
 metadata:
-  name: treehub
-spec:
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: treehub
-    spec:
-      containers:
-      - image: advancedtelematic/treehub:0.1.8
-        name: treehub
-        envFrom:
-        - configMapRef:
-            name: treehub-config
-        - secretRef:
-            name: treehub-secret
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 9001
-          name: treehub0
-        args:
-        resources:
-          requests:
-            cpu: '0.1'
-            memory: 512Mi
-        livenessProbe:
-          initialDelaySeconds: 300
-          periodSeconds: 30
-          httpGet:
-            port: 9001
-            path: "/health"
-      imagePullSecrets:
-      - name: atsk8sregistrykey
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: treehub-secret
-type: Opaque
-data:
-  DB_PASSWORD: ${TREEHUB_DB_PASSWORD}
-  JWT_SECRET: ${TREEHUB_JWT_SECRET}
+  name: treehub-config
 ---
 apiVersion: v1
 kind: Service
@@ -84,3 +34,75 @@ spec:
     name: treehub0
   selector:
     app: treehub
+  type: NodePort
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: treehub-pv-claim
+  labels:
+    app: treehub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: treehub
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: treehub
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: treehub
+    spec:
+      volumes:
+        - name: treehub-persistent-storage
+          persistentVolumeClaim:
+            claimName: treehub-pv-claim
+      imagePullSecrets:
+        - name: atsk8sregistrykey
+      containers:
+      - image: advancedtelematic/treehub:0.1.8
+        name: treehub
+        envFrom:
+        - configMapRef:
+            name: treehub-config
+        - secretRef:
+            name: treehub-secret            
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+          name: treehub0
+        args: 
+        resources:
+          requests:
+            cpu: '0.6'
+            memory: 600Mi
+        volumeMounts:
+          - name: treehub-persistent-storage
+            mountPath: /treehub-objects
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          httpGet:
+            port: 9001
+            path: "/health"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: treehub-secret
+type: Opaque
+data:
+  DB_PASSWORD: ${TREEHUB_DB_PASSWORD}

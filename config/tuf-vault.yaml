@@ -1,0 +1,77 @@
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  DEFAULT_LEASE_TTL: 30s
+  KAFKA_HOST: kafka-0:9092
+  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
+  MAX_LEASE_TTL: 30s
+  MYSQL_ADDR: mysql:3306
+  MYSQL_DATABASE: tuf_vault
+  MYSQL_DATABASE_TABLE: tuf_vault
+  MYSQL_USERNAME: tuf_vault
+  REPORT_METRICS: false
+metadata:
+  name: tuf-vault-config
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: tuf-vault
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: tuf-vault
+    spec:
+      containers:
+      - image: advancedtelematic/crypto-vault:0.3
+        name: tuf-vault
+        envFrom:
+        - configMapRef:
+            name: tuf-vault-config
+        - secretRef:
+            name: tuf-vault-secret
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8200
+          name: tuf-vault0
+        args:
+        resources:
+          requests:
+            cpu: '0.2'
+            memory: 1024Mi
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          tcpSocket:
+            port: 8200
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
+      imagePullSecrets:
+      - name: atsk8sregistrykey
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+data:
+  MYSQL_PASSWORD: ${TUF_VAULT_MYSQL_PASSWORD}
+metadata:
+  name: tuf-vault-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tuf-vault
+spec:
+  ports:
+  - port: 80
+    targetPort: 8200
+    protocol: TCP
+    name: tuf-vault0
+  selector:
+    app: tuf-vault

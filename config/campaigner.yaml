@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  BIND_PORT: '9001'
+  DB_MIGRATE: 'true'
+  DB_URL: jdbc:mariadb://mysql:3306/campaigner
+  DB_USER: campaigner
+  DEVICE_REGISTRY_HOST: device-registry
+  DEVICE_REGISTRY_PORT: '80'
+  DIRECTOR_HOST: director
+  DIRECTOR_PORT: '80'
+  ENV_PREFIX: ce_
+  JAVA_OPTS: ''
+  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
+  KAFKA_HOST: kafka-0:9092
+  KAFKA_TOPIC_SUFFIX: ce
+  MESSAGING_MODE: kafka
+  REPORT_METRICS: false
+  SCHEDULER_BATCH_SIZE: '200'
+  SCHEDULER_DELAY: 10 seconds
+  SCHEDULER_POLLING_TIMEOUT: 10 seconds
+metadata:
+  name: campaigner-config
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: campaigner
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: campaigner
+    spec:
+      containers:
+      - image: advancedtelematic/campaigner:0.0.1-64-g1d25684
+        name: campaigner
+        envFrom:
+        - configMapRef:
+            name: campaigner-config
+        - secretRef:
+            name: campaigner-secret
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+          name: campaigner0
+        args:
+        resources:
+          requests:
+            cpu: '0.2'
+            memory: 1024Mi
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          httpGet:
+            port: 9001
+            path: "/health"
+      imagePullSecrets:
+      - name: atsk8sregistrykey
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+data:
+  DB_PASSWORD: ${CAMPAIGNER_DB_PASSWORD}
+metadata:
+  name: campaigner-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: campaigner
+spec:
+  ports:
+  - port: 80
+    targetPort: 9001
+    protocol: TCP
+    name: campaigner0
+  selector:
+    app: campaigner

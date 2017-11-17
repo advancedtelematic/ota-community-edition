@@ -11,18 +11,15 @@ data:
   DIRECTOR_HOST: director
   DIRECTOR_PORT: '80'
   ENV_PREFIX: ce_
-  INFLUXDB_HOST: influx.k8s
-  INFLUXDB_PORT: '8086'
   JAVA_OPTS: ''
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
   MESSAGING_MODE: kafka
-  METRICS_DB: services
+  REPORT_METRICS: false
   SCHEDULER_BATCH_SIZE: '200'
   SCHEDULER_DELAY: 10 seconds
   SCHEDULER_POLLING_TIMEOUT: 10 seconds
-  INFLUXDB_URI: http://influx.k8s:8086
 metadata:
   name: campaigner-daemon-config
 ---
@@ -65,21 +62,6 @@ spec:
             path: "/health"
       imagePullSecrets:
       - name: atsk8sregistrykey
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: campaigner-daemon
-  annotations:
-    kubernetes.io/ingress.class: nginx
-spec:
-  rules:
-  - host: campaigner-daemon.external.kube.atsgarage.com
-    http:
-      paths:
-      - backend:
-          serviceName: campaigner-daemon
-          servicePort: 80
 ---
 apiVersion: v1
 kind: Secret

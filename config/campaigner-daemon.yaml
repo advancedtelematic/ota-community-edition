@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: campaigner-daemon-config
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
@@ -16,12 +18,10 @@ data:
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
   MESSAGING_MODE: kafka
-  REPORT_METRICS: false
+  REPORT_METRICS: "false"
   SCHEDULER_BATCH_SIZE: '200'
   SCHEDULER_DELAY: 10 seconds
   SCHEDULER_POLLING_TIMEOUT: 10 seconds
-metadata:
-  name: campaigner-daemon-config
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -52,8 +52,8 @@ spec:
         - com.advancedtelematic.campaigner.DaemonBoot
         resources:
           requests:
-            cpu: '0.2'
-            memory: 1024Mi
+            cpu: '0.1'
+            memory: 512Mi
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -65,8 +65,8 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+metadata:
+  name: campaigner-daemon-secret
 type: Opaque
 data:
   DB_PASSWORD: ${CAMPAIGNER_DAEMON_DB_PASSWORD}
-metadata:
-  name: campaigner-daemon-secret

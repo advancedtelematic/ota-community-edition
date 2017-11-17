@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: tuf-reposerver-config
 data:
   AUTH_PROTOCOL: none
   AUTH_VERIFICATION: none
@@ -12,13 +14,11 @@ data:
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
-  REPORT_METRICS: false
+  REPORT_METRICS: "false"
   TUF_KEYSERVER_HOST: tuf-keyserver
   TUF_KEYSERVER_PORT: '80'
   TUF_REPOSERVER_AWS_BUCKET_ID: ats-k8s-tuf-reposerver
   TUF_REPOSERVER_AWS_REGION: eu-central-1
-metadata:
-  name: tuf-reposerver-config
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -47,8 +47,8 @@ spec:
         args:
         resources:
           requests:
-            cpu: '0.2'
-            memory: 1048Mi
+            cpu: '0.1'
+            memory: 512Mi
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -60,11 +60,11 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+metadata:
+  name: tuf-reposerver-secret
 type: Opaque
 data:
   DB_PASSWORD: ${TUF_REPOSERVER_DB_PASSWORD}
-metadata:
-  name: tuf-reposerver-secret
 ---
 apiVersion: v1
 kind: Service

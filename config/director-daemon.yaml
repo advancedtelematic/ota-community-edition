@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: director-daemon-config
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
@@ -11,15 +13,13 @@ data:
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
-  REPORT_METRICS: false
+  REPORT_METRICS: "false"
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
   TUF_KEYSERVER_HOST: tuf-keyserver
   TUF_KEYSERVER_PORT: '80'
   TUF_REPOSERVER_HOST: tuf-reposerver
   TUF_REPOSERVER_PORT: '80'
-metadata:
-  name: director-daemon-config
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -50,8 +50,8 @@ spec:
         - com.advancedtelematic.director.daemon.DaemonBoot
         resources:
           requests:
-            cpu: '0.2'
-            memory: 1024Mi
+            cpu: '0.1'
+            memory: 512Mi
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -63,8 +63,8 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+metadata:
+  name: director-daemon-secret
 type: Opaque
 data:
   DB_PASSWORD: ${DIRECTOR_DAEMON_DB_PASSWORD}
-metadata:
-  name: director-daemon-secret

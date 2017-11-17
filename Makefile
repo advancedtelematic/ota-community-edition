@@ -25,4 +25,4 @@ cmd_%: # Check that a command exists
 	@: $(if $(shell command -v ${*}),,$(error Command "$*" not found))
 
 start-all: cmd_kubectl ## Start all services
-	@$(foreach service,$(SERVICES), kubectl apply --filename "config/${service}.yaml";)
+	@$(foreach service,$(SERVICES), envsubst < "config/${service}.yaml" | kubectl apply --filename -;)

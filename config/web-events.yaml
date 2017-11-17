@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: web-events-config
 data:
   AUTH_PROTOCOL: none
   AUTH_VERIFICATION: none
@@ -11,9 +13,7 @@ data:
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
   PACKAGES_VERSION_FORMAT: ".+"
-  REPORT_METRICS: false
-metadata:
-  name: web-events-config
+  REPORT_METRICS: "false"
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -42,8 +42,8 @@ spec:
         args:
         resources:
           requests:
-            cpu: '0.2'
-            memory: 1048Mi
+            cpu: '0.1'
+            memory: 512Mi
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -55,11 +55,11 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+metadata:
+  name: web-events-secret
 type: Opaque
 data:
   JWT_SECRET: ${WEB_EVENTS_JWT_SECRET}
-metadata:
-  name: web-events-secret
 ---
 apiVersion: v1
 kind: Service

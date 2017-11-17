@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: sota-core-config
 data:
   AUTH_PROTOCOL: none
   BIND_HOST: 0.0.0.0
@@ -19,14 +21,12 @@ data:
   KAFKA_TOPIC_SUFFIX: ce
   MESSAGING_MODE: kafka
   PACKAGES_VERSION_FORMAT: ".+"
-  REPORT_METRICS: false
+  REPORT_METRICS: "false"
   SOTA_RESOLVER_PORT: '80'
   TUF_REPOSERVER_HOST: tuf-reposerver
   TUF_REPOSERVER_PORT: '80'
   USE_TUF: 'true'
   USE_USER_PROFILE: 'false'
-metadata:
-  name: sota-core-config
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -55,8 +55,8 @@ spec:
         args:
         resources:
           requests:
-            cpu: '0.2'
-            memory: 1048Mi
+            cpu: '0.1'
+            memory: 512Mi
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -68,12 +68,12 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+metadata:
+  name: sota-core-secret
 type: Opaque
 data:
   CORE_DB_PASSWORD: ${SOTA_CORE_CORE_DB_PASSWORD}
   JWT_SECRET: ${SOTA_CORE_JWT_SECRET}
-metadata:
-  name: sota-core-secret
 ---
 apiVersion: v1
 kind: Service

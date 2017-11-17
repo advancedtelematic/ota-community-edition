@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: app-config
 data:
   AUTH_PROTOCOL: none
   AUTH_VERIFICATION: none
@@ -25,7 +27,7 @@ data:
   OIDC_TOKEN_VERIFICATION: com.advancedtelematic.auth.oidc.TokenValidityCheck
   PACKAGES_VERSION_FORMAT: ".+"
   PLAY_HTTP_SESSION_SECURE: 'false'
-  REPORT_METRICS: false
+  REPORT_METRICS: "false"
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
   TOGGLE_AUTO_FEATURE_ACTIVATION: 'false'
@@ -35,8 +37,6 @@ data:
   WS_HOST: web-events.external.kube.atsgarage.com
   WS_PORT: '80'
   WS_SCHEME: ws
-metadata:
-  name: app-config
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -67,8 +67,8 @@ spec:
         - "-Dwebsrc.atsgarage=ws://*.atsgarage.com:80"
         resources:
           requests:
-            cpu: '0.2'
-            memory: 1024Mi
+            cpu: '0.1'
+            memory: 512Mi
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -80,11 +80,11 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+metadata:
+  name: app-secret
 type: Opaque
 data:
   PLAY_CRYPTO_SECRET: ${APP_PLAY_CRYPTO_SECRET}
-metadata:
-  name: app-secret
 ---
 apiVersion: v1
 kind: Service

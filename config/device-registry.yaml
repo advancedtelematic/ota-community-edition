@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: device-registry-config
 data:
   AUTH_PROTOCOL: none
   BIND_HOST: 0.0.0.0
@@ -14,9 +16,7 @@ data:
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
   MESSAGING_MODE: kafka
-  REPORT_METRICS: false
-metadata:
-  name: device-registry-config
+  REPORT_METRICS: "false"
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -45,8 +45,8 @@ spec:
         args:
         resources:
           requests:
-            cpu: '0.2'
-            memory: 1048Mi
+            cpu: '0.1'
+            memory: 512Mi
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -58,11 +58,11 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+metadata:
+  name: device-registry-secret
 type: Opaque
 data:
   DEVICE_REGISTRY_DB_PASSWORD: ${DEVICE_REGISTRY_DB_PASSWORD}
-metadata:
-  name: device-registry-secret
 ---
 apiVersion: v1
 kind: Service

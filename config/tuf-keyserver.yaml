@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: tuf-keyserver-config
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
@@ -10,11 +12,9 @@ data:
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
-  REPORT_METRICS: false
+  REPORT_METRICS: "false"
   TUF_VAULT_HOST: tuf-vault
   TUF_VAULT_PORT: '80'
-metadata:
-  name: tuf-keyserver-config
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -45,8 +45,8 @@ spec:
         - com.advancedtelematic.tuf.keyserver.Boot
         resources:
           requests:
-            cpu: '0.2'
-            memory: 1048Mi
+            cpu: '0.1'
+            memory: 512Mi
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -58,12 +58,12 @@ spec:
 ---
 apiVersion: v1
 kind: Secret
+metadata:
+  name: tuf-keyserver-secret
 type: Opaque
 data:
   DB_PASSWORD: ${TUF_KEYSERVER_DB_PASSWORD}
   TUF_VAULT_TOKEN: ${TUF_VAULT_TOKEN}
-metadata:
-  name: tuf-keyserver-secret
 ---
 apiVersion: v1
 kind: Service

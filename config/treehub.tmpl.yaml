@@ -73,7 +73,7 @@ spec:
       imagePullSecrets:
         - name: atsk8sregistrykey
       containers:
-      - image: advancedtelematic/treehub:0.1.8
+      - image: {{ .treehubImage }}
         name: treehub
         envFrom:
         - configMapRef:
@@ -105,4 +105,4 @@ metadata:
   name: treehub-secret
 type: Opaque
 data:
-  DB_PASSWORD: ${TREEHUB_DB_PASSWORD}
+  DB_PASSWORD: {{ .treehubDbPassword }}

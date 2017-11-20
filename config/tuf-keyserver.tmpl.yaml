@@ -29,7 +29,7 @@ spec:
         app: tuf-keyserver
     spec:
       containers:
-      - image: advancedtelematic/tuf-keyserver:0.2.0-31-ge596ad8
+      - image: {{ .tufKeyserverImage }}
         name: tuf-keyserver
         envFrom:
         - configMapRef:
@@ -62,8 +62,8 @@ metadata:
   name: tuf-keyserver-secret
 type: Opaque
 data:
-  DB_PASSWORD: ${TUF_KEYSERVER_DB_PASSWORD}
-  TUF_VAULT_TOKEN: ${TUF_VAULT_TOKEN}
+  DB_PASSWORD: {{ .tufKeyserverDbPassword }}
+  TUF_VAULT_TOKEN: {{ .tufVaultToken }}
 ---
 apiVersion: v1
 kind: Service

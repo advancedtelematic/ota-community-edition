@@ -51,7 +51,7 @@ spec:
         app: app
     spec:
       containers:
-      - image: advancedtelematic/ota-plus-web:0.5.0-15-gecc0d2e
+      - image: {{ .appImage }}
         name: app
         envFrom:
         - configMapRef:
@@ -84,7 +84,7 @@ metadata:
   name: app-secret
 type: Opaque
 data:
-  PLAY_CRYPTO_SECRET: ${APP_PLAY_CRYPTO_SECRET}
+  PLAY_CRYPTO_SECRET: {{ .appPlayCryptoSecret }}
 ---
 apiVersion: v1
 kind: Service

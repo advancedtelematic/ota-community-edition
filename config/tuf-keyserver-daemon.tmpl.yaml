@@ -2,44 +2,47 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: web-events-config
+  name: tuf-keyserver-daemon-config
 data:
-  AUTH_PROTOCOL: none
-  AUTH_VERIFICATION: none
-  BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
-  ENV_PREFIX: ce_
+  DB_MIGRATE: 'true'
+  DB_URL: jdbc:mariadb://mysql:3306/tuf_keyserver
+  DB_USER: tuf_keyserver
+  JAVA_OPTS: "-Xmx900m"
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
-  PACKAGES_VERSION_FORMAT: ".+"
   REPORT_METRICS: "false"
+  TUF_VAULT_HOST: tuf-vault
+  TUF_VAULT_PORT: '80'
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: web-events
+  name: tuf-keyserver-daemon
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: web-events
+        app: tuf-keyserver-daemon
     spec:
       containers:
-      - image: advancedtelematic/web-events:0.0.7
-        name: web-events
+      - image: {{ .tufKeyserverImage }}
+        name: tuf-keyserver-daemon
         envFrom:
         - configMapRef:
-            name: web-events-config
+            name: tuf-keyserver-daemon-config
         - secretRef:
-            name: web-events-secret
+            name: tuf-keyserver-daemon-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: web-events0
+          name: tuf-keyserver0
         args:
+        - "-main"
+        - com.advancedtelematic.tuf.keyserver.daemon.KeyGenerationDaemon
         resources:
           requests:
             cpu: '0.1'
@@ -56,20 +59,8 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: web-events-secret
+  name: tuf-keyserver-daemon-secret
 type: Opaque
 data:
-  JWT_SECRET: ${WEB_EVENTS_JWT_SECRET}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: web-events
-spec:
-  ports:
-  - port: 80
-    targetPort: 9001
-    protocol: TCP
-    name: web-events0
-  selector:
-    app: web-events
+  DB_PASSWORD: {{ .tufKeyserverDaemonDbPassword }}
+  TUF_VAULT_TOKEN: {{ .tufKeyserverVaultToken }}

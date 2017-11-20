@@ -2,51 +2,48 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: campaigner-config
+  name: tuf-reposerver-config
 data:
+  AUTH_PROTOCOL: none
+  AUTH_VERIFICATION: none
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://mysql:3306/campaigner
-  DB_USER: campaigner
-  DEVICE_REGISTRY_HOST: device-registry
-  DEVICE_REGISTRY_PORT: '80'
-  DIRECTOR_HOST: director
-  DIRECTOR_PORT: '80'
-  ENV_PREFIX: ce_
-  JAVA_OPTS: ''
+  DB_URL: jdbc:mariadb://mysql:3306/tuf_reposerver
+  DB_USER: tuf_reposerver
+  JAVA_OPTS: "-Xmx900m"
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
-  MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
-  SCHEDULER_BATCH_SIZE: '200'
-  SCHEDULER_DELAY: 10 seconds
-  SCHEDULER_POLLING_TIMEOUT: 10 seconds
+  TUF_KEYSERVER_HOST: tuf-keyserver
+  TUF_KEYSERVER_PORT: '80'
+  TUF_REPOSERVER_AWS_BUCKET_ID: ats-k8s-tuf-reposerver
+  TUF_REPOSERVER_AWS_REGION: eu-central-1
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: campaigner
+  name: tuf-reposerver
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: campaigner
+        app: tuf-reposerver
     spec:
       containers:
-      - image: advancedtelematic/campaigner:0.0.1-64-g1d25684
-        name: campaigner
+      - image: {{ .tufReposerverImage }}
+        name: tuf-reposerver
         envFrom:
         - configMapRef:
-            name: campaigner-config
+            name: tuf-reposerver-config
         - secretRef:
-            name: campaigner-secret
+            name: tuf-reposerver-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: campaigner0
+          name: tuf-repo0
         args:
         resources:
           requests:
@@ -64,20 +61,20 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: campaigner-secret
+  name: tuf-reposerver-secret
 type: Opaque
 data:
-  DB_PASSWORD: ${CAMPAIGNER_DB_PASSWORD}
+  DB_PASSWORD: {{ .tufReposerverDbPassword }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: campaigner
+  name: tuf-reposerver
 spec:
   ports:
   - port: 80
     targetPort: 9001
     protocol: TCP
-    name: campaigner0
+    name: tuf-repo0
   selector:
-    app: campaigner
+    app: tuf-reposerver

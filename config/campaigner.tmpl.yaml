@@ -2,56 +2,51 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: sota-core-config
+  name: campaigner-config
 data:
-  AUTH_PROTOCOL: none
-  BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
-  CORE_AWS_BUCKET_ID: ats-k8s-core
-  CORE_DB_URL: jdbc:mariadb://mysql:3306/sota_core
-  CORE_DB_USER: sota_core
-  CORE_INTERACTION_PROTOCOL: none
   DB_MIGRATE: 'true'
+  DB_URL: jdbc:mariadb://mysql:3306/campaigner
+  DB_USER: campaigner
   DEVICE_REGISTRY_HOST: device-registry
   DEVICE_REGISTRY_PORT: '80'
+  DIRECTOR_HOST: director
+  DIRECTOR_PORT: '80'
   ENV_PREFIX: ce_
-  JAVA_OPTS: "-Xmx800m"
+  JAVA_OPTS: ''
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
   MESSAGING_MODE: kafka
-  PACKAGES_VERSION_FORMAT: ".+"
   REPORT_METRICS: "false"
-  SOTA_RESOLVER_PORT: '80'
-  TUF_REPOSERVER_HOST: tuf-reposerver
-  TUF_REPOSERVER_PORT: '80'
-  USE_TUF: 'true'
-  USE_USER_PROFILE: 'false'
+  SCHEDULER_BATCH_SIZE: '200'
+  SCHEDULER_DELAY: 10 seconds
+  SCHEDULER_POLLING_TIMEOUT: 10 seconds
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: sota-core
+  name: campaigner
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: sota-core
+        app: campaigner
     spec:
       containers:
-      - image: advancedtelematic/sota-core:0.3.23
-        name: sota-core
+      - image: {{ .campaignerImage }}
+        name: campaigner
         envFrom:
         - configMapRef:
-            name: sota-core-config
+            name: campaigner-config
         - secretRef:
-            name: sota-core-secret
+            name: campaigner-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: sota-core0
+          name: campaigner0
         args:
         resources:
           requests:
@@ -69,21 +64,20 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sota-core-secret
+  name: campaigner-secret
 type: Opaque
 data:
-  CORE_DB_PASSWORD: ${SOTA_CORE_CORE_DB_PASSWORD}
-  JWT_SECRET: ${SOTA_CORE_JWT_SECRET}
+  DB_PASSWORD: {{ .campaignerDbPassword }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: sota-core
+  name: campaigner
 spec:
   ports:
   - port: 80
     targetPort: 9001
     protocol: TCP
-    name: sota-core0
+    name: campaigner0
   selector:
-    app: sota-core
+    app: campaigner

@@ -27,7 +27,7 @@ spec:
         app: tuf-vault
     spec:
       containers:
-      - image: advancedtelematic/crypto-vault:0.3
+      - image: {{ .tufVaultImage }}
         name: tuf-vault
         envFrom:
         - configMapRef:
@@ -61,7 +61,7 @@ metadata:
   name: tuf-vault-secret
 type: Opaque
 data:
-  MYSQL_PASSWORD: ${TUF_VAULT_MYSQL_PASSWORD}
+  MYSQL_PASSWORD: {{ .tufVaultMysqlPassword }}
 ---
 apiVersion: v1
 kind: Service

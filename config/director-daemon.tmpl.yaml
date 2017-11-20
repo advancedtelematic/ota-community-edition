@@ -2,54 +2,52 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: campaigner-daemon-config
+  name: director-daemon-config
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://mysql:3306/campaigner
-  DB_USER: campaigner
-  DEVICE_REGISTRY_HOST: device-registry
-  DEVICE_REGISTRY_PORT: '80'
-  DIRECTOR_HOST: director
-  DIRECTOR_PORT: '80'
+  DB_URL: jdbc:mariadb://mysql:3306/director
+  DB_USER: director
   ENV_PREFIX: ce_
-  JAVA_OPTS: ''
+  JAVA_OPTS: "-Xmx800m"
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
-  MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
-  SCHEDULER_BATCH_SIZE: '200'
-  SCHEDULER_DELAY: 10 seconds
-  SCHEDULER_POLLING_TIMEOUT: 10 seconds
+  SOTA_CORE_HOST: sota-core
+  SOTA_CORE_PORT: '80'
+  TUF_KEYSERVER_HOST: tuf-keyserver
+  TUF_KEYSERVER_PORT: '80'
+  TUF_REPOSERVER_HOST: tuf-reposerver
+  TUF_REPOSERVER_PORT: '80'
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: campaigner-daemon
+  name: director-daemon
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: campaigner-daemon
+        app: director-daemon
     spec:
       containers:
-      - image: advancedtelematic/campaigner:0.0.1-64-g1d25684
-        name: campaigner-daemon
+      - image: {{ .directorImage }}
+        name: director-daemon
         envFrom:
         - configMapRef:
-            name: campaigner-daemon-config
+            name: director-daemon-config
         - secretRef:
-            name: campaigner-daemon-secret
+            name: director-daemon-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: camp-daem0
+          name: dir-daem0
         args:
         - "-main"
-        - com.advancedtelematic.campaigner.DaemonBoot
+        - com.advancedtelematic.director.daemon.DaemonBoot
         resources:
           requests:
             cpu: '0.1'
@@ -66,7 +64,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: campaigner-daemon-secret
+  name: director-daemon-secret
 type: Opaque
 data:
-  DB_PASSWORD: ${CAMPAIGNER_DAEMON_DB_PASSWORD}
+  DB_PASSWORD: {{ .directorDaemonDbPassword }}

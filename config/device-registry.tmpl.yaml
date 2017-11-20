@@ -2,47 +2,47 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tuf-keyserver-daemon-config
+  name: device-registry-config
 data:
+  AUTH_PROTOCOL: none
+  BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://mysql:3306/tuf_keyserver
-  DB_USER: tuf_keyserver
-  JAVA_OPTS: "-Xmx900m"
+  DEVICE_REGISTRY_DB_URL: jdbc:mariadb://mysql:3306/device_registry
+  DEVICE_REGISTRY_DB_USER: device_registry
+  ENV_PREFIX: ce_
+  JAVA_OPTS: "-Xmx800m"
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
+  MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
-  TUF_VAULT_HOST: tuf-vault
-  TUF_VAULT_PORT: '80'
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: tuf-keyserver-daemon
+  name: device-registry
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: tuf-keyserver-daemon
+        app: device-registry
     spec:
       containers:
-      - image: advancedtelematic/tuf-keyserver:0.2.0-31-ge596ad8
-        name: tuf-keyserver-daemon
+      - image: {{ .deviceRegistryImage }}
+        name: device-registry
         envFrom:
         - configMapRef:
-            name: tuf-keyserver-daemon-config
+            name: device-registry-config
         - secretRef:
-            name: tuf-keyserver-daemon-secret
+            name: device-registry-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: tuf-keyserver0
+          name: dev-reg0
         args:
-        - "-main"
-        - com.advancedtelematic.tuf.keyserver.daemon.KeyGenerationDaemon
         resources:
           requests:
             cpu: '0.1'
@@ -59,8 +59,20 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: tuf-keyserver-daemon-secret
+  name: device-registry-secret
 type: Opaque
 data:
-  DB_PASSWORD: ${TUF_KEYSERVER_DAEMON_DB_PASSWORD}
-  TUF_VAULT_TOKEN: ${TUF_KEYSERVER_TUF_VAULT_TOKEN}
+  DEVICE_REGISTRY_DB_PASSWORD: {{ .deviceRegistryDbPassword }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: device-registry
+spec:
+  ports:
+  - port: 80
+    targetPort: 9001
+    protocol: TCP
+    name: dev-reg0
+  selector:
+    app: device-registry

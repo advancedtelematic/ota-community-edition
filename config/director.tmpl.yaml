@@ -59,6 +59,21 @@ spec:
       imagePullSecrets:
       - name: atsk8sregistrykey
 ---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: director
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: director.{{ .externalDomain }}
+    http:
+      paths:
+      - backend:
+          serviceName: director
+          servicePort: 80
+---
 apiVersion: v1
 kind: Secret
 metadata:

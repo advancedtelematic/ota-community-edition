@@ -1,3 +1,7 @@
+# routing
+externalDomain: ota.local
+
+# images
 appImage: advancedtelematic/ota-plus-web:0.5.0-15-gecc0d2e
 campaignerImage: advancedtelematic/campaigner:0.0.1-64-g1d25684
 deviceRegistryImage: advancedtelematic/sota-device_registry:0.3.23

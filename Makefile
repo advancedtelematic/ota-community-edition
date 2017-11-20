@@ -1,6 +1,6 @@
 CONFIG ?= config.yaml
 SECRETS ?= secrets.yaml
-GENERATED ?= generated.yaml
+GENERATED ?= .generated.yaml
 
 
 .PHONY: help gen-config start-all

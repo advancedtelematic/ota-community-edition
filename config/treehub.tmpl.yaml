@@ -1,6 +1,8 @@
 ---
 apiVersion: v1
 kind: ConfigMap
+metadata:
+  name: treehub-config
 data:
   AUTH_PROTOCOL: none
   BIND_HOST: 0.0.0.0
@@ -11,7 +13,7 @@ data:
   DB_PASSWORD: treehub
   JAVA_OPTS: "-Xmx500m"
   KAFKA_HOST: kafka:9092
-  KAFKA_TOPIC_SUFFIX: staging
+  KAFKA_TOPIC_SUFFIX: ce
   MESSAGING_MODE: test
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
@@ -19,20 +21,6 @@ data:
   TREEHUB_LOCAL_STORE_PATH: "/treehub-objects"
   TREEHUB_STORAGE: local
   REPORT_METRICS: "false"
-metadata:
-  name: treehub-config
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: treehub-pv-claim
-  labels:
-    app: treehub
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
 ---
 apiVersion: v1
 kind: Secret
@@ -59,8 +47,6 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: treehub
-  labels:
-    app: wordpress
 spec:
   selector:
     matchLabels:
@@ -72,12 +58,6 @@ spec:
       labels:
         app: treehub
     spec:
-      volumes:
-        - name: treehub-persistent-storage
-          persistentVolumeClaim:
-            claimName: treehub-pv-claim
-      imagePullSecrets:
-        - name: atsk8sregistrykey
       containers:
       - image: {{ .treehubImage }}
         name: treehub
@@ -85,12 +65,12 @@ spec:
         - configMapRef:
             name: treehub-config
         - secretRef:
-            name: treehub-secret            
+            name: treehub-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
           name: treehub0
-        args: 
+        args:
         resources:
           requests:
             cpu: '0.2'
@@ -104,6 +84,12 @@ spec:
           httpGet:
             port: 9001
             path: "/health"
+      imagePullSecrets:
+        - name: atsk8sregistrykey
+      volumes:
+        - name: treehub-persistent-storage
+          persistentVolumeClaim:
+            claimName: treehub-pv-claim
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -121,6 +107,7 @@ spec:
           serviceName: treehub
           servicePort: 80
 ---
+apiVersion: v1
 kind: Service
 metadata:
   name: treehub

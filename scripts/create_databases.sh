@@ -1,4 +1,3 @@
-
 CREATE DATABASE treehub;
 
 create user 'treehub' identified by 'treehub';

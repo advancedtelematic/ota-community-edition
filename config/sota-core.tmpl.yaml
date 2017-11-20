@@ -72,8 +72,8 @@ metadata:
   name: sota-core-secret
 type: Opaque
 data:
-  CORE_DB_PASSWORD: {{ .sotaCoreDbPassword }}
-  JWT_SECRET: {{ .sotaCoreJwtSecret }}
+  CORE_DB_PASSWORD: {{ .sotaCoreDbPassword | b64enc }}
+  JWT_SECRET: {{ .sotaCoreJwtSecret | b64enc }}
 ---
 apiVersion: v1
 kind: Service

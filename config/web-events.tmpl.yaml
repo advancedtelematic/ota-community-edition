@@ -59,7 +59,7 @@ metadata:
   name: web-events-secret
 type: Opaque
 data:
-  JWT_SECRET: {{ .webEventsJwtSecret }}
+  JWT_SECRET: {{ .webEventsJwtSecret | b64enc }}
 ---
 apiVersion: v1
 kind: Service

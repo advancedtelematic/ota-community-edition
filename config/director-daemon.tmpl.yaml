@@ -67,4 +67,4 @@ metadata:
   name: director-daemon-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .directorDaemonDbPassword }}
+  DB_PASSWORD: {{ .directorDaemonDbPassword | b64enc }}

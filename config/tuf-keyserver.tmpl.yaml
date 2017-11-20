@@ -62,8 +62,8 @@ metadata:
   name: tuf-keyserver-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .tufKeyserverDbPassword }}
-  TUF_VAULT_TOKEN: {{ .tufVaultToken }}
+  DB_PASSWORD: {{ .tufKeyserverDbPassword | b64enc }}
+  TUF_VAULT_TOKEN: {{ .tufVaultToken | b64enc }}
 ---
 apiVersion: v1
 kind: Service

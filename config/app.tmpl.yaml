@@ -84,7 +84,7 @@ metadata:
   name: app-secret
 type: Opaque
 data:
-  PLAY_CRYPTO_SECRET: {{ .appPlayCryptoSecret }}
+  PLAY_CRYPTO_SECRET: {{ .appPlayCryptoSecret | b64enc }}
 ---
 apiVersion: v1
 kind: Service

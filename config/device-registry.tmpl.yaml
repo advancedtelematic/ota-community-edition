@@ -62,7 +62,7 @@ metadata:
   name: device-registry-secret
 type: Opaque
 data:
-  DEVICE_REGISTRY_DB_PASSWORD: {{ .deviceRegistryDbPassword }}
+  DEVICE_REGISTRY_DB_PASSWORD: {{ .deviceRegistryDbPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service

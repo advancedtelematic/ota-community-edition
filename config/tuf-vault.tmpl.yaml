@@ -61,7 +61,7 @@ metadata:
   name: tuf-vault-secret
 type: Opaque
 data:
-  MYSQL_PASSWORD: {{ .tufVaultMysqlPassword }}
+  MYSQL_PASSWORD: {{ .tufVaultMysqlPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service

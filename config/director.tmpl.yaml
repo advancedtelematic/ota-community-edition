@@ -65,7 +65,7 @@ metadata:
   name: director-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .directorDbPassword }}
+  DB_PASSWORD: {{ .directorDbPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service

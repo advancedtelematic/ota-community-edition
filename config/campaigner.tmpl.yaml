@@ -67,7 +67,7 @@ metadata:
   name: campaigner-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .campaignerDbPassword }}
+  DB_PASSWORD: {{ .campaignerDbPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service

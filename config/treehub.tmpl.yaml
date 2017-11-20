@@ -105,4 +105,4 @@ metadata:
   name: treehub-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .treehubDbPassword }}
+  DB_PASSWORD: {{ .treehubDbPassword | b64enc }}

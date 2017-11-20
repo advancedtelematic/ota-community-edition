@@ -64,7 +64,7 @@ metadata:
   name: tuf-reposerver-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .tufReposerverDbPassword }}
+  DB_PASSWORD: {{ .tufReposerverDbPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service

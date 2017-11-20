@@ -21,20 +21,26 @@ data:
   REPORT_METRICS: "false"
 metadata:
   name: treehub-config
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: treehub-pv-claim
+  labels:
+    app: treehub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: v1
-kind: Service
+kind: Secret
 metadata:
-  name: treehub
-spec:
-  ports:
-  - port: 80
-    targetPort: 9001
-    protocol: TCP
-    name: treehub0
-  selector:
-    app: treehub
-  type: NodePort
+  name: treehub-secret
+type: Opaque
+data:
+  DB_PASSWORD: {{ .treehubDbPassword | b64enc }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -87,8 +93,8 @@ spec:
         args: 
         resources:
           requests:
-            cpu: '0.6'
-            memory: 600Mi
+            cpu: '0.2'
+            memory: 512Mi
         volumeMounts:
           - name: treehub-persistent-storage
             mountPath: /treehub-objects
@@ -115,10 +121,15 @@ spec:
           serviceName: treehub
           servicePort: 80
 ---
-apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-  name: treehub-secret
-type: Opaque
-data:
-  DB_PASSWORD: {{ .treehubDbPassword | b64enc }}
+  name: treehub
+spec:
+  ports:
+  - port: 80
+    targetPort: 9001
+    protocol: TCP
+    name: treehub0
+  selector:
+    app: treehub
+  type: NodePort

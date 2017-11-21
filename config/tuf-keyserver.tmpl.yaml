@@ -8,22 +8,13 @@ data:
   DB_MIGRATE: 'true'
   DB_URL: jdbc:mariadb://mysql:3306/tuf_keyserver
   DB_USER: tuf_keyserver
-  JAVA_OPTS: "-Xmx900m"
+  JAVA_OPTS: "-Xmx400m"
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
   REPORT_METRICS: "false"
   TUF_VAULT_HOST: tuf-vault
   TUF_VAULT_PORT: '80'
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: tuf-keyserver-secret
-type: Opaque
-data:
-  DB_PASSWORD: {{ .tufKeyserverDbPassword | b64enc }}
-  TUF_VAULT_TOKEN: {{ .tufVaultToken | b64enc }}
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -79,6 +70,15 @@ spec:
       - backend:
           serviceName: tuf-keyserver
           servicePort: 80
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tuf-keyserver-secret
+type: Opaque
+data:
+  DB_PASSWORD: {{ .tufKeyserverDbPassword | b64enc }}
+  TUF_VAULT_TOKEN: {{ .tufVaultToken | b64enc }}
 ---
 apiVersion: v1
 kind: Service

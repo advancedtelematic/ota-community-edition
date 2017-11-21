@@ -11,20 +11,12 @@ data:
   DEVICE_REGISTRY_DB_URL: jdbc:mariadb://mysql:3306/device_registry
   DEVICE_REGISTRY_DB_USER: device_registry
   ENV_PREFIX: ce_
-  JAVA_OPTS: "-Xmx800m"
+  JAVA_OPTS: "-Xmx400m"
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
   MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: device-registry-secret
-type: Opaque
-data:
-  DEVICE_REGISTRY_DB_PASSWORD: {{ .deviceRegistryDbPassword | b64enc }}
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -78,6 +70,14 @@ spec:
       - backend:
           serviceName: device-registry
           servicePort: 80
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: device-registry-secret
+type: Opaque
+data:
+  DEVICE_REGISTRY_DB_PASSWORD: {{ .deviceRegistryDbPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service

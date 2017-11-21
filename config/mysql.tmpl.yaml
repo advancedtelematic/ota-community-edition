@@ -2,23 +2,10 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mysql-config
+  name: mysql-secret
 type: Opaque
 data:
   MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword }}
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pv-claim
-  labels:
-    app: ota-mysql
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
 ---
 apiVersion: apps/v1beta2
 kind: Deployment
@@ -54,6 +41,19 @@ spec:
       - name: mysql-persistent-storage
         persistentVolumeClaim:
           claimName: mysql-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: ota-mysql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
 ---
 apiVersion: v1
 kind: Service

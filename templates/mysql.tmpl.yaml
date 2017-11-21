@@ -2,18 +2,18 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: ota-mysql
+  name: mysql
 spec:
   selector:
     matchLabels:
-      app: ota-mysql
+      app: mysql
       tier: mysql
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: ota-mysql
+        app: mysql
         tier: mysql
     spec:
       containers:
@@ -53,7 +53,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: mysql-pv-claim
   labels:
-    app: ota-mysql
+    app: mysql
 spec:
   accessModes:
     - ReadWriteOnce
@@ -72,11 +72,10 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ota-mysql
+  name: mysql
 spec:
   ports:
     - port: 3306
   selector:
-    app: ota-mysql
+    app: mysql
     tier: mysql
-  clusterIP: None

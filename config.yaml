@@ -1,5 +1,10 @@
-# routing
+# environment
+envPrefix: ce_
 externalDomain: ota.local
+javaOpts: "-Xmx400m"
+kafkaHost: kafka
+kafkaTopicPrefix: ce
+mysqlHost: mysql
 
 # images
 appImage: advancedtelematic/ota-plus-web:0.5.0-15-gecc0d2e
@@ -15,3 +20,33 @@ tufReposerverImage: advancedtelematic/tuf-reposerver:0.2.0-31-ge596ad8
 tufVaultImage: advancedtelematic/crypto-vault:0.3
 webEventsImage: advancedtelematic/web-events:0.0.7
 zookeeperImage: wurstmeister/zookeeper:latest
+
+# resources
+appCpu: 100m
+appMemory: 512Mi
+campaignerCpu: 100m
+campaignerMemory: 512Mi
+campaignerDaemonCpu: 100m
+campaignerDaemonMemory: 512Mi
+deviceRegistryCpu: 100m
+deviceRegistryMemory: 512Mi
+directorCpu: 100m
+directorMemory: 512Mi
+directorDaemonCpu: 100m
+directorDaemonMemory: 512Mi
+kafkaCpu: 100m
+kafkaMemory: 512Mi
+sotaCoreCpu: 100m
+sotaCoreMemory: 512Mi
+treehubCpu: 100m
+treehubMemory: 512Mi
+tufKeyserverCpu: 100m
+tufKeyserverMemory: 512Mi
+tufKeyserverDaemonCpu: 100m
+tufKeyserverDaemonMemory: 512Mi
+tufReposerverCpu: 100m
+tufReposerverMemory: 512Mi
+tufVaultCpu: 100m
+tufVaultMemory: 512Mi
+webEventsCpu: 100m
+webEventsMemory: 512Mi

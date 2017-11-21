@@ -5,10 +5,10 @@ metadata:
   name: tuf-vault-config
 data:
   DEFAULT_LEASE_TTL: 30s
-  KAFKA_HOST: kafka-0:9092
-  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
+  KAFKA_HOST: {{ .kafkaHost }}:9092
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
   MAX_LEASE_TTL: 30s
-  MYSQL_ADDR: mysql:3306
+  MYSQL_ADDR: {{ .mysqlHost }}:3306
   MYSQL_DATABASE: tuf_vault
   MYSQL_DATABASE_TABLE: tuf_vault
   MYSQL_USERNAME: tuf_vault
@@ -41,8 +41,8 @@ spec:
         args:
         resources:
           requests:
-            cpu: '0.1'
-            memory: 512Mi
+            cpu: {{ .tufVaultCpu }}
+            memory: {{ .tufVaultMemory }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30

@@ -2,51 +2,48 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: device-registry-config
+  name: web-events-config
 data:
   AUTH_PROTOCOL: none
+  AUTH_VERIFICATION: none
   BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
-  DB_MIGRATE: 'true'
-  DEVICE_REGISTRY_DB_URL: jdbc:mariadb://mysql:3306/device_registry
-  DEVICE_REGISTRY_DB_USER: device_registry
-  ENV_PREFIX: ce_
-  JAVA_OPTS: "-Xmx400m"
-  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
-  KAFKA_HOST: kafka-0:9092
-  KAFKA_TOPIC_SUFFIX: ce
-  MESSAGING_MODE: kafka
+  ENV_PREFIX: {{ .envPrefix }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
+  KAFKA_HOST: {{ .kafkaHost }}:9092
+  KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
+  PACKAGES_VERSION_FORMAT: ".+"
   REPORT_METRICS: "false"
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: device-registry
+  name: web-events
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: device-registry
+        app: web-events
     spec:
       containers:
-      - image: {{ .deviceRegistryImage }}
-        name: device-registry
+      - image: {{ .webEventsImage }}
+        name: web-events
         envFrom:
         - configMapRef:
-            name: device-registry-config
+            name: web-events-config
         - secretRef:
-            name: device-registry-secret
+            name: web-events-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: dev-reg0
+          name: web-events0
         args:
         resources:
           requests:
-            cpu: '0.1'
-            memory: 512Mi
+            cpu: {{ .webEventsCpu }}
+            memory: {{ .webEventsMemory }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -59,35 +56,35 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: device-registry
+  name: web-events
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: device-registry.{{ .externalDomain }}
+  - host: web-events.{{ .externalDomain }}
     http:
       paths:
       - backend:
-          serviceName: device-registry
+          serviceName: web-events
           servicePort: 80
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: device-registry-secret
+  name: web-events-secret
 type: Opaque
 data:
-  DEVICE_REGISTRY_DB_PASSWORD: {{ .deviceRegistryDbPassword | b64enc }}
+  JWT_SECRET: {{ .webEventsJwtSecret | b64enc }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: device-registry
+  name: web-events
 spec:
   ports:
   - port: 80
     targetPort: 9001
     protocol: TCP
-    name: dev-reg0
+    name: web-events0
   selector:
-    app: device-registry
+    app: web-events

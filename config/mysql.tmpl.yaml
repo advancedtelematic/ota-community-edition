@@ -1,12 +1,4 @@
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mysql-secret
-type: Opaque
-data:
-  MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword }}
----
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -43,6 +35,20 @@ spec:
           claimName: mysql-pv-claim
 ---
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv-1
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/mysql-pv-1
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pv-claim
@@ -54,6 +60,14 @@ spec:
   resources:
     requests:
       storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+type: Opaque
+data:
+  MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword }}
 ---
 apiVersion: v1
 kind: Service

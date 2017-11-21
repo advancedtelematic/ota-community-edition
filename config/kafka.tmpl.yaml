@@ -1,0 +1,110 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+data:
+  JAVA_OPTS: "-Xmx400m"
+  KAFKA_BROKER_ID: "0"
+  KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://0.0.0.0:9092
+  KAFKA_ZOOKEEPER_CONNECT: localhost:2181
+  KAFKA_DELETE_TOPIC_ENABLE: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zookeeper-config
+data:
+  JAVA_OPTS: "-Xmx400m"
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: kafka
+spec:
+  selector:
+    matchLabels:
+      app: kafka
+      tier: backend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kafka
+        tier: backend
+    spec:
+      containers:
+      - image: {{ .kafkaImage }}
+        name: kafka
+        envFrom:
+        - configMapRef:
+            name: kafka-config
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: '0.1'
+            memory: 512Mi
+        ports:
+        - containerPort: 9092
+          name: kafka
+        volumeMounts:
+        - name: kafka-persistent-storage
+          mountPath: /var/lib/kafka
+      - image: {{ .zookeeperImage }}
+        name: zookeeper
+        envFrom:
+        - configMapRef:
+            name: zookeeper-config
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 2181
+          name: zookeeper
+        resources:
+          requests:
+            cpu: '0.1'
+            memory: 512Mi
+      volumes:
+        - name: kafka-persistent-storage
+          persistentVolumeClaim:
+            claimName: kafka-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-pv-1
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/kafka-pv-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-pv-claim
+  labels:
+    app: kafka
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+spec:
+  ports:
+    - port: 9092
+  selector:
+    app: kafka
+    tier: backend
+  clusterIP: None

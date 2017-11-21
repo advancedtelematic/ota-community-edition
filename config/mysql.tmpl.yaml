@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: ota-mysql
+spec:
+  selector:
+    matchLabels:
+      app: ota-mysql
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: ota-mysql
+        tier: mysql
+    spec:
+      containers:
+      - image: {{ .mysqlImage }}
+        name: mariadb
+        envFrom:
+        - secretRef:
+            name: mysql-secret
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv-1
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/mysql-pv-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: ota-mysql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+type: Opaque
+data:
+  MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ota-mysql
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: ota-mysql
+    tier: mysql
+  clusterIP: None

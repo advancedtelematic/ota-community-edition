@@ -1,0 +1,17 @@
+# routing
+externalDomain: ota.local
+
+# images
+appImage: advancedtelematic/ota-plus-web:0.5.0-15-gecc0d2e
+campaignerImage: advancedtelematic/campaigner:0.0.1-64-g1d25684
+deviceRegistryImage: advancedtelematic/sota-device_registry:0.3.23
+directorImage: advancedtelematic/director:0.2.0-1-gdae1759
+kafkaImage: wurstmeister/kafka:latest
+mysqlImage: mariadb:10.1.19
+sotaCoreImage: advancedtelematic/sota-core:0.3.23
+treehubImage: advancedtelematic/treehub:0.1.8
+tufKeyserverImage: advancedtelematic/tuf-keyserver:0.2.0-31-ge596ad8
+tufReposerverImage: advancedtelematic/tuf-reposerver:0.2.0-31-ge596ad8
+tufVaultImage: advancedtelematic/crypto-vault:0.3
+webEventsImage: advancedtelematic/web-events:0.0.7
+zookeeperImage: wurstmeister/zookeeper:latest

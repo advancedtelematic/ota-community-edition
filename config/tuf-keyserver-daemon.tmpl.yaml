@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tuf-keyserver-config
+  name: tuf-keyserver-daemon-config
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
   DB_URL: jdbc:mariadb://mysql:3306/tuf_keyserver
   DB_USER: tuf_keyserver
-  JAVA_OPTS: "-Xmx900m"
+  JAVA_OPTS: "-Xmx400m"
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
@@ -19,30 +19,30 @@ data:
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: tuf-keyserver
+  name: tuf-keyserver-daemon
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: tuf-keyserver
+        app: tuf-keyserver-daemon
     spec:
       containers:
-      - image: advancedtelematic/tuf-keyserver:0.2.0-31-ge596ad8
-        name: tuf-keyserver
+      - image: {{ .tufKeyserverImage }}
+        name: tuf-keyserver-daemon
         envFrom:
         - configMapRef:
-            name: tuf-keyserver-config
+            name: tuf-keyserver-daemon-config
         - secretRef:
-            name: tuf-keyserver-secret
+            name: tuf-keyserver-daemon-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
           name: tuf-keyserver0
         args:
         - "-main"
-        - com.advancedtelematic.tuf.keyserver.Boot
+        - com.advancedtelematic.tuf.keyserver.daemon.KeyGenerationDaemon
         resources:
           requests:
             cpu: '0.1'
@@ -56,24 +56,26 @@ spec:
       imagePullSecrets:
       - name: atsk8sregistrykey
 ---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: tuf-keyserver-daemon
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: tuf-keyserver-daemon.{{ .externalDomain }}
+    http:
+      paths:
+      - backend:
+          serviceName: tuf-keyserver-daemon
+          servicePort: 80
+---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: tuf-keyserver-secret
+  name: tuf-keyserver-daemon-secret
 type: Opaque
 data:
-  DB_PASSWORD: ${TUF_KEYSERVER_DB_PASSWORD}
-  TUF_VAULT_TOKEN: ${TUF_VAULT_TOKEN}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: tuf-keyserver
-spec:
-  ports:
-  - port: 80
-    targetPort: 9001
-    protocol: TCP
-    name: tuf-keyserver0
-  selector:
-    app: tuf-keyserver
+  DB_PASSWORD: {{ .tufKeyserverDaemonDbPassword | b64enc }}
+  TUF_VAULT_TOKEN: {{ .tufKeyserverVaultToken | b64enc }}

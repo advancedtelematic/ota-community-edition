@@ -1,0 +1,136 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: treehub-config
+data:
+  AUTH_PROTOCOL: none
+  BIND_HOST: 0.0.0.0
+  BIND_PORT: '9001'
+  DB_MIGRATE: 'true'
+  DB_URL: jdbc:mariadb://ota-mysql:3306/treehub
+  DB_USER: treehub
+  DB_PASSWORD: treehub
+  JAVA_OPTS: "-Xmx400m"
+  KAFKA_HOST: kafka:9092
+  KAFKA_TOPIC_SUFFIX: ce
+  MESSAGING_MODE: test
+  SOTA_CORE_HOST: sota-core
+  SOTA_CORE_PORT: '80'
+  TREEHUB_HOSTNAME: http://treehub/api/v2/mydevice
+  TREEHUB_LOCAL_STORE_PATH: "/treehub-objects"
+  TREEHUB_STORAGE: local
+  REPORT_METRICS: "false"
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: treehub
+spec:
+  selector:
+    matchLabels:
+      app: treehub
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: treehub
+    spec:
+      containers:
+      - image: {{ .treehubImage }}
+        name: treehub
+        envFrom:
+        - configMapRef:
+            name: treehub-config
+        - secretRef:
+            name: treehub-secret
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9001
+          name: treehub0
+        args:
+        resources:
+          requests:
+            cpu: '0.1'
+            memory: 512Mi
+        volumeMounts:
+          - name: treehub-persistent-storage
+            mountPath: /treehub-objects
+        livenessProbe:
+          initialDelaySeconds: 300
+          periodSeconds: 30
+          httpGet:
+            port: 9001
+            path: "/health"
+      imagePullSecrets:
+        - name: atsk8sregistrykey
+      volumes:
+        - name: treehub-persistent-storage
+          persistentVolumeClaim:
+            claimName: treehub-pv-claim
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: treehub
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    ingress.kubernetes.io/proxy-body-size: 30m
+spec:
+  rules:
+  - host: treehub.{{ .externalDomain }}
+    http:
+      paths:
+      - backend:
+          serviceName: treehub
+          servicePort: 80
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: treehub-pv-1
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/treehub-pv-1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: treehub-pv-claim
+  labels:
+    app: treehub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: treehub-secret
+type: Opaque
+data:
+  DB_PASSWORD: {{ .treehubDbPassword | b64enc }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: treehub
+spec:
+  ports:
+  - port: 80
+    targetPort: 9001
+    protocol: TCP
+    name: treehub0
+  selector:
+    app: treehub
+  type: NodePort

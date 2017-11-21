@@ -2,56 +2,56 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: device-gateway-config
+  name: sota-core-config
 data:
+  AUTH_PROTOCOL: none
   BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
-  CLIENT_ID: 815886dc-8232-459c-bb95-c928f4873f38
+  CORE_AWS_BUCKET_ID: ats-k8s-core
+  CORE_DB_URL: jdbc:mariadb://mysql:3306/sota_core
+  CORE_DB_USER: sota_core
+  CORE_INTERACTION_PROTOCOL: none
+  DB_MIGRATE: 'true'
   DEVICE_REGISTRY_HOST: device-registry
   DEVICE_REGISTRY_PORT: '80'
-  DIRECTOR_HOST: director
-  DIRECTOR_PORT: '80'
   ENV_PREFIX: ce_
+  JAVA_OPTS: "-Xmx400m"
   KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
   KAFKA_HOST: kafka-0:9092
   KAFKA_TOPIC_SUFFIX: ce
+  MESSAGING_MODE: kafka
+  PACKAGES_VERSION_FORMAT: ".+"
   REPORT_METRICS: "false"
-  SERVICE_TCP_PORT: '8000'
-  SOTA_CORE_HOST: sota-core
-  SOTA_CORE_PORT: '80'
-  TREEHUB_HOST: treehub
-  TREEHUB_PORT: '80'
+  SOTA_RESOLVER_PORT: '80'
   TUF_REPOSERVER_HOST: tuf-reposerver
   TUF_REPOSERVER_PORT: '80'
-  VAULT_HOST: crypt-vault
-  VAULT_PORT: '80'
+  USE_TUF: 'true'
+  USE_USER_PROFILE: 'false'
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: device-gateway
+  name: sota-core
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: device-gateway
+        app: sota-core
     spec:
       containers:
-      - image: advancedtelematic/device-gateway:0.1.56
-        name: device-gateway
+      - image: {{ .sotaCoreImage }}
+        name: sota-core
         envFrom:
         - configMapRef:
-            name: device-gateway-config
+            name: sota-core-config
         - secretRef:
-            name: device-gateway-secret
+            name: sota-core-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: dev-gw0
-        - containerPort: 9443
-          name: dev-gw1
+          name: sota-core0
         args:
         resources:
           requests:
@@ -66,29 +66,39 @@ spec:
       imagePullSecrets:
       - name: atsk8sregistrykey
 ---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sota-core
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: sota-core.{{ .externalDomain }}
+    http:
+      paths:
+      - backend:
+          serviceName: sota-core
+          servicePort: 80
+---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: device-gateway-secret
+  name: sota-core-secret
 type: Opaque
 data:
-  CLIENT_SECRET: ${DEVICE_GATEWAY_CLIENT_SECRET}
-  JWT_SECRET_KEY: ${DEVICE_GATEWAY_JWT_SECRET_KEY}
-  VAULT_TOKEN: ${DEVICE_GATEWAY_VAULT_TOKEN}
+  CORE_DB_PASSWORD: {{ .sotaCoreDbPassword | b64enc }}
+  JWT_SECRET: {{ .sotaCoreJwtSecret | b64enc }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: device-gateway
+  name: sota-core
 spec:
   ports:
   - port: 80
     targetPort: 9001
     protocol: TCP
-    name: dev-gw0
-  - port: 9443
-    targetPort: 9443
-    protocol: TCP
-    name: dev-gw1
+    name: sota-core0
   selector:
-    app: device-gateway
+    app: sota-core

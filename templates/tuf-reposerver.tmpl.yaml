@@ -80,6 +80,8 @@ metadata:
 type: Opaque
 data:
   DB_PASSWORD: {{ .tufReposerverDbPassword | b64enc }}
+  TUF_REPOSERVER_AWS_ACCESS_KEY: {{ .tufReposerverAwsAccessKey | b64enc }}
+  TUF_REPOSERVER_AWS_SECRET_KEY: {{ .tufReposerverAwsSecretKey | b64enc }}
 ---
 apiVersion: v1
 kind: Service

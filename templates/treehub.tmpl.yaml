@@ -120,6 +120,8 @@ metadata:
 type: Opaque
 data:
   DB_PASSWORD: {{ .treehubDbPassword | b64enc }}
+  TREEHUB_AWS_ACCESS_KEY: {{ .treehubAwsAccessKey | b64enc }}
+  TREEHUB_AWS_SECRET_KEY: {{ .treehubAwsSecretKey | b64enc }}
 ---
 apiVersion: v1
 kind: Service

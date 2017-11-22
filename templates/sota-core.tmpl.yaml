@@ -87,6 +87,8 @@ metadata:
   name: sota-core-secret
 type: Opaque
 data:
+  CORE_AWS_ACCESS_KEY: {{ .sotaCoreAwsAccessKey | b64enc }}
+  CORE_AWS_SECRET_KEY: {{ .sotaCoreAwsSecretKey | b64enc }}
   CORE_DB_PASSWORD: {{ .sotaCoreDbPassword | b64enc }}
   JWT_SECRET: {{ .sotaCoreJwtSecret | b64enc }}
 ---

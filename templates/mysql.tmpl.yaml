@@ -7,14 +7,12 @@ spec:
   selector:
     matchLabels:
       app: mysql
-      tier: mysql
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app: mysql
-        tier: mysql
     spec:
       containers:
       - image: {{ .mysqlImage }}
@@ -78,4 +76,3 @@ spec:
     - port: 3306
   selector:
     app: mysql
-    tier: mysql

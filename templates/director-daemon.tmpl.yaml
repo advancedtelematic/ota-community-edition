@@ -6,13 +6,13 @@ metadata:
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://mysql:3306/director
+  DB_URL: jdbc:mariadb://{{ .mysqlHost }}:3306/director
   DB_USER: director
-  ENV_PREFIX: ce_
-  JAVA_OPTS: "-Xmx400m"
-  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
-  KAFKA_HOST: kafka-0:9092
-  KAFKA_TOPIC_SUFFIX: ce
+  ENV_PREFIX: {{ .envPrefix }}
+  JAVA_OPTS: {{ .javaOpts }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
+  KAFKA_HOST: {{ .kafkaHost }}:9092
+  KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
   REPORT_METRICS: "false"
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
@@ -50,8 +50,8 @@ spec:
         - com.advancedtelematic.director.daemon.DaemonBoot
         resources:
           requests:
-            cpu: '0.1'
-            memory: 512Mi
+            cpu: {{ .directorDaemonCpu }}
+            memory: {{ .directorDaemonMemory }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30

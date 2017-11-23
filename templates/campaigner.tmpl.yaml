@@ -2,51 +2,56 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: device-registry-config
+  name: campaigner-config
 data:
-  AUTH_PROTOCOL: none
-  BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DEVICE_REGISTRY_DB_URL: jdbc:mariadb://mysql:3306/device_registry
-  DEVICE_REGISTRY_DB_USER: device_registry
-  ENV_PREFIX: ce_
-  JAVA_OPTS: "-Xmx400m"
-  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
-  KAFKA_HOST: kafka-0:9092
-  KAFKA_TOPIC_SUFFIX: ce
+  DB_URL: jdbc:mariadb://{{ .mysqlHost }}:3306/campaigner
+  DB_USER: campaigner
+  DEVICE_REGISTRY_HOST: device-registry
+  DEVICE_REGISTRY_PORT: '80'
+  DIRECTOR_HOST: director
+  DIRECTOR_PORT: '80'
+  ENV_PREFIX: {{ .envPrefix }}
+  JAVA_OPTS: {{ .javaOpts }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
+  KAFKA_HOST: {{ .kafkaHost }}:9092
+  KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
   MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
+  SCHEDULER_BATCH_SIZE: '200'
+  SCHEDULER_DELAY: 10 seconds
+  SCHEDULER_POLLING_TIMEOUT: 10 seconds
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: device-registry
+  name: campaigner
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: device-registry
+        app: campaigner
     spec:
       containers:
-      - image: {{ .deviceRegistryImage }}
-        name: device-registry
+      - image: {{ .campaignerImage }}
+        name: campaigner
         envFrom:
         - configMapRef:
-            name: device-registry-config
+            name: campaigner-config
         - secretRef:
-            name: device-registry-secret
+            name: campaigner-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: dev-reg0
+          name: campaigner0
         args:
         resources:
           requests:
-            cpu: '0.1'
-            memory: 512Mi
+            cpu: {{ .campaignerCpu }}
+            memory: {{ .campaignerMemory }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -59,35 +64,35 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: device-registry
+  name: campaigner
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: device-registry.{{ .externalDomain }}
+  - host: campaigner.{{ .externalDomain }}
     http:
       paths:
       - backend:
-          serviceName: device-registry
+          serviceName: campaigner
           servicePort: 80
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: device-registry-secret
+  name: campaigner-secret
 type: Opaque
 data:
-  DEVICE_REGISTRY_DB_PASSWORD: {{ .deviceRegistryDbPassword | b64enc }}
+  DB_PASSWORD: {{ .campaignerDbPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: device-registry
+  name: campaigner
 spec:
   ports:
   - port: 80
     targetPort: 9001
     protocol: TCP
-    name: dev-reg0
+    name: campaigner0
   selector:
-    app: device-registry
+    app: campaigner

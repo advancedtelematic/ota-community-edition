@@ -1,16 +1,14 @@
+# Starting all services
 
-# Only needed while stuff is not open sourced
+Start minikube with: `make start-minikube`.
 
-==== minikube start --mem <lots of it>
+While some images are still private, add your docker registry credentials with:
+```
+kubectl create secret docker-registry regsecret \
+  --docker-server=https://index.docker.io/v1/ \
+  --docker-username="${DOCKER_USER}" \
+  --docker-password="${DOCKER_PASS}" \
+  --docker-email="${DOCKER_EMAIL}"
+```
 
-==== kubectl create secret docker-registry $regsecret --docker-server=https://index.docker.io/v1/ --docker-username=$youruser --docker-password=$yourpass --docker-email=$yourmail
-
-(needs kubernetes running already)
-
-==== kubectl apply -f mysql.yaml
-
-==== kubectl apply -f volumes.yaml
-
-create databases (run script ?)
-
-==== kubectl apply -f treehub.yaml
+Then start all services with: `make start-services`

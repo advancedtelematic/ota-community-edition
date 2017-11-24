@@ -77,5 +77,5 @@ metadata:
   name: tuf-keyserver-daemon-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .tufKeyserverDaemonDbPassword | b64enc }}
+  DB_PASSWORD: {{ .tufKeyserverDbPassword | b64enc }}
   TUF_VAULT_TOKEN: {{ .tufKeyserverVaultToken | b64enc }}

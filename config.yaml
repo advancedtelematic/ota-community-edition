@@ -8,12 +8,12 @@ mysqlHost: mysql
 zookeeperHost: zookeeper
 
 # images
-appImage: advancedtelematic/ota-plus-web:0.5.0-15-gecc0d2e
+appImage: advancedtelematic/ota-plus-web:0.5.2-21-gb22eb94
 campaignerImage: advancedtelematic/campaigner:0.0.1-64-g1d25684
 deviceRegistryImage: advancedtelematic/sota-device_registry:0.3.23
 directorImage: advancedtelematic/director:0.2.0-1-gdae1759
 kafkaImage: wurstmeister/kafka:latest
-mysqlImage: mariadb:10.1.19
+mysqlImage: mariadb:10.3.2
 sotaCoreImage: advancedtelematic/sota-core:0.3.23
 treehubImage: advancedtelematic/treehub:0.1.8
 tufKeyserverImage: advancedtelematic/tuf-keyserver:0.2.0-31-ge596ad8

@@ -4,6 +4,7 @@ kind: ConfigMap
 metadata:
   name: app-config
 data:
+  ATS_GARAGE_THEME: "false"
   AUTH_PROTOCOL: none
   AUTH_VERIFICATION: none
   BIND_HOST: 0.0.0.1
@@ -30,8 +31,10 @@ data:
   REPORT_METRICS: "false"
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
-  TOGGLE_AUTO_FEATURE_ACTIVATION: 'false'
-  TOGGLE_USER_PROFILE_MENU: 'false'
+  TOGGLE_AUTO_FEATURE_ACTIVATION: "false"
+  TOGGLE_CREDENTIALS_DOWNLOAD: "false"
+  TOGGLE_PREBUILT_DEBRPM: "false"
+  TOGGLE_USER_PROFILE_MENU: "false"
   TUF_REPOSERVER_HOST: tuf-reposerver
   TUF_REPOSERVER_PORT: '80'
   WS_HOST: web-events.{{ .externalDomain }}

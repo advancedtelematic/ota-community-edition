@@ -2,19 +2,29 @@ CONFIG ?= config.yaml
 SECRETS ?= secrets.yaml
 GENERATED ?= .generated.yaml
 
-K8S_VERSION = $(shell kubectl version | base64 | tr -d '\n')
+KUBE_CPU ?= 2
+KUBE_MEM ?= 10000
 
 
-.PHONY: help gen-config start-minikube start-services
+.PHONY: help start-all start-minikube start-servcies start-db
 .DEFAULT_GOAL := help
 
-help: ## Print this message and exit
+help: ## Print this message and exit.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%15s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-cmd-%: # Check that a command exists
-	@: $(if $(shell command -v ${*} 2>/dev/null),,$(error Please install "$*" first))
+start-all: start-minikube start-services start-db ## Start minikube and all services.
+#start-all: start-services start-db ## Start minikube and all services.
 
-gen-config: cmd-kops ## Generate the config from templates
+start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
+	@minikube delete || true
+	@minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM) --network-plugin=cni
+	@kubectl apply --filename configs/weave.yaml
+	@kubectl create secret docker-registry atsk8sregistrykey \
+		--docker-username=$$(grep dockerUser $(SECRETS) | cut -d' ' -f2) \
+		--docker-password=$$(grep dockerPassword $(SECRETS) | cut -d' ' -f2) \
+		--docker-email=$$(grep dockerEmail $(SECRETS) | cut -d' ' -f2)
+
+start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 	@kops toolbox template \
 		--values $(CONFIG) \
 		--values $(SECRETS) \
@@ -23,10 +33,14 @@ gen-config: cmd-kops ## Generate the config from templates
 		--output $(GENERATED)
 	@ed $(GENERATED) <<< $$'1d\nw' #FIXME: delete garbage first line
 	@cat configs/ingress.yaml >> $(GENERATED)
-
-start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment
-	@minikube start --memory 10000 --network-plugin=cni
-	@kubectl apply --filename "https://cloud.weave.works/k8s/net?k8s-version=$(K8S_VERSION)"
-
-start-services: cmd-kubectl gen-config ## Start all services
 	@kubectl apply --filename $(GENERATED)
+
+start-db: cmd-kubectl ## Create all database tables and users.
+	@eval $$(minikube docker-env); \
+		until $$(docker ps | grep --silent mariadb); do sleep 5; done; sleep 15; \
+		CONTAINER="$$(docker ps | grep mariadb | awk '{print $$1}')"; \
+		docker cp "$(CURDIR)/scripts/create_databases.sql" "$${CONTAINER}:/tmp"; \
+		docker exec -it $${CONTAINER} bash -c "mysql -proot < /tmp/create_databases.sql"
+
+cmd-%: # Check that a command exists.
+	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "$*" first))

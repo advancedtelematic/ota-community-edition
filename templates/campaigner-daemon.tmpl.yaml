@@ -84,4 +84,4 @@ metadata:
   name: campaigner-daemon-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .campaignerDaemonDbPassword | b64enc }}
+  DB_PASSWORD: {{ .campaignerDbPassword | b64enc }}

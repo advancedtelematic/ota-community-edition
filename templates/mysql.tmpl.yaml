@@ -1,4 +1,10 @@
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+data:
+---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -65,7 +71,7 @@ metadata:
   name: mysql-secret
 type: Opaque
 data:
-  MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword }}
+  MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service
@@ -73,6 +79,6 @@ metadata:
   name: mysql
 spec:
   ports:
-    - port: 3306
+  - port: 3306
   selector:
     app: mysql

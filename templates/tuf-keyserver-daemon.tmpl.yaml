@@ -6,12 +6,12 @@ metadata:
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://mysql:3306/tuf_keyserver
+  DB_URL: jdbc:mariadb://{{ .mysqlHost }}:3306/tuf_keyserver
   DB_USER: tuf_keyserver
-  JAVA_OPTS: "-Xmx400m"
-  KAFKA_BOOTSTRAP_SERVERS: kafka-0:9092
-  KAFKA_HOST: kafka-0:9092
-  KAFKA_TOPIC_SUFFIX: ce
+  JAVA_OPTS: {{ .javaOpts }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
+  KAFKA_HOST: {{ .kafkaHost }}:9092
+  KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
   REPORT_METRICS: "false"
   TUF_VAULT_HOST: tuf-vault
   TUF_VAULT_PORT: '80'
@@ -45,8 +45,8 @@ spec:
         - com.advancedtelematic.tuf.keyserver.daemon.KeyGenerationDaemon
         resources:
           requests:
-            cpu: '0.1'
-            memory: 512Mi
+            cpu: {{ .tufKeyserverDaemonCpu }}
+            memory: {{ .tufKeyserverDaemonMemory }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -77,5 +77,5 @@ metadata:
   name: tuf-keyserver-daemon-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .tufKeyserverDaemonDbPassword | b64enc }}
+  DB_PASSWORD: {{ .tufKeyserverDbPassword | b64enc }}
   TUF_VAULT_TOKEN: {{ .tufKeyserverVaultToken | b64enc }}

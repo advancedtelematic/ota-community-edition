@@ -1,20 +1,24 @@
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+data:
+---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: ota-mysql
+  name: mysql
 spec:
   selector:
     matchLabels:
-      app: ota-mysql
-      tier: mysql
+      app: mysql
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: ota-mysql
-        tier: mysql
+        app: mysql
     spec:
       containers:
       - image: {{ .mysqlImage }}
@@ -53,7 +57,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: mysql-pv-claim
   labels:
-    app: ota-mysql
+    app: mysql
 spec:
   accessModes:
     - ReadWriteOnce
@@ -67,16 +71,14 @@ metadata:
   name: mysql-secret
 type: Opaque
 data:
-  MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword }}
+  MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword | b64enc }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ota-mysql
+  name: mysql
 spec:
   ports:
-    - port: 3306
+  - port: 3306
   selector:
-    app: ota-mysql
-    tier: mysql
-  clusterIP: None
+    app: mysql

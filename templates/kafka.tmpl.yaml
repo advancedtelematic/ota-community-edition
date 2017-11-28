@@ -4,19 +4,12 @@ kind: ConfigMap
 metadata:
   name: kafka-config
 data:
-  JAVA_OPTS: "-Xmx400m"
+  JAVA_OPTS: {{ .javaOpts }}
+  KAFKA_ADVERTISED_HOST_NAME: {{ .kafkaHost }}
+  KAFKA_ADVERTISED_PORT: "9092"
   KAFKA_BROKER_ID: "0"
-  KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-  KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://0.0.0.0:9092
-  KAFKA_ZOOKEEPER_CONNECT: localhost:2181
-  KAFKA_DELETE_TOPIC_ENABLE: "true"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: zookeeper-config
-data:
-  JAVA_OPTS: "-Xmx400m"
+  KAFKA_PORT: "9092"
+  KAFKA_ZOOKEEPER_CONNECT: {{ .zookeeperHost }}:2181
 ---
 apiVersion: apps/v1beta2
 kind: Deployment
@@ -26,14 +19,12 @@ spec:
   selector:
     matchLabels:
       app: kafka
-      tier: backend
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app: kafka
-        tier: backend
     spec:
       containers:
       - image: {{ .kafkaImage }}
@@ -44,27 +35,14 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            cpu: '0.1'
-            memory: 512Mi
+            cpu: {{ .kafkaCpu }}
+            memory: {{ .kafkaMemory }}
         ports:
         - containerPort: 9092
           name: kafka
         volumeMounts:
         - name: kafka-persistent-storage
           mountPath: /var/lib/kafka
-      - image: {{ .zookeeperImage }}
-        name: zookeeper
-        envFrom:
-        - configMapRef:
-            name: zookeeper-config
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 2181
-          name: zookeeper
-        resources:
-          requests:
-            cpu: '0.1'
-            memory: 512Mi
       volumes:
         - name: kafka-persistent-storage
           persistentVolumeClaim:
@@ -103,8 +81,8 @@ metadata:
   name: kafka
 spec:
   ports:
-    - port: 9092
+  - port: 9092
+    name: kafka-port
+    protocol: TCP
   selector:
     app: kafka
-    tier: backend
-  clusterIP: None

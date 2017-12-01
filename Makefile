@@ -15,7 +15,7 @@ start-all: start-minikube start-services start-db ## Start minikube and all serv
 
 start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 	@minikube delete || true
-	@minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM) --network-plugin=cni
+	@minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
 	@minikube addons enable ingress
 	@kubectl create secret docker-registry atsk8sregistrykey \
 		--docker-username=$$(grep dockerUser $(SECRETS) | cut -d' ' -f2) \

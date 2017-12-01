@@ -8,7 +8,7 @@ mysqlHost: mysql
 zookeeperHost: zookeeper
 
 # images
-appImage: advancedtelematic/ota-plus-web:0.5.2-21-gb22eb94
+appImage: advancedtelematic/ota-plus-web:0.5.2-47-g3479db2
 campaignerImage: advancedtelematic/campaigner:0.0.1-64-g1d25684
 deviceRegistryImage: advancedtelematic/sota-device_registry:0.3.23
 directorImage: advancedtelematic/director:0.2.0-1-gdae1759

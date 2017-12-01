@@ -6,7 +6,7 @@ metadata:
 data:
   ATS_GARAGE_THEME: "false"
   AUTH_PROTOCOL: none
-  AUTH_VERIFICATION: none
+  AUTH_VERIFICATION: local
   BIND_HOST: 0.0.0.1
   BIND_PORT: '9001'
   CAMPAIGNER_HOST: campaigner
@@ -22,7 +22,7 @@ data:
   KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
   KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
   MESSAGING_MODE: kafka
-  OIDC_LOGIN_ACTION: com.advancedtelematic.auth.oidc.LoginAction
+  OIDC_LOGIN_ACTION: com.advancedtelematic.auth.garage.NoLoginAction
   OIDC_NS_PROVIDER: com.advancedtelematic.auth.oidc.ConfiguredNamespace
   OIDC_TOKEN_EXCHANGE: com.advancedtelematic.auth.NoExchange
   OIDC_TOKEN_VERIFICATION: com.advancedtelematic.auth.oidc.TokenValidityCheck
@@ -102,6 +102,7 @@ metadata:
   name: app-secret
 type: Opaque
 data:
+  JWT_SECRET: {{ .appJwtSecret | b64enc }}
   PLAY_CRYPTO_SECRET: {{ .appPlayCryptoSecret | b64enc }}
 ---
 apiVersion: v1

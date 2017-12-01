@@ -135,4 +135,3 @@ spec:
     name: treehub0
   selector:
     app: treehub
-  type: NodePort

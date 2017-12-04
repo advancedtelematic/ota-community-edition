@@ -5,7 +5,7 @@ metadata:
   name: web-events-config
 data:
   AUTH_PROTOCOL: none
-  AUTH_VERIFICATION: none
+  AUTH_VERIFICATION: local
   BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
   ENV_PREFIX: {{ .envPrefix }}

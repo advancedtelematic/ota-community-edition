@@ -11,12 +11,14 @@ data:
   BIND_PORT: '9001'
   CAMPAIGNER_HOST: campaigner
   CAMPAIGNER_PORT: '80'
+  CRYPT_CREATE_ACCOUNTS: "false"
   DEVICE_GATEWAY_PORT: '8000'
   DEVICE_REGISTRY_HOST: device-registry
   DEVICE_REGISTRY_PORT: '80'
   DIRECTOR_HOST: director
   DIRECTOR_PORT: '80'
   ENV_PREFIX: {{ .envPrefix }}
+  EXTRA_CONNECT_SRC: "ws://web-events.{{ .externalDomain }}:80"
   JAVA_OPTS: {{ .javaOpts }}
   KAFKA_HOST: {{ .kafkaHost }}:9092
   KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}

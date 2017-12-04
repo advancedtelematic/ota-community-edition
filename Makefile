@@ -5,31 +5,32 @@ GENERATED ?= .generated.yaml
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
-.PHONY: help start-all start-minikube start-servcies start-db
+.PHONY: help start start-minikube start-servcies start-db
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%15s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-start-all: start-minikube start-services start-db ## Start minikube and all services.
+start: start-minikube start-services start-db ## Start minikube and all services.
 
 start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
-	@minikube delete || true
-	@minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
+	@if ! minikube ip 2>/dev/null; then \
+		minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM); \
+		kubectl create secret docker-registry atsk8sregistrykey \
+			--docker-username=$$(grep dockerUser $(SECRETS) | cut -d' ' -f2) \
+			--docker-password=$$(grep dockerPassword $(SECRETS) | cut -d' ' -f2) \
+			--docker-email=$$(grep dockerEmail $(SECRETS) | cut -d' ' -f2); \
+		fi
 	@minikube addons enable ingress
-	@kubectl create secret docker-registry atsk8sregistrykey \
-		--docker-username=$$(grep dockerUser $(SECRETS) | cut -d' ' -f2) \
-		--docker-password=$$(grep dockerPassword $(SECRETS) | cut -d' ' -f2) \
-		--docker-email=$$(grep dockerEmail $(SECRETS) | cut -d' ' -f2)
 
 start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 	@kops toolbox template \
+		--template templates \
 		--values $(CONFIG) \
 		--values $(SECRETS) \
-		--template templates \
-		--logtostderr \
-		--output $(GENERATED)
-	@sed '1,/^---$$/d' $(GENERATED) > .temp && mv .temp $(GENERATED)
+		--output $(GENERATED) \
+		2>/dev/null
+	@sed '1,/^---/d' $(GENERATED) > .temp && mv .temp $(GENERATED)
 	@kubectl apply --filename $(GENERATED)
 
 start-db: cmd-kubectl ## Create all database tables and users.

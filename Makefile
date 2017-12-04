@@ -23,7 +23,7 @@ start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 			--docker-username=$$(grep dockerUser $(SECRETS) | cut -d' ' -f2) \
 			--docker-password=$$(grep dockerPassword $(SECRETS) | cut -d' ' -f2) \
 			--docker-email=$$(grep dockerEmail $(SECRETS) | cut -d' ' -f2); \
-		fi
+	fi
 	@minikube addons enable ingress
 
 start-services: cmd-kops ## Apply the generated config to the k8s cluster.

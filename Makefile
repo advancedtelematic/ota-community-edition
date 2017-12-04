@@ -29,6 +29,7 @@ start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 		--template templates \
 		--logtostderr \
 		--output $(GENERATED)
+	@sed '1,/^---$$/d' $(GENERATED) > .temp && mv .temp $(GENERATED)
 	@kubectl apply --filename $(GENERATED)
 
 start-db: cmd-kubectl ## Create all database tables and users.

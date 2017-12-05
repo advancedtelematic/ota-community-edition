@@ -8,13 +8,13 @@ KUBE_MEM ?= 8192
 DOMAIN = $$(grep externalDomain $(CONFIG) | cut -d' ' -f2)
 
 
-.PHONY: help hosts start start-minikube start-servcies start-db
+.PHONY: help start start-minikube start-servcies create-databases unseal-vault hosts
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%15s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%16s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-start: start-minikube start-services start-db ## Start minikube and all services.
+start: start-minikube start-services create-databases unseal-vault ## Start minikube and all services.
 
 start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 	@if ! minikube ip 2>/dev/null; then \
@@ -31,23 +31,29 @@ start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 		--template templates \
 		--values $(CONFIG) \
 		--values $(SECRETS) \
-		--output $(GENERATED) \
-		2>/dev/null
+		--output $(GENERATED)
 	@sed '1,/^---/d' $(GENERATED) > .temp && mv .temp $(GENERATED)
 	@kubectl apply --filename $(GENERATED)
 
-start-db: cmd-kubectl ## Create all database tables and users.
+create-databases: cmd-kubectl ## Create all database tables and users.
 	@eval $$(minikube docker-env); \
 		until $$(docker ps | grep --silent mariadb); do sleep 5; done; sleep 15; \
 		CONTAINER="$$(docker ps | grep mariadb | awk '{print $$1}')"; \
-		docker cp "$(CURDIR)/scripts/create_databases.sql" "$${CONTAINER}:/tmp"; \
+		docker cp scripts/create_databases.sql "$${CONTAINER}:/tmp"; \
 		docker exec -it $${CONTAINER} bash -c "mysql -proot < /tmp/create_databases.sql"
+
+unseal-vault: cmd-kubectl ## Create all database tables and users.
+	@eval $$(minikube docker-env); \
+		until $$(docker ps | grep --silent k8s_tuf-vault); do sleep 5; done; sleep 15; \
+		CONTAINER="$$(docker ps | grep k8s_tuf-vault | awk '{print $$1}')"; \
+		docker cp scripts/unseal_vault.sh "$${CONTAINER}:/tmp"; \
+		docker exec $${CONTAINER} "/tmp/unseal_vault.sh"
 
 hosts: ## Print the service mappings for /etc/hosts
 	@export IP=$$(minikube ip); \
-		for filename in templates/*; do \
-			echo "$${IP} $$(basename $${filename} .tmpl.yaml).$(DOMAIN)"; \
-		done
+		grep --files-with-matches "kind: Ingress" templates/* \
+		| xargs -I{} basename {} .tmpl.yaml \
+		| xargs -I{} echo "$${IP} {}.$(DOMAIN)"
 
 cmd-%: # Check that a command exists.
 	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "$*" first))

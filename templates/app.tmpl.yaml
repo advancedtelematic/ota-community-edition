@@ -17,7 +17,6 @@ data:
   DIRECTOR_HOST: director
   DIRECTOR_PORT: '80'
   ENV_PREFIX: {{ .envPrefix }}
-  EXTRA_CONNECT_SRC: "ws://web-events.{{ .externalDomain }}:80"
   JAVA_OPTS: {{ .javaOpts }}
   KAFKA_HOST: {{ .kafkaHost }}:9092
   KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
@@ -69,7 +68,7 @@ spec:
           name: app0
         args:
         - "-Dhttp.port=9001"
-        - "-Dwebsrc.atsgarage=ws://*.atsgarage.com:80"
+        - "-Dwebsrc.atsgarage=ws://*.{{ .externalDomain }}:80"
         resources:
           requests:
             cpu: {{ .appCpu }}
@@ -115,7 +114,5 @@ spec:
   ports:
   - port: 80
     targetPort: 9001
-    protocol: TCP
-    name: app0
   selector:
     app: app

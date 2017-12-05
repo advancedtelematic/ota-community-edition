@@ -5,14 +5,13 @@ metadata:
   name: tuf-vault-config
 data:
   DEFAULT_LEASE_TTL: 30s
-  KAFKA_HOST: {{ .kafkaHost }}:9092
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
   MAX_LEASE_TTL: 30s
   MYSQL_ADDR: {{ .mysqlHost }}:3306
   MYSQL_DATABASE: tuf_vault
   MYSQL_DATABASE_TABLE: tuf_vault
   MYSQL_USERNAME: tuf_vault
   REPORT_METRICS: "false"
+  VAULT_ADDR: "http://127.0.0.1:8200"
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -37,7 +36,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8200
-          name: tuf-vault0
         args:
         resources:
           requests:
@@ -86,7 +84,5 @@ spec:
   ports:
   - port: 80
     targetPort: 8200
-    protocol: TCP
-    name: tuf-vault0
   selector:
     app: tuf-vault

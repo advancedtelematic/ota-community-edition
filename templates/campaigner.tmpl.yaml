@@ -92,7 +92,5 @@ spec:
   ports:
   - port: 80
     targetPort: 9001
-    protocol: TCP
-    name: campaigner0
   selector:
     app: campaigner

@@ -131,7 +131,5 @@ spec:
   ports:
   - port: 80
     targetPort: 9001
-    protocol: TCP
-    name: treehub0
   selector:
     app: treehub

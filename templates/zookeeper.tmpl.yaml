@@ -4,46 +4,60 @@ kind: ConfigMap
 metadata:
   name: zookeeper-config
 data:
-  JAVA_OPTS: {{ .javaOpts }}
-  ZOOKEEPER_ID: "1"
-  ZOOKEEPER_SERVER_1: zookeeper
+  zookeeper.properties: |
+    tickTime=2000
+    dataDir=/var/lib/zookeeper/data
+    dataLogDir=/var/lib/zookeeper/log
+    clientPort=2181
 ---
 apiVersion: apps/v1beta2
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: zookeeper
 spec:
+  serviceName: zookeeper
   selector:
     matchLabels:
       app: zookeeper
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
         app: zookeeper
     spec:
       containers:
-      - image: {{ .zookeeperImage }}
-        name: zookeeper
-        envFrom:
-        - configMapRef:
-            name: zookeeper-config
+      - name: zookeeper
+        image: {{ .zookeeperImage }}
+        command:
+          - /usr/share/apache-kafka/bin/zookeeper-server-start.sh
+          - /usr/share/apache-kafka/config/zookeeper.properties
         imagePullPolicy: Always
         ports:
         - containerPort: 2181
-          name: zookeeper
+          name: client
+        - containerPort: 2888
+          name: peer
+        - containerPort: 3888
+          name: election
         resources:
           requests:
             cpu: {{ .zookeeperCpu }}
             memory: {{ .zookeeperMemory }}
         volumeMounts:
-        - name: zookeeper-persistent-storage
+        - name: config
+          mountPath: /usr/share/apache-kafka/config/zookeeper.properties
+          subPath: zookeeper.properties
+        - name: data
           mountPath: /var/lib/zookeeper
       volumes:
-        - name: zookeeper-persistent-storage
-          persistentVolumeClaim:
-            claimName: zookeeper-pv-claim
+      - name: config
+        configMap:
+          name: zookeeper-config
+          items:
+          - key: zookeeper.properties
+            path: zookeeper.properties
+      - name: data
+        persistentVolumeClaim:
+          claimName: zookeeper-pv-claim
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -78,14 +92,11 @@ metadata:
   name: zookeeper
 spec:
   ports:
-  - name: client
-    port: 2181
-    protocol: TCP
-  - name: follower
-    port: 2888
-    protocol: TCP
-  - name: leader
-    port: 3888
-    protocol: TCP
+  - port: 2181
+    name: client
+  - port: 2888
+    name: peer
+  - port: 3888
+    name: election
   selector:
     app: zookeeper

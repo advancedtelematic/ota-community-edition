@@ -5,7 +5,10 @@ GENERATED ?= .generated.yaml
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
-.PHONY: help start start-minikube start-servcies start-db
+DOMAIN = $$(grep externalDomain $(CONFIG) | cut -d' ' -f2)
+
+
+.PHONY: help hosts start start-minikube start-servcies start-db
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
@@ -39,6 +42,12 @@ start-db: cmd-kubectl ## Create all database tables and users.
 		CONTAINER="$$(docker ps | grep mariadb | awk '{print $$1}')"; \
 		docker cp "$(CURDIR)/scripts/create_databases.sql" "$${CONTAINER}:/tmp"; \
 		docker exec -it $${CONTAINER} bash -c "mysql -proot < /tmp/create_databases.sql"
+
+hosts: ## Print the service mappings for /etc/hosts
+	@export IP=$$(minikube ip); \
+		for filename in templates/*; do \
+			echo "$${IP} $$(basename $${filename} .tmpl.yaml).$(DOMAIN)"; \
+		done
 
 cmd-%: # Check that a command exists.
 	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "$*" first))

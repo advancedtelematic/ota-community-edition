@@ -5,8 +5,6 @@ GENERATED ?= .generated.yaml
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
-DOMAIN = $$(grep externalDomain $(CONFIG) | cut -d' ' -f2)
-
 
 .PHONY: help start start-minikube start-servcies create-databases unseal-vault hosts
 .DEFAULT_GOAL := help
@@ -49,11 +47,8 @@ unseal-vault: cmd-kubectl ## Create all database tables and users.
 		docker cp scripts/unseal_vault.sh "$${CONTAINER}:/tmp"; \
 		docker exec $${CONTAINER} "/tmp/unseal_vault.sh"
 
-hosts: ## Print the service mappings for /etc/hosts
-	@export IP=$$(minikube ip); \
-		grep --files-with-matches "kind: Ingress" templates/* \
-		| xargs -I{} basename {} .tmpl.yaml \
-		| xargs -I{} echo "$${IP} {}.$(DOMAIN)"
+hosts: cmd-kubectl ## Print the service mappings for /etc/hosts
+	@kubectl get ingress | tail -n+2 | awk '{print $$3 " " $$2}'
 
 cmd-%: # Check that a command exists.
 	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "$*" first))

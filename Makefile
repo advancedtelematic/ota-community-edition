@@ -40,7 +40,7 @@ create-databases: cmd-kubectl ## Create all database tables and users.
 		docker cp scripts/create_databases.sql "$${CONTAINER}:/tmp"; \
 		docker exec -it $${CONTAINER} bash -c "mysql -proot < /tmp/create_databases.sql"
 
-unseal-vault: cmd-kubectl ## Create all database tables and users.
+unseal-vault: cmd-kubectl ## Automatically unseal the vault.
 	@eval $$(minikube docker-env); \
 		until $$(docker ps | grep --silent k8s_tuf-vault); do sleep 5; done; sleep 15; \
 		CONTAINER="$$(docker ps | grep k8s_tuf-vault | awk '{print $$1}')"; \

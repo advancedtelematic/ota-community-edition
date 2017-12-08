@@ -51,7 +51,7 @@ spec:
             add:
             - IPC_LOCK
       imagePullSecrets:
-      - name: atsk8sregistrykey
+      - name: docker-registry-key
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress

@@ -17,7 +17,7 @@ start: start-minikube start-services create-databases unseal-vault ## Start mini
 start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 	@if ! minikube ip 2>/dev/null; then \
 		minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM); \
-		kubectl create secret docker-registry atsk8sregistrykey \
+		kubectl create secret docker-registry docker-registry-key \
 			--docker-username=$$(grep dockerUser $(SECRETS) | cut -d' ' -f2) \
 			--docker-password=$$(grep dockerPassword $(SECRETS) | cut -d' ' -f2) \
 			--docker-email=$$(grep dockerEmail $(SECRETS) | cut -d' ' -f2); \

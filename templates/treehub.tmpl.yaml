@@ -64,7 +64,7 @@ spec:
             port: 9001
             path: "/health"
       imagePullSecrets:
-        - name: atsk8sregistrykey
+        - name: docker-registry-key
       volumes:
         - name: treehub-persistent-storage
           persistentVolumeClaim:

@@ -19,7 +19,6 @@ treehubImage: advancedtelematic/treehub:0.1.8
 tufKeyserverImage: advancedtelematic/tuf-keyserver:0.2.0-31-ge596ad8
 tufReposerverImage: advancedtelematic/tuf-reposerver:0.2.0-31-ge596ad8
 tufVaultImage: advancedtelematic/crypto-vault:0.3
-tufVaultBootstrapImage: advancedtelematic/bootstrap_ota_kube:1.6
 webEventsImage: advancedtelematic/web-events:0.0.7
 zookeeperImage: databench/apache-kafka-basic:0.4.0
 

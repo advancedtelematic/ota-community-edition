@@ -54,7 +54,7 @@ spec:
             port: 9001
             path: "/health"
       imagePullSecrets:
-      - name: atsk8sregistrykey
+      - name: docker-registry-key
 ---
 apiVersion: v1
 kind: Secret

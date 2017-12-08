@@ -1,6 +1,5 @@
 CONFIG ?= config.yaml
-SECRETS ?= secrets.yaml
-GENERATED ?= .generated.yaml
+OUTPUT ?= .generated.yaml
 
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
@@ -18,20 +17,16 @@ start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 	@if ! minikube ip 2>/dev/null; then \
 		minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM); \
 		kubectl create secret docker-registry docker-registry-key \
-			--docker-username=$$(grep dockerUser $(SECRETS) | cut -d' ' -f2) \
-			--docker-password=$$(grep dockerPassword $(SECRETS) | cut -d' ' -f2) \
-			--docker-email=$$(grep dockerEmail $(SECRETS) | cut -d' ' -f2); \
+			--docker-username=$(DOCKER_USER) \
+			--docker-password=$(DOCKER_PASS) \
+			--docker-email=$(DOCKER_EMAIL); \
 	fi
 	@minikube addons enable ingress
 
 start-services: cmd-kops ## Apply the generated config to the k8s cluster.
-	@kops toolbox template \
-		--template templates \
-		--values $(CONFIG) \
-		--values $(SECRETS) \
-		--output $(GENERATED)
-	@sed '1,/^---/d' $(GENERATED) > .temp && mv .temp $(GENERATED)
-	@kubectl apply --filename $(GENERATED)
+	@kops toolbox template --template templates --values $(CONFIG) --output $(OUTPUT)
+	@sed '1,/^---/d' $(OUTPUT) > .temp && mv .temp $(OUTPUT)
+	@kubectl apply --filename $(OUTPUT)
 
 create-databases: cmd-kubectl ## Create all database tables and users.
 	@eval $$(minikube docker-env); \

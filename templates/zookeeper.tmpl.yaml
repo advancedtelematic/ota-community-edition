@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: zookeeper
-        image: {{ .zookeeperImage }}
+        image: {{ .zookeeper_docker_image }}
         command:
           - /usr/share/apache-kafka/bin/zookeeper-server-start.sh
           - /usr/share/apache-kafka/config/zookeeper.properties
@@ -40,8 +40,8 @@ spec:
           name: election
         resources:
           requests:
-            cpu: {{ .zookeeperCpu }}
-            memory: {{ .zookeeperMemory }}
+            cpu: {{ .zookeeper_cpu }}
+            memory: {{ .zookeeper_mem }}
         volumeMounts:
         - name: config
           mountPath: /usr/share/apache-kafka/config/zookeeper.properties

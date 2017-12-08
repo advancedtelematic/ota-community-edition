@@ -26,7 +26,7 @@ data:
     socket.send.buffer.bytes=102400
     transaction.state.log.min.isr=1
     transaction.state.log.replication.factor=1
-    zookeeper.connect={{ .zookeeperHost }}:2181
+    zookeeper.connect={{ .zookeeper_host }}:2181
     zookeeper.connection.timeout.ms=6000
 ---
 apiVersion: v1
@@ -53,7 +53,7 @@ spec:
     spec:
       containers:
       - name: kafka
-        image: {{ .kafkaImage }}
+        image: {{ .kafka_docker_image }}
         command:
           - /usr/share/apache-kafka/bin/kafka-server-start.sh
           - /usr/share/apache-kafka/config/server.properties
@@ -62,8 +62,8 @@ spec:
             name: kafka-env
         resources:
           requests:
-            cpu: {{ .kafkaCpu }}
-            memory: {{ .kafkaMemory }}
+            cpu: {{ .kafka_cpu }}
+            memory: {{ .kafka_mem }}
         ports:
         - containerPort: 9092
           name: kafka

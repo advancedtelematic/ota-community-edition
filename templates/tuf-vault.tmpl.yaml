@@ -6,7 +6,7 @@ metadata:
 data:
   DEFAULT_LEASE_TTL: 30s
   MAX_LEASE_TTL: 30s
-  MYSQL_ADDR: {{ .mysqlHost }}:3306
+  MYSQL_ADDR: {{ .mysql_host }}:3306
   MYSQL_DATABASE: tuf_vault
   MYSQL_DATABASE_TABLE: tuf_vault
   MYSQL_USERNAME: tuf_vault
@@ -26,7 +26,7 @@ spec:
         app: tuf-vault
     spec:
       containers:
-      - image: {{ .tufVaultImage }}
+      - image: {{ .tuf_vault_docker_image }}
         name: tuf-vault
         envFrom:
         - configMapRef:
@@ -39,8 +39,8 @@ spec:
         args:
         resources:
           requests:
-            cpu: {{ .tufVaultCpu }}
-            memory: {{ .tufVaultMemory }}
+            cpu: {{ .tuf_vault_cpu }}
+            memory: {{ .tuf_vault_mem }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -61,7 +61,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: tuf-vault.{{ .externalDomain }}
+  - host: tuf-vault.{{ .ingress_dns_name }}
     http:
       paths:
       - backend:
@@ -74,7 +74,7 @@ metadata:
   name: tuf-vault-secret
 type: Opaque
 data:
-  MYSQL_PASSWORD: {{ .tufVaultDbPassword | b64enc }}
+  MYSQL_PASSWORD: {{ .tuf_vault_db_password | b64enc }}
 ---
 apiVersion: v1
 kind: Service

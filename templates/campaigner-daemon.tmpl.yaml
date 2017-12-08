@@ -6,17 +6,17 @@ metadata:
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://{{ .mysqlHost }}:3306/campaigner
+  DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/campaigner
   DB_USER: campaigner
   DEVICE_REGISTRY_HOST: device-registry
   DEVICE_REGISTRY_PORT: '80'
   DIRECTOR_HOST: director
   DIRECTOR_PORT: '80'
-  ENV_PREFIX: {{ .envPrefix }}
-  JAVA_OPTS: {{ .javaOpts }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
-  KAFKA_HOST: {{ .kafkaHost }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
+  ENV_PREFIX: {{ .env_prefix }}
+  JAVA_OPTS: {{ .campaigner_daemon_java_opts }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
+  KAFKA_HOST: {{ .kafka_host }}:9092
+  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
   MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
   SCHEDULER_BATCH_SIZE: '200'
@@ -36,7 +36,7 @@ spec:
         app: campaigner-daemon
     spec:
       containers:
-      - image: {{ .campaignerImage }}
+      - image: {{ .campaigner_docker_image }}
         name: campaigner-daemon
         envFrom:
         - configMapRef:
@@ -46,14 +46,13 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: camp-daem0
         args:
         - "-main"
         - com.advancedtelematic.campaigner.DaemonBoot
         resources:
           requests:
-            cpu: {{ .campaignerDaemonCpu }}
-            memory: {{ .campaignerDaemonMemory }}
+            cpu: {{ .campaigner_daemon_cpu }}
+            memory: {{ .campaigner_daemon_mem }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -69,4 +68,4 @@ metadata:
   name: campaigner-daemon-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .campaignerDbPassword | b64enc }}
+  DB_PASSWORD: {{ .campaigner_daemon_db_password | b64enc }}

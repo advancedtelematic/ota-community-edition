@@ -21,7 +21,7 @@ spec:
         app: mysql
     spec:
       containers:
-      - image: {{ .mysqlImage }}
+      - image: {{ .mysql_docker_image }}
         name: mariadb
         envFrom:
         - secretRef:
@@ -71,7 +71,7 @@ metadata:
   name: mysql-secret
 type: Opaque
 data:
-  MYSQL_ROOT_PASSWORD: {{ .mysqlRootPassword | b64enc }}
+  MYSQL_ROOT_PASSWORD: {{ .mysql_root_password | b64enc }}
 ---
 apiVersion: v1
 kind: Service

@@ -8,10 +8,10 @@ data:
   AUTH_VERIFICATION: local
   BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
-  ENV_PREFIX: {{ .envPrefix }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
-  KAFKA_HOST: {{ .kafkaHost }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
+  ENV_PREFIX: {{ .env_prefix }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
+  KAFKA_HOST: {{ .kafka_host }}:9092
+  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
   PACKAGES_VERSION_FORMAT: ".+"
   REPORT_METRICS: "false"
 ---
@@ -28,7 +28,7 @@ spec:
         app: web-events
     spec:
       containers:
-      - image: {{ .webEventsImage }}
+      - image: {{ .web_events_docker_image }}
         name: web-events
         envFrom:
         - configMapRef:
@@ -38,12 +38,11 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: web-events0
         args:
         resources:
           requests:
-            cpu: {{ .webEventsCpu }}
-            memory: {{ .webEventsMemory }}
+            cpu: {{ .web_events_cpu }}
+            memory: {{ .web_events_mem }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -61,7 +60,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: web-events.{{ .externalDomain }}
+  - host: web-events.{{ .ingress_dns_name }}
     http:
       paths:
       - backend:
@@ -74,7 +73,7 @@ metadata:
   name: web-events-secret
 type: Opaque
 data:
-  JWT_SECRET: {{ .webEventsJwtSecret | b64enc }}
+  JWT_SECRET: {{ .web_events_jwt_secret | b64enc }}
 ---
 apiVersion: v1
 kind: Service

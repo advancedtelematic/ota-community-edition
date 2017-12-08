@@ -6,17 +6,17 @@ metadata:
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://{{ .mysqlHost }}:3306/campaigner
+  DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/campaigner
   DB_USER: campaigner
   DEVICE_REGISTRY_HOST: device-registry
   DEVICE_REGISTRY_PORT: '80'
   DIRECTOR_HOST: director
   DIRECTOR_PORT: '80'
-  ENV_PREFIX: {{ .envPrefix }}
-  JAVA_OPTS: {{ .javaOpts }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafkaHost }}:9092
-  KAFKA_HOST: {{ .kafkaHost }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafkaTopicPrefix }}
+  ENV_PREFIX: {{ .env_prefix }}
+  JAVA_OPTS: {{ .campaigner_java_opts }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
+  KAFKA_HOST: {{ .kafka_host }}:9092
+  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
   MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
   SCHEDULER_BATCH_SIZE: '200'
@@ -36,7 +36,7 @@ spec:
         app: campaigner
     spec:
       containers:
-      - image: {{ .campaignerImage }}
+      - image: {{ .campaigner_docker_image }}
         name: campaigner
         envFrom:
         - configMapRef:
@@ -46,12 +46,11 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
-          name: campaigner0
         args:
         resources:
           requests:
-            cpu: {{ .campaignerCpu }}
-            memory: {{ .campaignerMemory }}
+            cpu: {{ .campaigner_cpu }}
+            memory: {{ .campaigner_mem }}
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
@@ -69,7 +68,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: campaigner.{{ .externalDomain }}
+  - host: campaigner.{{ .ingress_dns_name }}
     http:
       paths:
       - backend:
@@ -82,7 +81,7 @@ metadata:
   name: campaigner-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .campaignerDbPassword | b64enc }}
+  DB_PASSWORD: {{ .campaigner_db_password | b64enc }}
 ---
 apiVersion: v1
 kind: Service

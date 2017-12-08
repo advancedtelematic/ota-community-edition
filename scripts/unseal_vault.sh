@@ -5,7 +5,7 @@ set -euo pipefail
 
 init_key=${INIT_KEY:-/init.key}
 
-vault init -check && exit 0
+vault init -check 2>/dev/null && exit 0
 vault init -key-shares=1 -key-threshold=1 > "${init_key}"
 
 root_key=$(awk -F': ' '/^Initial Root Token/{e=0; print $2; exit} {e=1} END{exit e}' "${init_key}")

@@ -5,14 +5,10 @@
 The following tools are required:
 
 * [minikube](https://github.com/kubernetes/minikube)
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (version >=1.8)
-* [kops](https://github.com/kubernetes/kops) (version >=1.8)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (version >= 1.8)
+* [kops](https://github.com/kubernetes/kops) (version >= 1.8)
 
 ## Getting started
-
-### Copy the secrets.yaml example file
-
-Copy the default `secrets.yaml.example` file to `secrets.yaml` and update the default values as desired.
 
 ### Start all services
 
@@ -41,5 +37,5 @@ start | Start minikube and all services.
 start-minikube | Start local minikube environment.
 start-services | Apply the generated config to the k8s cluster.
 create-databases | Create all database tables and users.
-unseal-vault | Create all database tables and users.
+unseal-vault | Automatically unseal the vault.
 hosts | Print the service mappings for /etc/hosts

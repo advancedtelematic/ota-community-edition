@@ -78,7 +78,7 @@ metadata:
 type: Opaque
 data:
   DB_PASSWORD: {{ .tufKeyserverDbPassword | b64enc }}
-  TUF_VAULT_TOKEN: {{ .tufVaultToken | b64enc }}
+  TUF_VAULT_TOKEN: {{ .tufKeyserverVaultToken | b64enc }}
 ---
 apiVersion: v1
 kind: Service
@@ -88,7 +88,5 @@ spec:
   ports:
   - port: 80
     targetPort: 9001
-    protocol: TCP
-    name: tuf-keyserver0
   selector:
     app: tuf-keyserver

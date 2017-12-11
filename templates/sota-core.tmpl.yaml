@@ -100,7 +100,5 @@ spec:
   ports:
   - port: 80
     targetPort: 9001
-    protocol: TCP
-    name: sota-core0
   selector:
     app: sota-core

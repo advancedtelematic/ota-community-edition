@@ -91,7 +91,5 @@ spec:
   ports:
   - port: 80
     targetPort: 9001
-    protocol: TCP
-    name: tuf-repo0
   selector:
     app: tuf-reposerver

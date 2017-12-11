@@ -90,7 +90,5 @@ spec:
   ports:
   - port: 80
     targetPort: 9001
-    protocol: TCP
-    name: director0
   selector:
     app: director

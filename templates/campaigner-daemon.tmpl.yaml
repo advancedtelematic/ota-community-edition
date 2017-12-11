@@ -43,7 +43,7 @@ spec:
             name: campaigner-daemon-config
         - secretRef:
             name: campaigner-daemon-secret
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9001
         args:

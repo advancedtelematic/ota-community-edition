@@ -48,7 +48,7 @@ spec:
             name: sota-core-config
         - secretRef:
             name: sota-core-secret
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9001
         args:

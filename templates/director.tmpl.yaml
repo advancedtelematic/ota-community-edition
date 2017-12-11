@@ -41,7 +41,7 @@ spec:
             name: director-config
         - secretRef:
             name: director-secret
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9001
         args:

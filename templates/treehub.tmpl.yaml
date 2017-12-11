@@ -45,7 +45,7 @@ spec:
             name: treehub-config
         - secretRef:
             name: treehub-secret
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9001
         args:

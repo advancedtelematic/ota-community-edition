@@ -14,13 +14,12 @@ help: ## Print this message and exit.
 start: start-minikube start-services create-databases unseal-vault ## Start minikube and all services.
 
 start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
-	@if ! minikube ip 2>/dev/null; then \
-		minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM); \
+	@minikube ip 2>/dev/null || minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
+	@kubectl get secret docker-registry-key 2>/dev/null || \
 		kubectl create secret docker-registry docker-registry-key \
 			--docker-username=$(DOCKER_USER) \
 			--docker-password=$(DOCKER_PASS) \
-			--docker-email=$(DOCKER_EMAIL); \
-	fi
+			--docker-email=$(DOCKER_EMAIL)
 	@minikube addons enable ingress
 
 start-services: cmd-kops ## Apply the generated config to the k8s cluster.

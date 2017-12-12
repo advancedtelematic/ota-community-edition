@@ -15,7 +15,7 @@ data:
   DEVICE_REGISTRY_HOST: device-registry
   DEVICE_REGISTRY_PORT: '80'
   ENV_PREFIX: {{ .env_prefix }}
-  JAVA_OPTS: {{ .sota_core_docker_image }}
+  JAVA_OPTS: {{ .sota_core_java_opts }}
   KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
   KAFKA_HOST: {{ .kafka_host }}:9092
   KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
@@ -87,7 +87,7 @@ metadata:
 type: Opaque
 data:
   CORE_AWS_ACCESS_KEY: {{ .sota_core_aws_key | b64enc }}
-  CORE_AWS_SECRET_KEY: {{ .sota_core_aws_key | b64enc }}
+  CORE_AWS_SECRET_KEY: {{ .sota_core_aws_secret | b64enc }}
   CORE_DB_PASSWORD: {{ .sota_core_db_password | b64enc }}
   JWT_SECRET: {{ .sota_core_jwt_secret | b64enc }}
 ---

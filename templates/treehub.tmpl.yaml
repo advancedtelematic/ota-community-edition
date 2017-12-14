@@ -11,13 +11,16 @@ data:
   DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/treehub
   DB_USER: treehub
   DB_PASSWORD: treehub
+  DEVICE_REGISTRY_HOST: device-registry
+  DEVICE_REGISTRY_PORT: '80'
   JAVA_OPTS: {{ .treehub_java_opts }}
-  KAFKA_HOST: kafka:9092
+  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
+  KAFKA_HOST: {{ .kafka_host }}:9092
   KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
-  MESSAGING_MODE: test
+  MESSAGING_MODE: kafka
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
-  TREEHUB_HOSTNAME: http://treehub/api/v2/mydevice
+  TREEHUB_HOSTNAME: http://treehub.{{ .ingress_dns_name }}/api/v2/mydevice
   TREEHUB_LOCAL_STORE_PATH: "/treehub-objects"
   TREEHUB_STORAGE: local
   REPORT_METRICS: "false"
@@ -48,26 +51,25 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9001
-        args:
         resources:
           requests:
             cpu: {{ .treehub_cpu }}
             memory: {{ .treehub_mem }}
-        volumeMounts:
-          - name: treehub-persistent-storage
-            mountPath: /treehub-objects
         livenessProbe:
           initialDelaySeconds: 300
           periodSeconds: 30
           httpGet:
             port: 9001
             path: "/health"
+        volumeMounts:
+        - name: objects
+          mountPath: /treehub-objects/object-storage
       imagePullSecrets:
         - name: docker-registry-key
       volumes:
-        - name: treehub-persistent-storage
-          persistentVolumeClaim:
-            claimName: treehub-pv-claim
+      - name: objects
+        persistentVolumeClaim:
+          claimName: treehub-pv-claim
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress

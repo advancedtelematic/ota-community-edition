@@ -1,0 +1,11 @@
+[req]
+prompt = no
+distinguished_name = dn
+req_extensions = ext
+
+[dn]
+CN=$ENV::DEVICE_ID
+
+[ext]
+keyUsage=critical, digitalSignature
+extendedKeyUsage=critical, clientAuth

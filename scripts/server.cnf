@@ -1,0 +1,12 @@
+[req]
+prompt = no
+distinguished_name = dn
+req_extensions = ext
+
+[dn]
+CN=ota-gateway
+
+[ext]
+keyUsage=critical, digitalSignature, keyEncipherment, keyAgreement
+extendedKeyUsage=critical, serverAuth
+subjectAltName=DNS:$ENV::SERVERNAME

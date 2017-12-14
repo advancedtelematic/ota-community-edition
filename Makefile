@@ -5,15 +5,21 @@ KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
 
-.PHONY: help start start-minikube start-servcies create-databases unseal-vault hosts
+.PHONY: help start start-all start-minikube start-servcies create-databases unseal-vault hosts
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%16s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-start: start-minikube start-services create-databases unseal-vault ## Start minikube and all services.
+start: start-all ## Start minikube and all services.
 
-start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
+start-all: \
+	start-minikube \
+	start-services \
+	create-databases \
+	unseal-vault
+
+start-minikube: cmd-minikube cmd-kubectl cmd-helm ## Start local minikube environment.
 	@minikube ip 2>/dev/null || minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
 	@kubectl get secret docker-registry-key 2>/dev/null || \
 		kubectl create secret docker-registry docker-registry-key \
@@ -21,6 +27,8 @@ start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 			--docker-password=$(DOCKER_PASS) \
 			--docker-email=$(DOCKER_EMAIL)
 	@minikube addons enable ingress
+	@minikube ssh -- "for dir in mysql treehub kafka zookeeper; do \
+		sudo mkdir -p /data/\$${dir}-pv-1; sudo chown docker:docker /data/\$${dir}-pv-1; done"
 
 start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 	@kops toolbox template --template templates --values $(CONFIG) --output $(OUTPUT)
@@ -42,7 +50,9 @@ unseal-vault: cmd-kubectl ## Automatically unseal the vault.
 		docker exec $${CONTAINER} "/tmp/unseal_vault.sh"
 
 hosts: cmd-kubectl ## Print the service mappings for /etc/hosts
-	@kubectl get ingress | tail -n+2 | awk '{print $$3 " " $$2}'
+	@$(if $$(kubectl get ingress | egrep --quiet "(\d{1,3}.?){4}"), \
+		kubectl get ingress --no-headers | awk '{print $$3 " " $$2}', \
+		$(error Hosts are not ready yet))
 
 cmd-%: # Check that a command exists.
 	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "$*" first))

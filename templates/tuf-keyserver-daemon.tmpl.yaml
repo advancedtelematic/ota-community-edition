@@ -36,7 +36,7 @@ spec:
             name: tuf-keyserver-daemon-config
         - secretRef:
             name: tuf-keyserver-daemon-secret
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9001
         args:

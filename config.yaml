@@ -13,7 +13,7 @@ campaigner_docker_image: advancedtelematic/campaigner:0.0.1-67-g27d5d9b
 device_registry_docker_image: advancedtelematic/sota-device_registry:0.3.25
 director_daemon_docker_image: advancedtelematic/director:0.2.0-6-g916d772
 director_docker_image: advancedtelematic/director:0.2.0-6-g916d772
-kafka_docker_image: databench/apache-kafka-basic:0.4.0
+kafka_docker_image: confluentinc/cp-kafka:4.0.0
 mysql_docker_image: mariadb:10.3.2
 sota_core_docker_image: advancedtelematic/sota-core:0.3.25
 treehub_docker_image: advancedtelematic/treehub:0.1.12
@@ -22,7 +22,7 @@ tuf_keyserver_docker_image: advancedtelematic/tuf-keyserver:0.2.0-54-g1e7a646
 tuf_reposerver_docker_image: advancedtelematic/tuf-reposerver:0.2.0-54-g1e7a646
 tuf_vault_docker_image: advancedtelematic/crypto-vault:0.3
 web_events_docker_image: advancedtelematic/web-events:0.0.7
-zookeeper_docker_image: databench/apache-kafka-basic:0.4.0
+zookeeper_docker_image: gcr.io/google_samples/k8szk:v2
 
 # services
 app_cpu: 80m

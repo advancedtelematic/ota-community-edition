@@ -8,8 +8,8 @@ data:
   BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DEVICE_REGISTRY_DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/device_registry
-  DEVICE_REGISTRY_DB_USER: device_registry
+  DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/device_registry
+  DB_USER: device_registry
   ENV_PREFIX: {{ .env_prefix }}
   JAVA_OPTS: {{ .device_registry_java_opts }}
   KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
@@ -76,7 +76,7 @@ metadata:
   name: device-registry-secret
 type: Opaque
 data:
-  DEVICE_REGISTRY_DB_PASSWORD: {{ .device_registry_db_password | b64enc }}
+  DB_PASSWORD: {{ .device_registry_db_password | b64enc }}
 ---
 apiVersion: v1
 kind: Service

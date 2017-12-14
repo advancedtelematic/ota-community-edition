@@ -8,9 +8,9 @@ image_pull_secrets_name: docker-registry-key
 zookeeper_host: zookeeper
 
 # images
-app_docker_image: advancedtelematic/ota-plus-web:0.5.3-7-g18fe662
+app_docker_image: advancedtelematic/ota-plus-web:0.6.0-19-g4adbd77
 campaigner_docker_image: advancedtelematic/campaigner:0.0.1-67-g27d5d9b
-device_registry_docker_image: advancedtelematic/sota-device_registry:0.3.25
+device_registry_docker_image: advancedtelematic/device-registry:0.0.1-14-g0a1af2e
 director_daemon_docker_image: advancedtelematic/director:0.2.0-6-g916d772
 director_docker_image: advancedtelematic/director:0.2.0-6-g916d772
 kafka_docker_image: confluentinc/cp-kafka:4.0.0

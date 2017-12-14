@@ -2,7 +2,8 @@
 
 set -ue
 
-readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../out
+export SERVERNAME=${SERVERNAME:-ota.ce}
+readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../${SERVERNAME}
 mkdir -p ${DIR}
 
 openssl ecparam -genkey -name prime256v1 | openssl ec -out ${DIR}/ca.key

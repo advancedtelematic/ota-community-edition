@@ -22,10 +22,7 @@ start-all: \
 start-minikube: cmd-minikube cmd-kubectl cmd-helm ## Start local minikube environment.
 	@minikube ip 2>/dev/null || minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
 	@kubectl get secret docker-registry-key 2>/dev/null || \
-		kubectl create secret docker-registry docker-registry-key \
-			--docker-username=$(DOCKER_USER) \
-			--docker-password=$(DOCKER_PASS) \
-			--docker-email=$(DOCKER_EMAIL)
+		DOCKER_USER=$(DOCKER_USER) DOCKER_PASS=$(DOCKER_PASS) scripts/docker_login.sh
 	@minikube addons enable ingress
 	@minikube ssh -- "for dir in mysql treehub kafka zookeeper; do \
 		sudo mkdir -p /data/\$${dir}-pv-1; sudo chown docker:docker /data/\$${dir}-pv-1; done"

@@ -8,34 +8,34 @@ The following tools are required:
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (version >= 1.8)
 * [kops](https://github.com/kubernetes/kops) (version >= 1.8)
 
-## Getting started
+## Usage
 
-### Start all services
+Run `make` to see a list of the available Makefile commands.
 
-Run `make start` to start all services on minikube, as well as creating all databases and unsealing vault.
+### Getting started
 
-### Update your hosts file
+0. **Until all images are public...**
 
-Run `make hosts` next to print a list of services to add to your `/etc/hosts` file.
+   Set the `DOCKER_USER` and `DOCKER_PASS` environment variables for pulling the private ATS images.
 
-### Visit OTA Community Edition Garage
+1. **Start all services**
 
-The OTA Community Edition Garage should now be available to view in your browser at http://app.ota.local (by default).
+   Run `make start` to start all services inside minikube. *n.b. you will need 8GB of free RAM*
+
+2. **Update your hosts file**
+
+   Run `make hosts` to print a list of entries to add to your `/etc/hosts` file.
+
+3. **Visit the garage**
+
+   The Community Edition Garage should now be available to view in your browser at http://app.ota.local (by default).
 
 ### Admin interface
 
 Run `minikube dashboard` to open the admin interface in your browser, which will be at http://192.168.99.100:30000 by default.
 
-## Command line interface
+## Troubleshooting
 
-Run `make` to see a list of the available Makefile commands, which are:
+Try re-running `make start` if you receive any of the following errors:
 
-command | description
----|---
-help | Print this message and exit.
-start | Start minikube and all services.
-start-minikube | Start local minikube environment.
-start-services | Apply the generated config to the k8s cluster.
-create-databases | Create all database tables and users.
-unseal-vault | Automatically unseal the vault.
-hosts | Print the service mappings for /etc/hosts
+* `Unable to connect to the server: dial tcp 192.168.99.100:8443: getsockopt: operation timed out`

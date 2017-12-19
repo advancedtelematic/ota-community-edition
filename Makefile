@@ -13,13 +13,21 @@ help: ## Print this message and exit.
 
 start: start-all ## Start minikube and all services.
 
+stop: cmd-minikube ## Stop minikube and all running services.
+	@minikube stop
+
+delete: cmd-minikube ## Delete the minikube VM and all service data.
+	@minikube delete
+
 start-all: \
 	start-minikube \
 	start-services \
 	create-databases \
-	unseal-vault
+	unseal-vault \
+	copy-tokens \
+	hosts
 
-start-minikube: cmd-minikube cmd-kubectl cmd-helm ## Start local minikube environment.
+start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 	@minikube ip 2>/dev/null || minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
 	@kubectl get secret docker-registry-key 2>/dev/null || \
 		DOCKER_USER=$(DOCKER_USER) DOCKER_PASS=$(DOCKER_PASS) scripts/docker_login.sh
@@ -32,24 +40,20 @@ start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 	@sed '1,/^---/d' $(OUTPUT) > .temp && mv .temp $(OUTPUT)
 	@kubectl apply --filename $(OUTPUT)
 
-create-databases: cmd-kubectl ## Create all database tables and users.
-	@eval $$(minikube docker-env); \
-		until $$(docker ps | grep --silent mariadb); do sleep 5; done; sleep 15; \
-		CONTAINER="$$(docker ps | grep mariadb | awk '{print $$1}')"; \
-		docker cp scripts/create_databases.sql "$${CONTAINER}:/tmp"; \
-		docker exec -it $${CONTAINER} bash -c "mysql -proot < /tmp/create_databases.sql"
+create-databases: cmd-minikube ## Create all database tables and users.
+	@DB_PASS=$$(awk '/mysql_root_password/ {print $$2}' $(CONFIG)) \
+		scripts/container_run.sh $@
 
-unseal-vault: cmd-kubectl ## Automatically unseal the vault.
-	@eval $$(minikube docker-env); \
-		until $$(docker ps | grep --silent k8s_tuf-vault); do sleep 5; done; sleep 15; \
-		CONTAINER="$$(docker ps | grep k8s_tuf-vault | awk '{print $$1}')"; \
-		docker cp scripts/unseal_vault.sh "$${CONTAINER}:/tmp"; \
-		docker exec $${CONTAINER} "/tmp/unseal_vault.sh"
+unseal-vault: cmd-minikube ## Automatically unseal the vault.
+	@scripts/container_run.sh $@
+
+copy-tokens: cmd-minikube ## Copy vault tokens to their respective containers.
+	@scripts/container_run.sh $@
 
 hosts: cmd-kubectl ## Print the service mappings for /etc/hosts
-	@$(if $$(kubectl get ingress | egrep --quiet "(\d{1,3}.?){4}"), \
+	@$(if $$(kubectl get ingress | egrep --quiet "(\d{1,3}.){3}\d{1,3}"), \
 		kubectl get ingress --no-headers | awk '{print $$3 " " $$2}', \
 		$(error Hosts are not ready yet))
 
 cmd-%: # Check that a command exists.
-	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "$*" first))
+	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "${*}" first))

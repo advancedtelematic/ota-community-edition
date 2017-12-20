@@ -5,7 +5,8 @@ KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
 
-.PHONY: help start start-all start-minikube start-servcies create-databases unseal-vault hosts
+.PHONY: help start stop delete start-all start-minikube start-services \
+	create-databases unseal-vault copy-tokens hosts
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
@@ -36,8 +37,9 @@ start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 		sudo mkdir -p /data/\$${dir}-pv-1; sudo chown docker:docker /data/\$${dir}-pv-1; done"
 
 start-services: cmd-kops ## Apply the generated config to the k8s cluster.
+	@find templates -type f -not -name "*.yaml" -print \
+		| xargs -I{} sh -c 'echo Non-template file found: {} && false'
 	@kops toolbox template --template templates --values $(CONFIG) --output $(OUTPUT)
-	@sed '1,/^---/d' $(OUTPUT) > .temp && mv .temp $(OUTPUT)
 	@kubectl apply --filename $(OUTPUT)
 
 create-databases: cmd-minikube ## Create all database tables and users.

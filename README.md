@@ -39,3 +39,5 @@ Run `minikube dashboard` to open the admin interface in your browser, which will
 Try re-running `make start` if you receive any of the following errors:
 
 * `Unable to connect to the server: dial tcp 192.168.99.100:8443: getsockopt: operation timed out`
+* `Error initializing Vault: Put http://127.0.0.1:8200/v1/sys/init: dial tcp 127.0.0.1:8200: getsockopt: connection refused`
+* `ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2)`

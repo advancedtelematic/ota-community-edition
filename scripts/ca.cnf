@@ -9,4 +9,4 @@ CN = otaCA
 [ext]
 basicConstraints=CA:TRUE
 keyUsage = keyCertSign
-extendedKeyUsage = critical, serverAuth
+extendedKeyUsage = critical, serverAuth, clientAuth

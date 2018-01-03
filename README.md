@@ -14,10 +14,6 @@ Run `make` to see a list of the available Makefile commands.
 
 ### Getting started
 
-0. **Until all images are public...**
-
-   Set the `DOCKER_USER` and `DOCKER_PASS` environment variables for pulling the private ATS images.
-
 1. **Start all services**
 
    Run `make start` to start all services inside minikube. *n.b. you will need 8GB of free RAM*

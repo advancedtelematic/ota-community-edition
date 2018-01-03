@@ -1,8 +1,30 @@
 # OTA Community Edition
 
+The OTA Community Edition is open-source server software to allow
+over-the-air (OTA) updates of compatible clients (see the
+[Aktualizr](https://github.com/advancedtelematic/aktualizr)
+open-source example client). It is comprised of a number of services
+which together make up the OTA system. The source code for the servers
+is available on [Github](https://github.com/advancedtelematic) and is
+licensed under the MPL2.0 (as is the code in this repository, see
+below). Docker container images of the latest build are available on
+[Docker Hub](https://hub.docker.com/u/advancedtelematic).
+
+This repository contains scripts to launch the open-source OTA
+Community Edition software under the
+[Kubernetes](https://kubernetes.io/) orchestration system on a single
+machine (minikube).
+
+Note that the OTA Community Edition doesn't use authentication nor any
+other security provision needed for a production system. It is meant
+to run locally/inside of a firewall.
+
 ## Requirements
 
-The following tools are required:
+OTA needs at least 8GB of RAM to run.
+
+The following software tools are required to run the scripts in the
+current repository:
 
 * [minikube](https://github.com/kubernetes/minikube)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (version >= 1.8)
@@ -10,21 +32,23 @@ The following tools are required:
 
 ## Usage
 
-Run `make` to see a list of the available Makefile commands.
+The single entry point to the scripts is the `Makefile`.
+
+It is self-documenting, run `make` to see a list of the available commands.
 
 ### Getting started
 
 1. **Start all services**
 
-   Run `make start` to start all services inside minikube. *n.b. you will need 8GB of free RAM*
+   Run `make start` to start all services inside minikube.
 
 2. **Update your hosts file**
 
    Run `make hosts` to print a list of entries to add to your `/etc/hosts` file.
 
-3. **Visit the garage**
+3. **Visit the Admin User Interface**
 
-   The Community Edition Garage should now be available to view in your browser at http://app.ota.local (by default).
+   The Community Edition Admin UI should now be available to view in your browser at http://app.ota.local (by default).
 
 ### Admin interface
 

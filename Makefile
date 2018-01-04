@@ -38,6 +38,7 @@ start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 	@find templates -type f -not -name "*.yaml" -print \
 		| xargs -I{} sh -c 'echo Non-template file found: {} && false'
 	@kops toolbox template --template templates --values $(CONFIG) --output $(OUTPUT)
+	@kubectl create secret generic gateway-tls --from-file ota.ce/server.key --from-file ota.ce/server.chain.pem --from-file ota.ce/devices/ca.crt
 	@kubectl apply --filename $(OUTPUT)
 
 create-databases: cmd-minikube ## Create all database tables and users.

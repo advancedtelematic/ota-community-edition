@@ -93,6 +93,7 @@ metadata:
   name: treehub-pv-1
   labels:
     type: local
+    volume: treehub
 spec:
   capacity:
     storage: 1Gi
@@ -113,6 +114,9 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  selector:
+    matchLabels:
+      volume: treehub
 ---
 apiVersion: v1
 kind: Secret

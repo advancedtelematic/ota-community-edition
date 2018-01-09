@@ -88,6 +88,7 @@ metadata:
   name: kafka-pv-1
   labels:
     type: local
+    volume: kafka
 spec:
   capacity:
     storage: 1Gi
@@ -108,6 +109,9 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  selector:
+    matchLabels:
+      volume: kafka
 ---
 apiVersion: v1
 kind: Service

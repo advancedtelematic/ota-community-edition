@@ -4,9 +4,9 @@ distinguished_name = dn
 x509_extensions = ext
 
 [dn]
-CN = otaCA
+CN = ota-devices-CA
 
 [ext]
 basicConstraints=CA:TRUE
 keyUsage = keyCertSign
-extendedKeyUsage = critical, serverAuth, clientAuth
+extendedKeyUsage = critical, clientAuth

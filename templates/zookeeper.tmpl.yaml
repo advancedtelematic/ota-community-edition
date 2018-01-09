@@ -87,6 +87,7 @@ metadata:
   name: zookeeper-pv-1
   labels:
     type: local
+    volume: zookeeper
 spec:
   capacity:
     storage: 1Gi
@@ -107,6 +108,9 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  selector:
+    matchLabels:
+      volume: zookeeper
 ---
 apiVersion: v1
 kind: Service

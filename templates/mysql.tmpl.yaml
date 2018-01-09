@@ -44,6 +44,7 @@ metadata:
   name: mysql-pv-1
   labels:
     type: local
+    volume: mysql
 spec:
   capacity:
     storage: 1Gi
@@ -64,6 +65,9 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  selector:
+    matchLabels:
+      volume: mysql
 ---
 apiVersion: v1
 kind: Secret

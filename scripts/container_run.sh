@@ -27,16 +27,34 @@ wait_for_container() {
   print_container_id "${container_name}"
 }
 
+retryCheck() {
+    local n=0
+    local try=30
+    local cmd="${@: 2}"
+    until eval $cmd
+    do
+        if [[ $((n++)) -ge $try ]]; then
+            return 1
+        fi
+        echo "Waiting for $1" >&2
+        sleep 5s
+    done
+    echo "$1 is ready" && return 0
+}
+
 create_databases() {
-  container_id=$(wait_for_container "${DB_NAME}" 15)
-  docker cp "${SCRIPT_DIR}/create_databases.sql" "${container_id}:/tmp"
-  docker exec -it "${container_id}" bash -c "mysql -p${DB_PASS} < /tmp/create_databases.sql"
+  retryCheck "mysql" "[ -n \"\$(kubectl get deploy mysql -o json | jq '.status.conditions[]? | select(.type == \"Available\" and .status == \"True\")')\" ]"
+  local kubeName=$(kubectl get po -l app=mysql -o json -o=jsonpath='{.items[0].metadata.name}')
+  kubectl cp "${SCRIPT_DIR}/create_databases.sql" ${kubeName}:/tmp/create_databases.sql
+  kubectl exec -ti ${kubeName} -- bash -c "mysql -p${DB_PASS} < /tmp/create_databases.sql"
 }
 
 unseal_vault() {
-  container_id=$(wait_for_container "${VAULT_NAME}" 5)
-  docker cp "${SCRIPT_DIR}/unseal_vault.sh" "${container_id}:/tmp"
-  docker exec "${container_id}" "/tmp/unseal_vault.sh"
+  retryCheck "mysql" "[ -n \"\$(kubectl get deploy tuf-vault -o json | jq '.status.conditions[]? | select(.type == \"Available\" and .status == \"True\")')\" ]"
+  local kubeName=$(kubectl get po -l app=tuf-vault -o json -o=jsonpath='{.items[0].metadata.name}')
+  retryCheck "vault" "http --check-status --ignore-stdin http://127.0.0.1/v1/sys/init \"Host: tuf-vault.ota.local\""
+  kubectl cp ${SCRIPT_DIR}/unseal_vault.sh ${kubeName}:/tmp/unseal_vault.sh
+  kubectl exec ${kubeName} /tmp/unseal_vault.sh
 }
 
 copy_tokens() {
@@ -52,7 +70,7 @@ copy_tokens() {
 [ $# -lt 1 ] && { echo "Usage: $0 <command>"; exit 1; }
 command=$(echo "$1" | sed 's/-/_/g')
 
-eval $(minikube docker-env)
+# eval $(minikube docker-env)
 case "${command}" in
   "create_databases")
     create_databases

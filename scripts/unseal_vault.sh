@@ -4,6 +4,7 @@ set -euo pipefail
 
 
 init_key=${INIT_KEY:-/init.key}
+keyserver_token=${KEYSERVER_TOKEN:-123e4567-e89b-12d3-a456-426655440000}
 
 # initialize vault
 vault init -check 2>/dev/null && exit 0
@@ -24,4 +25,4 @@ END
 vault mount -path /ota-tuf/keys generic
 
 # generate tuf-keyserver token
-vault token-create -policy="tuf" -period="72h" -id  123e4567-e89b-12d3-a456-426655440000
+vault token-create -policy="tuf" -period="72h" -id "${keyserver_token}"

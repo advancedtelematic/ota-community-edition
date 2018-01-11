@@ -50,7 +50,8 @@ create-databases: cmd-minikube ## Create all database tables and users.
 		scripts/container_run.sh $@
 
 unseal-vault: cmd-minikube ## Automatically unseal the vault.
-	@scripts/container_run.sh $@
+	@KEYSERVER_TOKEN=$$(awk '/tuf_keyserver_vault_token/ {print $$2}' $(CONFIG)) \
+		scripts/container_run.sh $@
 
  hosts: cmd-kubectl ## Print the service mappings for /etc/hosts
 	@$(if $$(kubectl get ingress | egrep --quiet "(\d{1,3}.){3}\d{1,3}"), \

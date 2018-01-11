@@ -79,7 +79,7 @@ tuf_keyserver_daemon_db_password: tuf_keyserver
 tuf_keyserver_daemon_db_user: tuf_keyserver
 tuf_keyserver_daemon_java_opts: "-Xmx250m"
 tuf_keyserver_daemon_mem: 300Mi
-tuf_keyserver_daemon_vault_token: 123e4567-e89b-12d3-a456-426655440000
+tuf_keyserver_vault_token: 123e4567-e89b-12d3-a456-426655440000
 tuf_keyserver_cpu: 80m
 tuf_keyserver_db_password: tuf_keyserver
 tuf_keyserver_db_user: tuf_keyserver

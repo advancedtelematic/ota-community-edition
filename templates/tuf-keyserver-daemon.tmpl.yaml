@@ -62,4 +62,4 @@ metadata:
 type: Opaque
 data:
   DB_PASSWORD: {{ .tuf_keyserver_daemon_db_password | b64enc }}
-  TUF_VAULT_TOKEN: {{ .tuf_keyserver_daemon_vault_token | b64enc }}
+  TUF_VAULT_TOKEN: {{ .tuf_keyserver_vault_token | b64enc }}

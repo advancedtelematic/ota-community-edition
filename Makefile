@@ -1,6 +1,7 @@
 CONFIG ?= config.yaml
 OUTPUT ?= .generated.yaml
 
+KUBE_VM ?= virtualbox
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
@@ -29,16 +30,20 @@ start-all: \
 	hosts
 
 start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
-	@minikube ip 2>/dev/null || minikube start --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
+	@minikube ip 2>/dev/null || minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
 	@minikube addons enable ingress
-	@minikube ssh -- "for dir in mysql treehub kafka zookeeper; do \
-		sudo mkdir -p /data/\$${dir}-pv-1; sudo chown docker:docker /data/\$${dir}-pv-1; done"
 
 start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 	@find templates -type f -not -name "*.yaml" -print \
 		| xargs -I{} sh -c 'echo Non-template file found: {} && false'
 	@kops toolbox template --template templates --values $(CONFIG) --output $(OUTPUT)
-	@kubectl create secret generic gateway-tls --from-file ota.ce/server.key --from-file ota.ce/server.chain.pem --from-file ota.ce/devices/ca.crt
+	@kubectl get secret gateway-tls 2>/dev/null || { \
+		scripts/genserver.sh; \
+		kubectl create secret generic gateway-tls \
+		--from-file ota.ce/server.key \
+		--from-file ota.ce/server.chain.pem \
+		--from-file ota.ce/devices/ca.crt; \
+		}
 	@kubectl apply --filename $(OUTPUT)
 
 create-databases: cmd-minikube ## Create all database tables and users.

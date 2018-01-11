@@ -41,8 +41,8 @@ spec:
         - bash
         - -c
         - |
-          until [ -f /keyserver-token ]; do sleep 5; done && \
-          export TUF_VAULT_TOKEN=$( </keyserver-token ) && \
+          until [ -f /tmp/keyserver-token ]; do sleep 5; done && \
+          export TUF_VAULT_TOKEN=$( </tmp/keyserver-token ) && \
           /opt/keyserver/bin/keyserver -main com.advancedtelematic.tuf.keyserver.Boot
         ports:
         - containerPort: 9001

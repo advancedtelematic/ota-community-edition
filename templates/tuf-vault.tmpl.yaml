@@ -42,10 +42,11 @@ spec:
             cpu: {{ .tuf_vault_cpu }}
             memory: {{ .tuf_vault_mem }}
         livenessProbe:
-          initialDelaySeconds: 300
-          periodSeconds: 30
-          tcpSocket:
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          httpGet:
             port: 8200
+            path: /v1/sys/init
         securityContext:
           capabilities:
             add:

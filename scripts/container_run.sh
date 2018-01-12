@@ -8,9 +8,6 @@ DB_NAME=${DB_NAME:-mariadb}
 DB_PASS=${DB_PASS:-root}
 MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
 VAULT_NAME=${VAULT_NAME:-tuf-vault}
-KEYSERVER_NAME=${KEYSERVER_NAME:-tuf-keyserver}
-KEYSERVER_TOKEN=${KEYSERVER_TOKEN:-/keyserver-token}
-
 
 print_pod_name() {
   app_name=${1}
@@ -58,16 +55,6 @@ unseal_vault() {
   kubectl exec ${vault_name} /tmp/unseal_vault.sh
 }
 
-copy_tokens() {
-  vault_name=$(wait_for_pod "${VAULT_NAME}")
-  keyserver_name=$(wait_for_pod "${KEYSERVER_NAME}")
-  temp_file=$(mktemp)
-  kubectl cp "${vault_name}:${KEYSERVER_TOKEN}" "${temp_file}"
-  kubectl cp "${temp_file}" "${keyserver_name}:/tmp/${KEYSERVER_TOKEN}"
-  rm "${temp_file}"
-}
-
-
 [ $# -lt 1 ] && { echo "Usage: $0 <command>"; exit 1; }
 command=$(echo "$1" | sed 's/-/_/g')
 
@@ -77,9 +64,6 @@ case "${command}" in
     ;;
   "unseal_vault")
     unseal_vault
-    ;;
-  "copy_tokens")
-    copy_tokens
     ;;
   *)
     echo "Unknown command: ${command}"

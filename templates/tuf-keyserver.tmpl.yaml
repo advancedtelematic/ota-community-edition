@@ -37,13 +37,9 @@ spec:
         - secretRef:
             name: tuf-keyserver-secret
         imagePullPolicy: IfNotPresent
-        command:
-        - bash
-        - -c
-        - |
-          until [ -f /tmp/keyserver-token ]; do sleep 5; done && \
-          export TUF_VAULT_TOKEN=$( </tmp/keyserver-token ) && \
-          /opt/keyserver/bin/keyserver -main com.advancedtelematic.tuf.keyserver.Boot
+        args:
+        - " -main"
+        - com.advancedtelematic.tuf.keyserver.Boot
         ports:
         - containerPort: 9001
         resources:
@@ -81,6 +77,7 @@ metadata:
 type: Opaque
 data:
   DB_PASSWORD: {{ .tuf_keyserver_db_password | b64enc }}
+  TUF_VAULT_TOKEN: {{ .tuf_keyserver_vault_token | b64enc }}
 ---
 apiVersion: v1
 kind: Service

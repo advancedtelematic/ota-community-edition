@@ -17,8 +17,8 @@ print_pod_name() {
 retry_check() {
   local n=0
   local try=60
-  local cmd=${@: 2}
-  until eval $cmd >/dev/null 2>&1; do
+  local cmd="[ -n \"\$(${@: 2})\" ]"
+  until eval $cmd 2>/dev/null; do
     [[ $((n++)) -ge $try ]] && return 1
     echo >&2 "Waiting for $1"
     sleep 5s

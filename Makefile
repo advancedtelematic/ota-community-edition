@@ -53,7 +53,7 @@ unseal-vault: cmd-minikube ## Automatically unseal the vault.
 	@KEYSERVER_TOKEN=$$(awk '/tuf_keyserver_vault_token/ {print $$2}' $(CONFIG)) \
 		scripts/container_run.sh $@
 
- hosts: cmd-kubectl ## Print the service mappings for /etc/hosts
+hosts: cmd-kubectl ## Print the service mappings for /etc/hosts
 	@$(if $$(kubectl get ingress | egrep --quiet "(\d{1,3}.){3}\d{1,3}"), \
 		kubectl get ingress --no-headers | awk '{print $$3 " " $$2}', \
 		$(error Hosts are not ready yet))

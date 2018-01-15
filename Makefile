@@ -1,5 +1,6 @@
 CONFIG ?= config.yaml
 OUTPUT ?= .generated.yaml
+CA_DIR ?= ota.ce
 
 KUBE_VM ?= virtualbox
 KUBE_CPU ?= 2
@@ -36,12 +37,12 @@ start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 	@find templates -type f -not -name "*.yaml" -print \
 		| xargs -I{} sh -c 'echo Non-template file found: {} && false'
 	@kops toolbox template --template templates --values $(CONFIG) --output $(OUTPUT)
-	@kubectl get secret gateway-tls 2>/dev/null || { \
+	@[[ -d "$(CA_DIR)" ]] || { \
 		scripts/genserver.sh; \
 		kubectl create secret generic gateway-tls \
-		--from-file ota.ce/server.key \
-		--from-file ota.ce/server.chain.pem \
-		--from-file ota.ce/devices/ca.crt; \
+		--from-file $(CA_DIR)/server.key \
+		--from-file $(CA_DIR)/server.chain.pem \
+		--from-file $(CA_DIR)/devices/ca.crt; \
 		}
 	@kubectl apply --filename $(OUTPUT)
 

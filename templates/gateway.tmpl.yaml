@@ -39,7 +39,7 @@ data:
       }
 
       location /repo/ {
-        rewrite ^/repo/(.*)$ /api/v1/user_repo/${deviceUuid}/$1 break;
+        rewrite ^/repo/(.*)$ /api/v1/user_repo/$1 break;
         proxy_set_header x-ats-namespace $deviceNamespace;
         proxy_pass http://repo;
       }

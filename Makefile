@@ -7,7 +7,7 @@ KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
 
-.PHONY: help start stop delete start-all start-minikube start-services \
+.PHONY: help start stop test clean start-all start-minikube start-services \
 	create-databases unseal-vault copy-tokens hosts
 .DEFAULT_GOAL := help
 
@@ -19,8 +19,12 @@ start: start-all ## Start minikube and all services.
 stop: cmd-minikube ## Stop minikube and all running services.
 	@minikube stop
 
-delete: cmd-minikube ## Delete the minikube VM and all service data.
-	@minikube delete
+test: ## Run the end-to-end test suite.
+	@false # FIXME: placeholder
+
+clean: cmd-minikube ## Delete the minikube VM and all service data.
+	@minikube delete >/dev/null || true
+	@rm -rf $(CA_DIR)
 
 start-all: \
 	start-minikube \

@@ -62,6 +62,13 @@ unseal_vault() {
   http --ignore-stdin --check-status PUT "${api}/auth/token/create" "${host}" "X-Vault-Token: ${token}" id=${KEYSERVER_TOKEN} policies:='["tuf"]' period="72h"
 }
 
+print_hosts() {
+  try_command ingress "kubectl get ingress -o json \
+    | jq --exit-status '.items[0].status.loadBalancer.ingress'"
+  kubectl get ingress --no-headers | awk '{print $3 " " $2}'
+}
+
+
 [ $# -lt 1 ] && { echo "Usage: $0 <command>"; exit 1; }
 command=$(echo "$1" | sed 's/-/_/g')
 
@@ -71,6 +78,9 @@ case "${command}" in
     ;;
   "unseal_vault")
     unseal_vault
+    ;;
+  "print_hosts")
+    print_hosts
     ;;
   *)
     echo "Unknown command: ${command}"

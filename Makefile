@@ -8,7 +8,7 @@ KUBE_MEM ?= 8192
 
 
 .PHONY: help start stop test clean start-all start-minikube start-services \
-	create-databases unseal-vault copy-tokens hosts
+	create-databases unseal-vault copy-tokens print-hosts
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
@@ -30,8 +30,7 @@ start-all: \
 	start-minikube \
 	start-services \
 	create-databases \
-	unseal-vault \
-	hosts
+	unseal-vault
 
 start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 	@minikube ip 2>/dev/null || minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
@@ -58,10 +57,8 @@ unseal-vault: cmd-minikube ## Automatically unseal the vault.
 	@KEYSERVER_TOKEN=$$(awk '/tuf_keyserver_vault_token/ {print $$2}' $(CONFIG)) \
 		scripts/container_run.sh $@
 
-hosts: cmd-kubectl ## Print the service mappings for /etc/hosts
-	@$(if $$(kubectl get ingress | egrep --quiet "(\d{1,3}.){3}\d{1,3}"), \
-		kubectl get ingress --no-headers | awk '{print $$3 " " $$2}', \
-		$(error Hosts are not ready yet))
+print-hosts: cmd-kubectl cmd-jq ## Print the service mappings for /etc/hosts
+	@scripts/container_run.sh $@
 
 cmd-%: # Check that a command exists.
 	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "${*}" first))

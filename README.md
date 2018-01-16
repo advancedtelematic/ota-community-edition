@@ -44,7 +44,7 @@ It is self-documenting, run `make` to see a list of the available commands.
 
 2. **Update your hosts file**
 
-   Run `make hosts` to print a list of entries to add to your `/etc/hosts` file.
+   Run `make print-hosts` to print a list of entries to add to your `/etc/hosts` file.
 
 3. **Visit the Admin User Interface**
 

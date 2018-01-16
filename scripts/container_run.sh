@@ -56,9 +56,9 @@ unseal_vault() {
     local token=$(kubectl get secret vault-init -o jsonpath --template='{.data.token}' | base64 --decode)
   fi
 
-  http -vvv --ignore-stdin --check-status PUT "${api}/sys/unseal" "${host}" key=${key}
-  http --ignore-stdin --check-status PUT "${api}/sys/policy/tuf" "${host}" "X-Vault-Token: ${token}" policy="path \"ota-tuf/keys/*\" {\n  policy = \"write\"\n}"
+  http --ignore-stdin --check-status PUT "${api}/sys/unseal" "${host}" key=${key}
   http --ignore-stdin PUT "${api}/sys/mounts/ota-tuf/keys" "${host}" "X-Vault-Token: ${token}" type=generic
+  http --ignore-stdin --check-status PUT "${api}/sys/policy/tuf" "${host}" "X-Vault-Token: ${token}" rules=@${SCRIPT_DIR}/tuf-policy.hcl
   http --ignore-stdin --check-status PUT "${api}/auth/token/create" "${host}" "X-Vault-Token: ${token}" id=${KEYSERVER_TOKEN} policies:='["tuf"]' period="72h"
 }
 

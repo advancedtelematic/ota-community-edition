@@ -8,20 +8,20 @@ image_pull_secrets_name: docker-registry-key
 zookeeper_host: zookeeper
 
 # images
-app_docker_image: advancedtelematic/ota-plus-web:0.6.0-19-g4adbd77
-campaigner_docker_image: advancedtelematic/campaigner:0.0.1-67-g27d5d9b
-device_registry_docker_image: advancedtelematic/device-registry:0.0.1-14-g0a1af2e
-director_daemon_docker_image: advancedtelematic/director:0.2.0-6-g916d772
-director_docker_image: advancedtelematic/director:0.2.0-6-g916d772
+app_docker_image: advancedtelematic/ota-plus-web:latest
+campaigner_docker_image: advancedtelematic/campaigner:latest
+device_registry_docker_image: advancedtelematic/device-registry:latest
+director_daemon_docker_image: advancedtelematic/director:latest
+director_docker_image: advancedtelematic/director:latest
 kafka_docker_image: confluentinc/cp-kafka:4.0.0
 mysql_docker_image: mariadb:10.3.2
-sota_core_docker_image: advancedtelematic/sota-core:0.3.25
-treehub_docker_image: advancedtelematic/treehub:0.1.12
-tuf_keyserver_daemon_docker_image: advancedtelematic/tuf-keyserver:0.2.0-54-g1e7a646
-tuf_keyserver_docker_image: advancedtelematic/tuf-keyserver:0.2.0-54-g1e7a646
-tuf_reposerver_docker_image: advancedtelematic/tuf-reposerver:0.2.0-54-g1e7a646
+sota_core_docker_image: advancedtelematic/sota-core:latest
+treehub_docker_image: advancedtelematic/treehub:latest
+tuf_keyserver_daemon_docker_image: advancedtelematic/tuf-keyserver:latest
+tuf_keyserver_docker_image: advancedtelematic/tuf-keyserver:latest
+tuf_reposerver_docker_image: advancedtelematic/tuf-reposerver:latest
 tuf_vault_docker_image: advancedtelematic/crypto-vault:0.3
-web_events_docker_image: advancedtelematic/web-events:0.0.7
+web_events_docker_image: advancedtelematic/web-events:latest
 zookeeper_docker_image: gcr.io/google_samples/k8szk:v2
 
 # services

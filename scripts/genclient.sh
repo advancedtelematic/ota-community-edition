@@ -5,7 +5,6 @@ set -euo pipefail
 export SERVERNAME=${SERVERNAME:-ota.ce}
 export DEVICE_ID=${1}
 export DEVICE_UUID=$(uuidgen)
-UPDATE_DEVICE=${2:-false}
 
 readonly MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
 readonly GATEWAY_ADDR=${GATEWAY_ADDR:-$(kubectl get nodes -o jsonpath --template='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')}
@@ -29,8 +28,6 @@ openssl x509 -in ${DIR}/client.pem -text -noout
 http PUT http://${MINIKUBE_IP}/api/v1/devices "Host:${REGISTRY_HOST}" deviceUuid="${DEVICE_UUID}" \
   deviceId=${DEVICE_ID} deviceName=${DEVICE_ID} deviceType=Other credentials=@${DIR}/client.pem
 
-if [[ ${UPDATE_DEVICE} = true ]]; then
-  ssh -o StrictHostKeyChecking=no root@localhost -p 2222 "echo \"${GATEWAY_ADDR} ota.ce\" >> /etc/hosts"
-  scp -P 2222 -o StrictHostKeyChecking=no ${DIR}/client.pem root@${DEVICE_ADDR}:/var/sota/client.pem
-  scp -P 2222 -o StrictHostKeyChecking=no ${DIR}/pkey.pem root@${DEVICE_ADDR}:/var/sota/pkey.pem
-fi
+ssh -o StrictHostKeyChecking=no root@localhost -p 2222 "echo \"${GATEWAY_ADDR} ota.ce\" >> /etc/hosts"
+scp -P 2222 -o StrictHostKeyChecking=no ${DIR}/client.pem root@${DEVICE_ADDR}:/var/sota/client.pem
+scp -P 2222 -o StrictHostKeyChecking=no ${DIR}/pkey.pem root@${DEVICE_ADDR}:/var/sota/pkey.pem

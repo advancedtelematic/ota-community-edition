@@ -41,7 +41,7 @@ start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 	@find templates -type f -not -name "*.yaml" -print \
 		| xargs -I{} sh -c 'echo Non-template file found: {} && false'
 	@kops toolbox template --template templates --values $(CONFIG) --output $(OUTPUT)
-	@[[ -d "$(CA_DIR)" ]] || { \
+	@[ -d "$(CA_DIR)" ] || { \
 		scripts/genserver.sh; \
 		kubectl create secret generic gateway-tls \
 		--from-file $(CA_DIR)/server.key \

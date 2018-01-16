@@ -23,6 +23,7 @@ data:
   KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
   MESSAGING_MODE: kafka
   OIDC_LOGIN_ACTION: com.advancedtelematic.auth.garage.NoLoginAction
+  OIDC_LOGOUT_ACTION: com.advancedtelematic.auth.garage.NoLogoutAction
   OIDC_NS_PROVIDER: com.advancedtelematic.auth.oidc.ConfiguredNamespace
   OIDC_TOKEN_EXCHANGE: com.advancedtelematic.auth.NoExchange
   OIDC_TOKEN_VERIFICATION: com.advancedtelematic.auth.oidc.TokenValidityCheck

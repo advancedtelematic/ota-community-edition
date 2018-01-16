@@ -48,7 +48,7 @@ start-services: cmd-kops ## Apply the generated config to the k8s cluster.
 		--from-file $(CA_DIR)/server.chain.pem \
 		--from-file $(CA_DIR)/devices/ca.crt; \
 		}
-	@kubectl apply --filename $(OUTPUT)
+	@[ -f "$(OUTPUT)" ] && kubectl apply --filename $(OUTPUT)
 
 create-databases: cmd-minikube ## Create all database tables and users.
 	@DB_PASS=$$(awk '/mysql_root_password/ {print $$2}' $(CONFIG)) \

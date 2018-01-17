@@ -82,21 +82,6 @@ spec:
           claimName: zookeeper-pv-claim
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: zookeeper-pv-1
-  labels:
-    type: local
-    volume: zookeeper
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/zookeeper-pv-1
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: zookeeper-pv-claim

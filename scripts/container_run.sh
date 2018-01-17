@@ -6,6 +6,8 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DB_PASS=${DB_PASS:-root}
 MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
+SERVERNAME=${SERVERNAME:-ota.ce}
+readonly SERVER_DIR="${SCRIPT_DIR}/../${SERVERNAME}"
 
 print_pod_name() {
   app_name=${1}
@@ -25,11 +27,27 @@ try_command() {
   done
 }
 
+try_command_no_redirect() {
+    local name=$1
+    local command=${@:2}
+    local n=0
+    local max=100
+    while true; do
+        eval "$command" && return 0
+        [[ $((n++)) -gt $max ]] && return 1
+        echo >&2 "Waiting for $name"
+        sleep 5s
+    done
+}
 wait_for_service() {
   service_name=${1}
   try_command "${service_name}" "[ -n \"\$(kubectl get deploy ${service_name} -o json \
     | jq '.status.conditions[]? | select(.type == \"Available\" and .status == \"True\")')\" ]"
   print_pod_name "${service_name}"
+}
+
+wait_for_containers() {
+  try_command "containers" "[ -n \$(kubectl get po -o jsonpath --template='{.items[*].status.containerStatuses[?(@.ready!=true)].name}')]"
 }
 
 create_databases() {
@@ -68,6 +86,28 @@ print_hosts() {
   kubectl get ingress --no-headers | awk '{print $3 " " $2}'
 }
 
+init() {
+  local repoId=$(http --ignore-stdin --check-status --print=b post http://$(minikube ip)/api/v1/user_repo "Host: tuf-reposerver.ota.local" "x-ats-namespace: default" | jq --raw-output .)
+  http --ignore-stdin --check-status post http://$(minikube ip)/api/v1/admin/repo "Host: director.ota.local" "x-ats-namespace: default"
+  try_command "keys" "http --ignore-stdin --check-status http://${MINIKUBE_IP}/api/v1/root/${repoId} \"Host: tuf-keyserver.ota.local\""
+  local keys=$(http --ignore-stdin --check-status http://${MINIKUBE_IP}/api/v1/root/${repoId}/keys/targets/pairs "Host: tuf-keyserver.ota.local")
+  echo ${keys} | jq -r 'del(.[0].keyval.private)' | jq -r '.[0]' > ${SERVER_DIR}/targets.pub
+  echo ${keys} | jq -r 'del(.[0].keyval.public)'  | jq -r '.[0]' > ${SERVER_DIR}/targets.sec
+  try_command_no_redirect "download root.json" "http --ignore-stdin --check-status -d -o \"${SERVER_DIR}/root.json\" http://${MINIKUBE_IP}/api/v1/user_repo/root.json \"Host: tuf-reposerver.ota.local\" \"x-ats-namespace: default\""
+  echo "http://tuf-reposerver.ota.local" > ${SERVER_DIR}/tufrepo.url
+  echo https://${SERVERNAME}:30443 > ${SERVER_DIR}/autoprov.url
+  cat > ${SERVER_DIR}/treehub.json <<EOF
+{
+    "no_auth": true,
+    "ostree": {
+        "server": "http://treehub.ota.local/api/v3/"
+    }
+}
+EOF
+  zip -qj ${SERVER_DIR}/credentials.zip ${SERVER_DIR}/autoprov.url ${SERVER_DIR}/server_ca.pem \
+      ${SERVER_DIR}/tufrepo.url ${SERVER_DIR}/targets.pub ${SERVER_DIR}/targets.sec ${SERVER_DIR}/treehub.json \
+      ${SERVER_DIR}/root.json
+}
 
 [ $# -lt 1 ] && { echo "Usage: $0 <command>"; exit 1; }
 command=$(echo "$1" | sed 's/-/_/g')
@@ -81,6 +121,12 @@ case "${command}" in
     ;;
   "print_hosts")
     print_hosts
+    ;;
+  "init")
+    init
+    ;;
+  "wait_for_containers")
+    wait_for_containers
     ;;
   *)
     echo "Unknown command: ${command}"

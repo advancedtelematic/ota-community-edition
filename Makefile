@@ -1,18 +1,25 @@
-CONFIG ?= config.yaml
-OUTPUT ?= .generated.yaml
 CA_DIR ?= ota.ce
+CONFIG ?= config.yaml
+
+GEN_PLATFORM ?= .platform.yaml
+GEN_VAULT ?= .vault.yaml
+GEN_SERVICES ?= .services.yaml
+
+DB_PASS = $$(awk '/mysql_root_password/ {print $$2}' $(CONFIG))
+DNS_NAME = $$(awk '/ingress_dns_name/ {print $$2}' $(CONFIG))
+KS_TOKEN = $$(awk '/tuf_keyserver_vault_token/ {print $$2}' $(CONFIG))
 
 KUBE_VM ?= virtualbox
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
 
-.PHONY: help start stop test clean start-all start-minikube start-services \
-	create-databases unseal-vault copy-tokens print-hosts
+.PHONY: help start stop test clean start-all generate-templates \
+	start-minikube start-platform unseal-vault start-services print-hosts
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%16s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%20s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 start: start-all ## Start minikube and all services.
 
@@ -27,46 +34,42 @@ clean: cmd-minikube ## Delete the minikube VM and all service data.
 	@rm -rf $(CA_DIR)
 
 start-all: \
+	generate-templates \
 	start-minikube \
 	start-platform \
-	start-vault \
+	unseal-vault \
 	start-services
 
+generate-templates: cmd-kops ## Generate kubernetes config from the templates.
+	@find templates/{platform,vault,services} -type f -not -name "*.yaml" -print \
+		| xargs -I{} sh -c 'echo Non-template file found: {} && false'
+	@kops toolbox template --template templates/platform --values $(CONFIG) --output $(GEN_PLATFORM)
+	@kops toolbox template --template templates/vault --values $(CONFIG) --output $(GEN_VAULT)
+	@kops toolbox template --template templates/services --values $(CONFIG) --output $(GEN_SERVICES)
+
 start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
-	@minikube ip 2>/dev/null || minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
+	@minikube ip 2>/dev/null || \
+		minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
 	@minikube addons enable ingress
 
-start-services: cmd-kops ## Apply the generated config to the k8s cluster.
-	@find templates/services -type f -not -name "*.yaml" -print \
-    | xargs -I{} sh -c 'echo Non-template file found: {} && false'
-	@kops toolbox template --template templates/services --values $(CONFIG) --output $(OUTPUT)
+start-platform: cmd-kubectl ## Create all database tables and users.
 	@[ -d "$(CA_DIR)" ] || { \
 		scripts/genserver.sh; \
 		kubectl create secret generic gateway-tls \
 		--from-file $(CA_DIR)/server.key \
 		--from-file $(CA_DIR)/server.chain.pem \
 		--from-file $(CA_DIR)/devices/ca.crt; \
-		}
-	@[ -f "$(OUTPUT)" ] && kubectl apply --filename $(OUTPUT)
-	@scripts/container_run.sh wait_for_containers
-	@scripts/container_run.sh init
+	}
+	@kubectl apply --filename $(GEN_PLATFORM)
+	@DB_PASS=$(DB_PASS) scripts/container_run.sh create-databases
 
-start-platform: cmd-kops cmd-kubectl ## Create all database tables and users.
-	@kubectl apply --filename templates/volumes.yaml
-	@kops toolbox template --template templates/mysql.tmpl.yaml \
-		--template templates/zookeeper.tmpl.yaml \
-    --template templates/kafka.tmpl.yaml \
-		--values $(CONFIG) --output .platform.yaml
-	@kubectl apply --filename .platform.yaml
-	@DB_PASS=$$(awk '/mysql_root_password/ {print $$2}' $(CONFIG)) \
-		scripts/container_run.sh create-databases
-	scripts/container_run.sh wait_for_containers
+unseal-vault: cmd-kubectl ## Automatically unseal vault.
+	@kubectl apply --filename $(GEN_VAULT)
+	@DNS_NAME=$(DNS_NAME) KEYSERVER_TOKEN=$(KS_TOKEN) scripts/container_run.sh $@
 
-start-vault: cmd-minikube ## Automatically unseal the vault.
-	@kops toolbox template --template templates/tuf-vault.tmpl.yaml --values $(CONFIG) --output .vault.yaml
-	@kubectl apply --filename .vault.yaml
-	@KEYSERVER_TOKEN=$$(awk '/tuf_keyserver_vault_token/ {print $$2}' $(CONFIG)) \
-		scripts/container_run.sh unseal-vault
+start-services: cmd-kubectl ## Start the OTA services.
+	@kubectl apply --filename $(GEN_SERVICES)
+	@DNS_NAME=$(DNS_NAME) scripts/container_run.sh $@
 
 print-hosts: cmd-kubectl cmd-jq ## Print the service mappings for /etc/hosts
 	@scripts/container_run.sh $@

@@ -25,6 +25,22 @@ data:
   TREEHUB_STORAGE: local
   REPORT_METRICS: "false"
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: treehub-pv-claim
+  labels:
+    app: treehub
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      volume: treehub
+---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -56,7 +72,7 @@ spec:
             cpu: {{ .treehub_cpu }}
             memory: {{ .treehub_mem }}
         livenessProbe:
-          initialDelaySeconds: 300
+          initialDelaySeconds: 5
           periodSeconds: 30
           httpGet:
             port: 9001
@@ -86,37 +102,6 @@ spec:
       - backend:
           serviceName: treehub
           servicePort: 80
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: treehub-pv-1
-  labels:
-    type: local
-    volume: treehub
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/treehub-pv-1
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: treehub-pv-claim
-  labels:
-    app: treehub
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  selector:
-    matchLabels:
-      volume: treehub
 ---
 apiVersion: v1
 kind: Secret

@@ -2,57 +2,52 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: director-daemon-config
+  name: tuf-keyserver-daemon-config
 data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
-  DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/director
-  DB_USER: director
-  ENV_PREFIX: {{ .env_prefix }}
-  JAVA_OPTS: {{ .director_daemon_java_opts }}
+  DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/tuf_keyserver
+  DB_USER: tuf_keyserver
+  JAVA_OPTS: {{ .tuf_keyserver_java_opts }}
   KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
   KAFKA_HOST: {{ .kafka_host }}:9092
   KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
   REPORT_METRICS: "false"
-  SOTA_CORE_HOST: sota-core
-  SOTA_CORE_PORT: '80'
-  TUF_KEYSERVER_HOST: tuf-keyserver
-  TUF_KEYSERVER_PORT: '80'
-  TUF_REPOSERVER_HOST: tuf-reposerver
-  TUF_REPOSERVER_PORT: '80'
+  TUF_VAULT_HOST: tuf-vault
+  TUF_VAULT_PORT: '80'
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: director-daemon
+  name: tuf-keyserver-daemon
 spec:
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: director-daemon
+        app: tuf-keyserver-daemon
     spec:
       containers:
-      - image: {{ .director_daemon_docker_image }}
-        name: director-daemon
+      - image: {{ .tuf_keyserver_daemon_docker_image }}
+        name: tuf-keyserver-daemon
         envFrom:
         - configMapRef:
-            name: director-daemon-config
+            name: tuf-keyserver-daemon-config
         - secretRef:
-            name: director-daemon-secret
+            name: tuf-keyserver-daemon-secret
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 9001
         args:
         - "-main"
-        - com.advancedtelematic.director.daemon.DaemonBoot
+        - com.advancedtelematic.tuf.keyserver.daemon.KeyGenerationDaemon
         resources:
           requests:
-            cpu: {{ .director_daemon_cpu }}
-            memory: {{ .director_daemon_mem }}
+            cpu: {{ .tuf_keyserver_daemon_cpu }}
+            memory: {{ .tuf_keyserver_daemon_mem }}
         livenessProbe:
-          initialDelaySeconds: 300
+          initialDelaySeconds: 60
           periodSeconds: 30
           httpGet:
             port: 9001
@@ -63,7 +58,8 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: director-daemon-secret
+  name: tuf-keyserver-daemon-secret
 type: Opaque
 data:
-  DB_PASSWORD: {{ .director_daemon_db_password | b64enc }}
+  DB_PASSWORD: {{ .tuf_keyserver_daemon_db_password | b64enc }}
+  TUF_VAULT_TOKEN: {{ .tuf_keyserver_vault_token | b64enc }}

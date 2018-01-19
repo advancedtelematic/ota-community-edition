@@ -1,2 +1,4 @@
-.generated.yaml
+.platform.yaml
+.services.yaml
+.vault.yaml
 ota.ce/

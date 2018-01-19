@@ -4,7 +4,7 @@ set -euo pipefail
 
 export SERVERNAME=${SERVERNAME:-ota.ce}
 export DEVICE_ID=${1}
-export DEVICE_UUID=$(uuidgen)
+export DEVICE_UUID=$(uuidgen | tr A-Z a-z)
 
 readonly MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
 readonly GATEWAY_ADDR=${GATEWAY_ADDR:-$(kubectl get nodes -o jsonpath --template='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')}

@@ -19,12 +19,6 @@ data:
       }
       set $deviceNamespace "default";
 
-      location /core/ {
-        rewrite ^/core/(.*)$ /api/v1/mydevice/${deviceUuid}/$1 break;
-        proxy_set_header x-ats-namespace $deviceNamespace;
-        proxy_pass http://core;
-      }
-
       location /treehub/ {
         rewrite ^/treehub/(.*)$ /api/v2/$1 break;
         proxy_set_header x-ats-device-uuid $deviceUuid;
@@ -46,10 +40,6 @@ data:
 
     }
   upstreams.conf: |-
-    upstream core {
-      server sota-core:80;
-    }
-
     upstream treehub {
       server treehub:80;
     }

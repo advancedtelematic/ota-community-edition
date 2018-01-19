@@ -74,7 +74,7 @@ spec:
             cpu: {{ .app_cpu }}
             memory: {{ .app_mem }}
         livenessProbe:
-          initialDelaySeconds: 300
+          initialDelaySeconds: 10
           periodSeconds: 30
           httpGet:
             port: 9001

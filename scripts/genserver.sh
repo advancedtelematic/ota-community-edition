@@ -24,5 +24,3 @@ openssl ecparam -genkey -name prime256v1 | openssl ec -out ${DEVICES_DIR}/ca.key
 openssl req -new -x509 -days 3650 -key ${DEVICES_DIR}/ca.key -config ${SCRIPT_DIR}/device_ca.cnf \
   -out ${DEVICES_DIR}/ca.crt
 
-echo https://${SERVERNAME}:30443 > ${SERVER_DIR}/autoprov.url
-zip -qj ${SERVER_DIR}/credentials.zip ${SERVER_DIR}/autoprov.url ${SERVER_DIR}/server_ca.pem

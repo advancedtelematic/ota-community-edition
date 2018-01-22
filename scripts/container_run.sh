@@ -8,7 +8,9 @@ readonly DB_PASS=${DB_PASS:-root}
 readonly MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
 readonly SERVERNAME=${SERVERNAME:-ota.ce}
 readonly DNS_NAME=${DNS_NAME:-ota.local}
-readonly API=${API:-"http://${MINIKUBE_IP}/api"}
+readonly API_BASE_URL=${API:-"http://${MINIKUBE_IP}"}
+readonly VAULT_API=${VAULT_API:-"${API_BASE_URL}/v1"}
+readonly OTA_API=${OTA_API:-"${API_BASE_URL}/api"}
 readonly SERVER_DIR="${SCRIPT_DIR}/../${SERVERNAME}"
 
 
@@ -64,11 +66,11 @@ unseal_vault() {
   wait_for_service "tuf-vault"
   local host="Host: tuf-vault.${DNS_NAME}"
 
-  try_command "vault" false "http --check-status --ignore-stdin ${API}/sys/init \"${host}\""
-  local status=$(http --ignore-stdin "${API}/sys/health" "${host}")
+  try_command "vault" false "http --check-status --ignore-stdin ${VAULT_API}/sys/init \"${host}\""
+  local status=$(http --ignore-stdin "${VAULT_API}/sys/health" "${host}")
 
   if [ "$(echo ${status} | jq --raw-output '.initialized')" = "false" ]; then
-    local result=$(http --check-status --ignore-stdin PUT "${API}/sys/init" "${host}" \
+    local result=$(http --check-status --ignore-stdin PUT "${VAULT_API}/sys/init" "${host}" \
       secret_shares:=1 secret_threshold:=1)
     local key=$(echo $result | jq --raw-output '.keys[0]')
     local token=$(echo $result | jq --raw-output '.root_token')
@@ -78,13 +80,18 @@ unseal_vault() {
     local token=$(kubectl get secret vault-init -o jsonpath --template='{.data.token}' | base64 --decode)
   fi
 
-  http --ignore-stdin --check-status PUT "${API}/sys/unseal" "${host}" key=${key}
-  http --ignore-stdin PUT "${API}/sys/mounts/ota-tuf/keys" "${host}" "X-Vault-Token: ${token}" type=generic
-  http --ignore-stdin --check-status PUT "${API}/sys/policy/tuf" "${host}" "X-Vault-Token: ${token}" rules=@${SCRIPT_DIR}/tuf-policy.hcl
-  http --ignore-stdin --check-status PUT "${API}/auth/token/create" "${host}" "X-Vault-Token: ${token}" id=${KEYSERVER_TOKEN} policies:='["tuf"]' period="72h"
+  http --ignore-stdin --check-status PUT "${VAULT_API}/sys/unseal" "${host}" key=${key}
+  http --ignore-stdin PUT "${VAULT_API}/sys/mounts/ota-tuf/keys" "${host}" "X-Vault-Token: ${token}" type=generic
+  http --ignore-stdin --check-status PUT "${VAULT_API}/sys/policy/tuf" "${host}" "X-Vault-Token: ${token}" rules=@${SCRIPT_DIR}/tuf-policy.hcl
+  http --ignore-stdin --check-status PUT "${VAULT_API}/auth/token/create" "${host}" "X-Vault-Token: ${token}" id=${KEYSERVER_TOKEN} policies:='["tuf"]' period="72h"
 }
 
 start_services() {
+  if [ -e ${SERVER_DIR}/credentials.zip ]
+  then
+    return 0
+  fi
+
   wait_for_containers
   local ns="x-ats-namespace: default"
   local ks="Host: tuf-keyserver.${DNS_NAME}"
@@ -92,15 +99,15 @@ start_services() {
   local dir="Host: director.${DNS_NAME}"
 
   local id=$(http --ignore-stdin --check-status --print=b \
-    POST ${API}/v1/user_repo "${repo}" "${ns}" | jq --raw-output .)
-  http --ignore-stdin --check-status post ${API}/v1/admin/repo "${dir}" "${ns}"
-  try_command "keys" false "http --ignore-stdin --check-status ${API}/v1/root/${id} \"${ks}\""
-  local keys=$(http --ignore-stdin --check-status ${API}/v1/root/${id}/keys/targets/pairs \"${key}\")
+    POST ${OTA_API}/v1/user_repo "${repo}" "${ns}" | jq --raw-output .)
+  http --ignore-stdin --check-status post ${OTA_API}/v1/admin/repo "${dir}" "${ns}"
+  try_command "keys" false "http --ignore-stdin --check-status ${OTA_API}/v1/root/${id} \"${ks}\""
+  local keys=$(http --ignore-stdin --check-status ${OTA_API}/v1/root/${id}/keys/targets/pairs "${ks}")
   echo ${keys} | jq -r 'del(.[0].keyval.private)' | jq -r '.[0]' > ${SERVER_DIR}/targets.pub
   echo ${keys} | jq -r 'del(.[0].keyval.public)'  | jq -r '.[0]' > ${SERVER_DIR}/targets.sec
   try_command "download root.json" true \
     "http --ignore-stdin --check-status -d -o \"${SERVER_DIR}/root.json\" \
-    ${API}/v1/user_repo/root.json \"${repo}\" \"${ns}\""
+    ${OTA_API}/v1/user_repo/root.json \"${repo}\" \"${ns}\""
   echo "http://tuf-reposerver.${DNS_NAME}" > ${SERVER_DIR}/tufrepo.url
   echo "https://${SERVERNAME}:30443" > ${SERVER_DIR}/autoprov.url
   cat > ${SERVER_DIR}/treehub.json <<EOF

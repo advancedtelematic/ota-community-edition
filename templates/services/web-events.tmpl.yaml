@@ -35,7 +35,7 @@ spec:
             name: web-events-config
         - secretRef:
             name: web-events-secret
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 9001
         args:

@@ -41,7 +41,7 @@ spec:
             name: director-daemon-config
         - secretRef:
             name: director-daemon-secret
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 9001
         args:

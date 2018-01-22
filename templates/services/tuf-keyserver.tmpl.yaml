@@ -36,7 +36,7 @@ spec:
             name: tuf-keyserver-config
         - secretRef:
             name: tuf-keyserver-secret
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         args:
         - " -main"
         - com.advancedtelematic.tuf.keyserver.Boot

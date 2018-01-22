@@ -63,7 +63,7 @@ spec:
             name: app-config
         - secretRef:
             name: app-secret
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 9001
         args:

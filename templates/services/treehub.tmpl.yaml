@@ -64,7 +64,7 @@ spec:
             name: treehub-config
         - secretRef:
             name: treehub-secret
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 9001
         resources:
@@ -80,8 +80,6 @@ spec:
         volumeMounts:
         - name: objects
           mountPath: /treehub-objects/object-storage
-      imagePullSecrets:
-        - name: docker-registry-key
       volumes:
       - name: objects
         persistentVolumeClaim:

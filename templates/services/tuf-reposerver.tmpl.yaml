@@ -40,7 +40,7 @@ spec:
             name: tuf-reposerver-config
         - secretRef:
             name: tuf-reposerver-secret
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 9001
         args:

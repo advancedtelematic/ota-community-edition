@@ -38,7 +38,7 @@ spec:
             name: device-registry-config
         - secretRef:
             name: device-registry-secret
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 9001
         args:

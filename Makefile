@@ -63,11 +63,11 @@ start-platform: cmd-kubectl ## Create all database tables and users.
 	@kubectl apply --filename $(GEN_PLATFORM)
 	@DB_PASS=$(DB_PASS) scripts/container_run.sh create-databases
 
-unseal-vault: cmd-kubectl ## Automatically unseal vault.
+unseal-vault: cmd-kubectl cmd-http cmd-jq ## Automatically unseal vault.
 	@kubectl apply --filename $(GEN_VAULT)
 	@DNS_NAME=$(DNS_NAME) KEYSERVER_TOKEN=$(KS_TOKEN) scripts/container_run.sh $@
 
-start-services: cmd-kubectl ## Start the OTA services.
+start-services: cmd-kubectl cmd-http cmd-jq ## Start the OTA services.
 	@kubectl apply --filename $(GEN_SERVICES)
 	@DNS_NAME=$(DNS_NAME) scripts/container_run.sh $@
 

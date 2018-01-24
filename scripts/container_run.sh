@@ -10,7 +10,6 @@ readonly MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
 readonly SERVERNAME=${SERVERNAME:-ota.ce}
 readonly DNS_NAME=${DNS_NAME:-ota.local}
 readonly API_BASE_URL=${API:-"http://${MINIKUBE_IP}"}
-readonly VAULT_API=${VAULT_API:-"${API_BASE_URL}/v1"}
 readonly OTA_API=${OTA_API:-"${API_BASE_URL}/api"}
 readonly SERVER_DIR="${SCRIPT_DIR}/../${SERVERNAME}"
 
@@ -65,13 +64,18 @@ create_databases() {
 unseal_vault() {
   wait_for_containers
   wait_for_service "tuf-vault"
-  local host="Host: tuf-vault.${DNS_NAME}"
+  local api="http://localhost:12345/api/v1/proxy/namespaces/default/services/tuf-vault/v1"
 
-  try_command "vault" false "http --check-status --ignore-stdin ${VAULT_API}/sys/init \"${host}\""
-  local status=$(http --ignore-stdin "${VAULT_API}/sys/health" "${host}")
+  ${KUBECTL} proxy --port 12345 &
+  proxy_pid=$!
+  trap "kill $proxy_pid" EXIT
+
+  try_command "vault" false "http --check-status --ignore-stdin ${api}/sys/init"
+
+  local status=$(http --ignore-stdin "${api}/sys/health")
 
   if [ "$(echo ${status} | jq --raw-output '.initialized')" = "false" ]; then
-    local result=$(http --check-status --ignore-stdin PUT "${VAULT_API}/sys/init" "${host}" \
+    local result=$(http --check-status --ignore-stdin PUT "${api}/sys/init" \
       secret_shares:=1 secret_threshold:=1)
     local key=$(echo $result | jq --raw-output '.keys[0]')
     local token=$(echo $result | jq --raw-output '.root_token')
@@ -81,10 +85,10 @@ unseal_vault() {
     local token=$(${KUBECTL} get secret vault-init -o jsonpath --template='{.data.token}' | base64 --decode)
   fi
 
-  http --ignore-stdin --check-status PUT "${VAULT_API}/sys/unseal" "${host}" key=${key}
-  http --ignore-stdin PUT "${VAULT_API}/sys/mounts/ota-tuf/keys" "${host}" "X-Vault-Token: ${token}" type=generic
-  http --ignore-stdin --check-status PUT "${VAULT_API}/sys/policy/tuf" "${host}" "X-Vault-Token: ${token}" rules=@${SCRIPT_DIR}/tuf-policy.hcl
-  http --ignore-stdin --check-status PUT "${VAULT_API}/auth/token/create" "${host}" "X-Vault-Token: ${token}" id=${KEYSERVER_TOKEN} policies:='["tuf"]' period="72h"
+  http --ignore-stdin --check-status PUT "${api}/sys/unseal" key=${key}
+  http --ignore-stdin PUT "${api}/sys/mounts/ota-tuf/keys" "X-Vault-Token: ${token}" type=generic
+  http --ignore-stdin --check-status PUT "${api}/sys/policy/tuf" "X-Vault-Token: ${token}" rules=@${SCRIPT_DIR}/tuf-policy.hcl
+  http --ignore-stdin --check-status PUT "${api}/auth/token/create" "X-Vault-Token: ${token}" id=${KEYSERVER_TOKEN} policies:='["tuf"]' period="72h"
 }
 
 start_services() {

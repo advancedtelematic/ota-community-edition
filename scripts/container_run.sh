@@ -39,9 +39,10 @@ print_pod_name() {
 }
 
 print_hosts() {
-  try_command ingress false "${KUBECTL} get ingress -o json \
-    | jq --exit-status '.items[0].status.loadBalancer.ingress'"
-  ${KUBECTL} get ingress --no-headers | awk '{print $3 " " $2}'
+  try_command ingress false "${KUBECTL} get ingress ota -o json \
+    | jq --exit-status '.status.loadBalancer.ingress'"
+  ${KUBECTL} get ingress ota -o jsonpath \
+      --template='{.status.loadBalancer.ingress[0].ip}{"\t\t"}{.spec.rules[*].host}{"\t"}'
 }
 
 wait_for_service() {

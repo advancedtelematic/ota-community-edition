@@ -84,6 +84,7 @@ kind: Service
 metadata:
   name: tuf-keyserver
 spec:
+  type: NodePort
   ports:
   - port: 80
     targetPort: 9001

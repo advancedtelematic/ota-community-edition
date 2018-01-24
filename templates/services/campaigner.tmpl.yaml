@@ -88,6 +88,7 @@ kind: Service
 metadata:
   name: campaigner
 spec:
+  type: NodePort
   ports:
   - port: 80
     targetPort: 9001

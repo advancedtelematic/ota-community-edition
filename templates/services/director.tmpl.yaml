@@ -86,6 +86,7 @@ kind: Service
 metadata:
   name: director
 spec:
+  type: NodePort
   ports:
   - port: 80
     targetPort: 9001

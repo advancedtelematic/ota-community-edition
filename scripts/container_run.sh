@@ -6,11 +6,8 @@ set -euo pipefail
 readonly KUBECTL="${KUBECTL:-kubectl}"
 readonly SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 readonly DB_PASS=${DB_PASS:-root}
-readonly MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
 readonly SERVERNAME=${SERVERNAME:-ota.ce}
 readonly DNS_NAME=${DNS_NAME:-ota.local}
-readonly API_BASE_URL=${API:-"http://${MINIKUBE_IP}"}
-readonly OTA_API=${OTA_API:-"${API_BASE_URL}/api"}
 readonly SERVER_DIR="${SCRIPT_DIR}/../${SERVERNAME}"
 
 
@@ -98,21 +95,27 @@ start_services() {
   fi
 
   wait_for_containers
+
+  ${KUBECTL} proxy --port 12345 &
+  proxy_pid=$!
+  trap "kill $proxy_pid" EXIT
+
   local ns="x-ats-namespace: default"
-  local ks="Host: tuf-keyserver.${DNS_NAME}"
-  local repo="Host: tuf-reposerver.${DNS_NAME}"
-  local dir="Host: director.${DNS_NAME}"
+  local apibase="http://localhost:12345/api/v1/proxy/namespaces/default/services"
+  local ks="${apibase}/tuf-keyserver/api"
+  local repo="${apibase}/tuf-reposerver/api"
+  local dir="${apibase}/director/api"
 
   local id=$(http --ignore-stdin --check-status --print=b \
-    POST ${OTA_API}/v1/user_repo "${repo}" "${ns}" | jq --raw-output .)
-  http --ignore-stdin --check-status post ${OTA_API}/v1/admin/repo "${dir}" "${ns}"
-  try_command "keys" false "http --ignore-stdin --check-status ${OTA_API}/v1/root/${id} \"${ks}\""
-  local keys=$(http --ignore-stdin --check-status ${OTA_API}/v1/root/${id}/keys/targets/pairs "${ks}")
+    POST ${repo}/v1/user_repo "${ns}" | jq --raw-output .)
+  http --ignore-stdin --check-status post ${dir}/v1/admin/repo "${ns}"
+  try_command "keys" false "http --ignore-stdin --check-status ${ks}/v1/root/${id}"
+  local keys=$(http --ignore-stdin --check-status ${ks}/v1/root/${id}/keys/targets/pairs)
   echo ${keys} | jq -r 'del(.[0].keyval.private)' | jq -r '.[0]' > ${SERVER_DIR}/targets.pub
   echo ${keys} | jq -r 'del(.[0].keyval.public)'  | jq -r '.[0]' > ${SERVER_DIR}/targets.sec
   try_command "download root.json" true \
     "http --ignore-stdin --check-status -d -o \"${SERVER_DIR}/root.json\" \
-    ${OTA_API}/v1/user_repo/root.json \"${repo}\" \"${ns}\""
+    ${repo}/v1/user_repo/root.json \"${ns}\""
   echo "http://tuf-reposerver.${DNS_NAME}" > ${SERVER_DIR}/tufrepo.url
   echo "https://${SERVERNAME}:30443" > ${SERVER_DIR}/autoprov.url
   cat > ${SERVER_DIR}/treehub.json <<EOF

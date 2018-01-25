@@ -62,6 +62,8 @@ start-platform: cmd-kubectl ## Create all database tables and users.
 	}
 	@kubectl apply --filename $(GEN_PLATFORM)
 	@DB_PASS=$(DB_PASS) scripts/container_run.sh create-databases
+	minikube ssh -- "for dir in mysql treehub kafka zookeeper; do \
+			 sudo mkdir -p /data/\$${dir}-pv-1; sudo chmod 777 /data/\$${dir}-pv-1; done"
 
 unseal-vault: cmd-kubectl ## Automatically unseal vault.
 	@kubectl apply --filename $(GEN_VAULT)

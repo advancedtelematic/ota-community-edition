@@ -29,6 +29,8 @@ current repository:
 * [minikube](https://github.com/kubernetes/minikube)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (version >= 1.8)
 * [kops](https://github.com/kubernetes/kops) (version >= 1.8)
+* [jq](https://stedolan.github.io/jq/)
+* [httpie](https://httpie.org/)
 * [VirtualBox](https://www.virtualbox.org/)
 
 ## Usage

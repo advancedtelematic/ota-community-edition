@@ -4,6 +4,7 @@ set -euo pipefail
 
 export SERVERNAME=${SERVERNAME:-ota.ce}
 export DEVICE_ID=${1}
+export DEVICE_SSH_PORT=${2:-2222}
 export DEVICE_UUID=$(uuidgen | tr A-Z a-z)
 
 readonly MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
@@ -28,6 +29,6 @@ openssl x509 -in ${DIR}/client.pem -text -noout
 http PUT http://${MINIKUBE_IP}/api/v1/devices "Host:${REGISTRY_HOST}" deviceUuid="${DEVICE_UUID}" \
   deviceId=${DEVICE_ID} deviceName=${DEVICE_ID} deviceType=Other credentials=@${DIR}/client.pem
 
-ssh -o StrictHostKeyChecking=no root@localhost -p 2222 "echo \"${GATEWAY_ADDR} ota.ce\" >> /etc/hosts"
-scp -P 2222 -o StrictHostKeyChecking=no ${DIR}/client.pem root@${DEVICE_ADDR}:/var/sota/client.pem
-scp -P 2222 -o StrictHostKeyChecking=no ${DIR}/pkey.pem root@${DEVICE_ADDR}:/var/sota/pkey.pem
+ssh -o StrictHostKeyChecking=no root@localhost -p ${DEVICE_SSH_PORT} "echo \"${GATEWAY_ADDR} ota.ce\" >> /etc/hosts"
+scp -P ${DEVICE_SSH_PORT} -o StrictHostKeyChecking=no ${DIR}/client.pem root@${DEVICE_ADDR}:/var/sota/client.pem
+scp -P ${DEVICE_SSH_PORT} -o StrictHostKeyChecking=no ${DIR}/pkey.pem root@${DEVICE_ADDR}:/var/sota/pkey.pem

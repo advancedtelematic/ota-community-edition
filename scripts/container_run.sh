@@ -2,6 +2,7 @@
 
 set -euox pipefail
 
+readonly KUBECTL="kubectl ${KUBECTL_ARGS:-}"
 
 readonly SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 readonly DB_PASS=${DB_PASS:-root}
@@ -34,31 +35,31 @@ try_command() {
 
 print_pod_name() {
   app_name=${1}
-  kubectl get pods -l app=${app_name} -o json -o=jsonpath='{.items[0].metadata.name}'
+  ${KUBECTL} get pods -l app=${app_name} -o json -o=jsonpath='{.items[0].metadata.name}'
 }
 
 print_hosts() {
-  try_command ingress false "kubectl get ingress -o json \
+  try_command ingress false "${KUBECTL} get ingress -o json \
     | jq --exit-status '.items[0].status.loadBalancer.ingress'"
-  kubectl get ingress --no-headers | awk '{print $3 " " $2}'
+  ${KUBECTL} get ingress --no-headers | awk '{print $3 " " $2}'
 }
 
 wait_for_service() {
   service_name=${1}
-  try_command "${service_name}" false "[ -n \"\$(kubectl get deploy ${service_name} -o json \
+  try_command "${service_name}" false "[ -n \"\$(${KUBECTL} get deploy ${service_name} -o json \
     | jq '.status.conditions[]? | select(.type == \"Available\" and .status == \"True\")')\" ]"
   print_pod_name "${service_name}"
 }
 
 wait_for_containers() {
-  try_command "containers" false "[ -n \$(kubectl get pods -o jsonpath \
+  try_command "containers" false "[ -n \$(${KUBECTL} get pods -o jsonpath \
     --template='{.items[*].status.containerStatuses[?(@.ready!=true)].name}')]"
 }
 
 create_databases() {
   mysql_name=$(wait_for_service "mysql")
-  kubectl cp "${SCRIPT_DIR}/create_databases.sql" "${mysql_name}:/tmp/create_databases.sql"
-  kubectl exec -ti "${mysql_name}" -- bash -c "mysql -p${DB_PASS} < /tmp/create_databases.sql"
+  ${KUBECTL} cp "${SCRIPT_DIR}/create_databases.sql" "${mysql_name}:/tmp/create_databases.sql"
+  ${KUBECTL} exec -ti "${mysql_name}" -- bash -c "mysql -p${DB_PASS} < /tmp/create_databases.sql"
 }
 
 unseal_vault() {
@@ -74,10 +75,10 @@ unseal_vault() {
       secret_shares:=1 secret_threshold:=1)
     local key=$(echo $result | jq --raw-output '.keys[0]')
     local token=$(echo $result | jq --raw-output '.root_token')
-    kubectl create secret generic vault-init --from-literal=token=${token} --from-literal=key=${key}
+    ${KUBECTL} create secret generic vault-init --from-literal=token=${token} --from-literal=key=${key}
   else
-    local key=$(kubectl get secret vault-init -o jsonpath --template='{.data.key}' | base64 --decode)
-    local token=$(kubectl get secret vault-init -o jsonpath --template='{.data.token}' | base64 --decode)
+    local key=$(${KUBECTL} get secret vault-init -o jsonpath --template='{.data.key}' | base64 --decode)
+    local token=$(${KUBECTL} get secret vault-init -o jsonpath --template='{.data.token}' | base64 --decode)
   fi
 
   http --ignore-stdin --check-status PUT "${VAULT_API}/sys/unseal" "${host}" key=${key}

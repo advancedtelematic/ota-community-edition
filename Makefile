@@ -13,6 +13,7 @@ KUBE_VM ?= virtualbox
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
+KUBECTL_ARGS ?=
 
 .PHONY: help start stop test clean start-all generate-templates \
 	start-minikube start-platform unseal-vault start-services print-hosts
@@ -55,22 +56,22 @@ start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 start-platform: cmd-kubectl ## Create all database tables and users.
 	@[ -d "$(CA_DIR)" ] || { \
 		scripts/genserver.sh; \
-		kubectl create secret generic gateway-tls \
+		kubectl $(KUBECTL_ARGS) create secret generic gateway-tls \
 		--from-file $(CA_DIR)/server.key \
 		--from-file $(CA_DIR)/server.chain.pem \
 		--from-file $(CA_DIR)/devices/ca.crt; \
 	}
-	@kubectl apply --filename $(GEN_PLATFORM)
+	@kubectl $(KUBECTL_ARGS) apply --filename $(GEN_PLATFORM)
 	@DB_PASS=$(DB_PASS) scripts/container_run.sh create-databases
 	minikube ssh -- "for dir in mysql treehub kafka zookeeper; do \
 			 sudo mkdir -p /data/\$${dir}-pv-1; sudo chmod 777 /data/\$${dir}-pv-1; done"
 
-unseal-vault: cmd-kubectl ## Automatically unseal vault.
-	@kubectl apply --filename $(GEN_VAULT)
+unseal-vault: cmd-kubectl cmd-http cmd-jq ## Automatically unseal vault.
+	@kubectl $(KUBECTL_ARGS) apply --filename $(GEN_VAULT)
 	@DNS_NAME=$(DNS_NAME) KEYSERVER_TOKEN=$(KS_TOKEN) scripts/container_run.sh $@
 
-start-services: cmd-kubectl ## Start the OTA services.
-	@kubectl apply --filename $(GEN_SERVICES)
+start-services: cmd-kubectl cmd-http cmd-jq ## Start the OTA services.
+	@kubectl $(KUBECTL_ARGS) apply --filename $(GEN_SERVICES)
 	@DNS_NAME=$(DNS_NAME) scripts/container_run.sh $@
 
 print-hosts: cmd-kubectl cmd-jq ## Print the service mappings for /etc/hosts

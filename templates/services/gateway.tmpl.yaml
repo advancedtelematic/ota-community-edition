@@ -55,8 +55,6 @@ kind: ConfigMap
 metadata:
   creationTimestamp: 2017-12-20T15:46:34Z
   name: gateway-config
-  namespace: default
-  selfLink: /api/v1/namespaces/default/configmaps/gateway-config
 ---
 apiVersion: apps/v1beta1
 kind: Deployment

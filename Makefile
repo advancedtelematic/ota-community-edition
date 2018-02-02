@@ -41,7 +41,7 @@ start-all: \
 	start-services
 
 generate-templates: cmd-kops ## Generate kubernetes config from the templates.
-	@find templates/{platform,vault,services} -type f -not -name "*.yaml" -print \
+	@find templates/platform templates/vault templates/services -type f -not -name "*.yaml" -print \
 		| xargs -I{} sh -c 'echo Non-template file found: {} && false'
 	@kops toolbox template --template templates/platform --values $(CONFIG) --output $(GEN_PLATFORM)
 	@kops toolbox template --template templates/vault --values $(CONFIG) --output $(GEN_VAULT)

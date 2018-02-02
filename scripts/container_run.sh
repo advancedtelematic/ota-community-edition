@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-set -euox pipefail
+[[ ${DEBUG} = true ]] && set -x
+set -euo pipefail
 
-readonly KUBECTL="kubectl ${KUBECTL_ARGS:-}"
-
+readonly KUBECTL="${KUBECTL:-kubectl}"
 readonly SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 readonly DB_PASS=${DB_PASS:-root}
 readonly MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}

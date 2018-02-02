@@ -1,0 +1,80 @@
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: {{ template "kafka.fullname" . }}
+  labels:
+    app: {{ template "kafka.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  serviceName: {{ template "kafka.fullname" . }}
+  selector:
+    matchLabels:
+      app: {{ template "kafka.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "kafka.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - image: {{ .Values.image.repository }}:{{.Values.image.tag}}
+        imagePullPolicy: IfNotPresent
+        name: {{ template "kafka.fullname" . }}
+        envFrom:
+        - configMapRef:
+            name: {{template "kafka.fullname" . }}
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        command:
+        - sh
+        - -c
+        - |
+          export KAFKA_ADVERTISED_HOST_NAME=${POD_IP} && \
+          export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092 && \
+          export KAFKA_BROKER_ID=${HOSTNAME##*-} && \
+          /etc/confluent/docker/run
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9092
+          timeoutSeconds: 5
+        ports:
+        - containerPort: 9092
+        readinessProbe:
+          exec:
+            command:
+            - kafka-topics
+            - --zookeeper
+            - {{ .Values.configmap.zookeeper_host }}
+            - --list
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
+        volumeMounts:
+        - name: data
+          mountPath: /opt/kafka/data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+           claimName: {{ template "kafka.fullname" . }}

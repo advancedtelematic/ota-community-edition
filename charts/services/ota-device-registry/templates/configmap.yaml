@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "device-registry.fullname" . }}
+data:
+  AUTH_PROTOCOL: none
+  BIND_HOST: 0.0.0.0
+  BIND_PORT: '9001'
+  DB_MIGRATE: 'true'
+  DB_URL: jdbc:mariadb://{{ .Values.db.host }}:3306/{{ .Values.db.database }}
+  DB_USER: {{ .Values.db.user }}
+  ENV_PREFIX: {{ .Values.envPrefix }}
+  JAVA_OPTS: {{ .Values.javaOpts }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.kafka.host }}:9092
+  KAFKA_HOST: {{ .Values.kafka.host }}:9092
+  KAFKA_TOPIC_SUFFIX: {{ .Values.kafka.topicSuffix }}
+  MESSAGING_MODE: kafka
+  REPORT_METRICS: "false"

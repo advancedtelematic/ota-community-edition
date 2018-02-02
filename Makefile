@@ -36,6 +36,7 @@ clean: cmd-minikube ## Delete the minikube VM and all service data.
 start-all: \
 	generate-templates \
 	start-minikube \
+	start-helm \
 	start-platform \
 	unseal-vault \
 	start-services
@@ -51,6 +52,10 @@ start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 	@minikube ip 2>/dev/null || \
 		minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
 	@minikube addons enable ingress
+
+start-helm:
+	@scripts/helm_install.sh
+	@helm init
 
 start-platform: cmd-kubectl ## Create all database tables and users.
 	@[ -d "$(CA_DIR)" ] || { \

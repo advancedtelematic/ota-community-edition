@@ -1,0 +1,44 @@
+apiVersion: extensions/v1beta1 # TODO check this, could be apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "device-registry.fullname" . }}
+  labels:
+    app: {{ template "device-registry.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "device-registry.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ template "device-registry.fullname" . }}
+          - secretRef:
+              name: {{ template "device-registry.fullname" . }}
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          livenessProbe:
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            httpGet:
+              path: /health
+              port: {{ .Values.service.internalPort }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.internalPort }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}

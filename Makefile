@@ -53,9 +53,9 @@ start-minikube: cmd-minikube cmd-kubectl ## Start local minikube environment.
 		minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
 	@minikube addons enable ingress
 
-start-helm:
-	@scripts/helm_install.sh
-	@helm init
+start-helm: cmd-kubectl cmd-helm # Start Helm.
+	@helm init | grep HELM_HOME
+	@scripts/wait_for_tiller.sh
 
 start-platform: cmd-kubectl ## Create all database tables and users.
 	@[ -d "$(CA_DIR)" ] || { \

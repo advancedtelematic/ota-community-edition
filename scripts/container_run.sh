@@ -25,7 +25,7 @@ try_command() {
     if [[ ${output} = true ]]; then
       eval "$command" && return 0
     else
-      eval "$command" 1>/dev/null 2>&1 && return 0
+      eval "$command" &> /dev/null && return 0
     fi
     [[ $((n++)) -gt $max ]] && return 1
     echo >&2 "Waiting for $name"

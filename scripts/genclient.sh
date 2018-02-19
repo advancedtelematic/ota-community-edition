@@ -7,10 +7,9 @@ export DEVICE_ID=${1}
 export DEVICE_SSH_PORT=${2:-2222}
 export DEVICE_UUID=$(uuidgen | tr A-Z a-z)
 
-readonly MINIKUBE_IP=${MINIKUBE_IP:-$(minikube ip)}
-readonly GATEWAY_ADDR=${GATEWAY_ADDR:-$(kubectl get nodes -o jsonpath --template='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')}
+readonly KUBECTL="kubectl ${KUBECTL_ARGS:-}"
+readonly GATEWAY_ADDR=${GATEWAY_ADDR:-$(${KUBECTL} get nodes -o jsonpath --template='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')}
 readonly DEVICE_ADDR=${DEVICE_ADDR:-localhost}
-readonly REGISTRY_HOST=$(kubectl get ingress -o jsonpath --template='{.items[?(@.metadata.name=="device-registry")].spec.rules[0].host}')
 readonly SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 readonly SERVER_DIR="${SCRIPT_DIR}/../${SERVERNAME}"
 readonly DEVICES_DIR=${SERVER_DIR}/devices
@@ -26,7 +25,12 @@ ln -s ${SERVER_DIR}/server_ca.pem ${DIR}/ca.pem || true
 
 openssl x509 -in ${DIR}/client.pem -text -noout
 
-http PUT http://${MINIKUBE_IP}/api/v1/devices "Host:${REGISTRY_HOST}" deviceUuid="${DEVICE_UUID}" \
+${KUBECTL} proxy --port 12345 &
+proxy_pid=$!
+trap "kill $proxy_pid" EXIT
+
+readonly url="http://localhost:12345/api/v1/proxy/namespaces/default/services/device-registry/api/v1/devices"
+http PUT $url deviceUuid="${DEVICE_UUID}" \
   deviceId=${DEVICE_ID} deviceName=${DEVICE_ID} deviceType=Other credentials=@${DIR}/client.pem
 
 ssh -o StrictHostKeyChecking=no root@${DEVICE_ADDR} -p ${DEVICE_SSH_PORT} "echo \"${GATEWAY_ADDR} ota.ce\" >> /etc/hosts"

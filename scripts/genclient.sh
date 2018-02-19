@@ -29,6 +29,6 @@ openssl x509 -in ${DIR}/client.pem -text -noout
 http PUT http://${MINIKUBE_IP}/api/v1/devices "Host:${REGISTRY_HOST}" deviceUuid="${DEVICE_UUID}" \
   deviceId=${DEVICE_ID} deviceName=${DEVICE_ID} deviceType=Other credentials=@${DIR}/client.pem
 
-ssh -o StrictHostKeyChecking=no root@localhost -p ${DEVICE_SSH_PORT} "echo \"${GATEWAY_ADDR} ota.ce\" >> /etc/hosts"
+ssh -o StrictHostKeyChecking=no root@${DEVICE_ADDR} -p ${DEVICE_SSH_PORT} "echo \"${GATEWAY_ADDR} ota.ce\" >> /etc/hosts"
 scp -P ${DEVICE_SSH_PORT} -o StrictHostKeyChecking=no ${DIR}/client.pem root@${DEVICE_ADDR}:/var/sota/client.pem
 scp -P ${DEVICE_SSH_PORT} -o StrictHostKeyChecking=no ${DIR}/pkey.pem root@${DEVICE_ADDR}:/var/sota/pkey.pem

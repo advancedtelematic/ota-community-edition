@@ -65,7 +65,7 @@ create_databases() {
 unseal_vault() {
   wait_for_containers
   wait_for_service "tuf-vault"
-  local host="Host: tuf-vault.${DNS_NAME}"
+  local host="Host:tuf-vault.${DNS_NAME}"
 
   try_command "vault" false "http --check-status --ignore-stdin ${VAULT_API}/sys/init \"${host}\""
   local status=$(http --ignore-stdin "${VAULT_API}/sys/health" "${host}")
@@ -82,9 +82,9 @@ unseal_vault() {
   fi
 
   http --ignore-stdin --check-status PUT "${VAULT_API}/sys/unseal" "${host}" key=${key}
-  http --ignore-stdin PUT "${VAULT_API}/sys/mounts/ota-tuf/keys" "${host}" "X-Vault-Token: ${token}" type=generic
-  http --ignore-stdin --check-status PUT "${VAULT_API}/sys/policy/tuf" "${host}" "X-Vault-Token: ${token}" rules=@${SCRIPT_DIR}/tuf-policy.hcl
-  http --ignore-stdin --check-status PUT "${VAULT_API}/auth/token/create" "${host}" "X-Vault-Token: ${token}" id=${KEYSERVER_TOKEN} policies:='["tuf"]' period="72h"
+  http --ignore-stdin PUT "${VAULT_API}/sys/mounts/ota-tuf/keys" "${host}" "X-Vault-Token:${token}" type=generic
+  http --ignore-stdin --check-status PUT "${VAULT_API}/sys/policy/tuf" "${host}" "X-Vault-Token:${token}" rules=@${SCRIPT_DIR}/tuf-policy.hcl
+  http --ignore-stdin --check-status PUT "${VAULT_API}/auth/token/create" "${host}" "X-Vault-Token:${token}" id=${KEYSERVER_TOKEN} policies:='["tuf"]' period="72h"
 }
 
 start_services() {
@@ -95,9 +95,9 @@ start_services() {
 
   wait_for_containers
   local ns="x-ats-namespace: default"
-  local ks="Host: tuf-keyserver.${DNS_NAME}"
-  local repo="Host: tuf-reposerver.${DNS_NAME}"
-  local dir="Host: director.${DNS_NAME}"
+  local ks="Host:tuf-keyserver.${DNS_NAME}"
+  local repo="Host:tuf-reposerver.${DNS_NAME}"
+  local dir="Host:director.${DNS_NAME}"
 
   local id=$(http --ignore-stdin --check-status --print=b \
     POST ${OTA_API}/v1/user_repo "${repo}" "${ns}" | jq --raw-output .)

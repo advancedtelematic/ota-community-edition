@@ -94,7 +94,7 @@ start_services() {
   fi
 
   wait_for_containers
-  local ns="x-ats-namespace: default"
+  local ns="x-ats-namespace:default"
   local ks="Host:tuf-keyserver.${DNS_NAME}"
   local repo="Host:tuf-reposerver.${DNS_NAME}"
   local dir="Host:director.${DNS_NAME}"

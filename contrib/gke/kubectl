@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+GCLOUD_CONFIG="${GCLOUD_CONFIG-`pwd`/gcloud-config}"
+docker run --rm -v ${GCLOUD_CONFIG}:/root/.config/gcloud otace-client kubectl $*

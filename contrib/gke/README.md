@@ -24,6 +24,15 @@ Create the k8s cluster with:
  ./contrib/gke/gcloud container clusters get-credentials ota-ce
 ~~~
 
+## Deploy In Kubernetes
+
+~~~
+  ./contrib/gke/make SERVER_NAME="TODO" DNS_NAME="TODO" new-server
+  ./contrib/gke/make start-infra
+  ./contrib/gke/make VAULTS="tuf-vault" start-vaults
+  ./contrib/gke/make start-services
+~~~
+
 ## Cleaning Up
 The setup can be completed removed with:
 ~~~

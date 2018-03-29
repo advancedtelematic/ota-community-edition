@@ -38,6 +38,16 @@ data:
         proxy_pass http://repo;
       }
 
+      location /core/system_info {
+        rewrite ^/core/(.*)$ /api/v1/mydevice/$deviceUuid/$1 break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://device-registry;
+      }
+      location /core/installed {
+        rewrite ^/core/(.*)$ /api/v1/mydevice/$deviceUuid/packages break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://device-registry;
+      }
     }
   upstreams.conf: |-
     upstream treehub {

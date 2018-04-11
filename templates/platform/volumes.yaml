@@ -1,3 +1,11 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1beta1
+metadata:
+  name: fast
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-ssd
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -13,48 +21,3 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /data/treehub-pv-1
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mysql-pv-1
-  labels:
-    type: local
-    volume: mysql
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/mysql-pv-1
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: zookeeper-pv-1
-  labels:
-    type: local
-    volume: zookeeper
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/zookeeper-pv-1
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: kafka-pv-1
-  labels:
-    type: local
-    volume: kafka
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/kafka-pv-1

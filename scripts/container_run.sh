@@ -44,6 +44,13 @@ print_hosts() {
   ${KUBECTL} get ingress --no-headers | awk '{print $3 " " $2}'
 }
 
+wait_for_stateful() {
+  name=${1}
+  try_command "${name}" false "[ -n \"\$(${KUBECTL} get statefulset ${name} -o json \
+    | jq '.status | select(.readyReplicas == 1)')\" ]"
+  print_pod_name "${name}"
+}
+
 wait_for_service() {
   service_name=${1}
   try_command "${service_name}" false "[ -n \"\$(${KUBECTL} get deploy ${service_name} -o json \
@@ -57,7 +64,7 @@ wait_for_containers() {
 }
 
 create_databases() {
-  mysql_name=$(wait_for_service "mysql")
+  mysql_name=$(wait_for_stateful "mysql")
   ${KUBECTL} cp "${SCRIPT_DIR}/create_databases.sql" "${mysql_name}:/tmp/create_databases.sql"
   ${KUBECTL} exec -ti "${mysql_name}" -- bash -c "mysql -p${DB_PASS} < /tmp/create_databases.sql"
 }

@@ -72,30 +72,22 @@ spec:
         terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /var/lib/zookeeper
-          name: data
+          name: platform-vol
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: zookeeper-pv-claim
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: zookeeper-pv-claim
-  labels:
-    app: zookeeper
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  selector:
-    matchLabels:
-      volume: zookeeper
+
+  volumeClaimTemplates:
+  - metadata:
+      name: platform-vol
+      annotations:
+        volume.beta.kubernetes.io/storage-class: fast
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
 ---
 apiVersion: v1
 kind: Service

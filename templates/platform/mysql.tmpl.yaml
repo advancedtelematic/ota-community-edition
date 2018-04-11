@@ -6,15 +6,14 @@ metadata:
 data:
 ---
 apiVersion: apps/v1beta2
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mysql
 spec:
   selector:
     matchLabels:
       app: mysql
-  strategy:
-    type: Recreate
+  serviceName: mysql
   template:
     metadata:
       labels:
@@ -31,7 +30,10 @@ spec:
         - containerPort: 3306
           name: mysql
         volumeMounts:
-        - name: mysql-persistent-storage
+        - name: platform-vol
+          # subPath required so volume's lost+found
+          # directory doesn't break mysql's init
+          subPath: mysql_data
           mountPath: /var/lib/mysql
         livenessProbe:
           exec:
@@ -46,26 +48,18 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 2
           timeoutSeconds: 1
-      volumes:
-      - name: mysql-persistent-storage
-        persistentVolumeClaim:
-          claimName: mysql-pv-claim
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pv-claim
-  labels:
-    app: mysql
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  selector:
-    matchLabels:
-      volume: mysql
+
+  volumeClaimTemplates:
+  - metadata:
+      name: platform-vol
+      annotations:
+        volume.beta.kubernetes.io/storage-class: fast
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
 ---
 apiVersion: v1
 kind: Secret

@@ -72,31 +72,23 @@ spec:
             cpu: {{ .kafka_cpu }}
             memory: {{ .kafka_mem }}
         volumeMounts:
-        - name: data
+        - name: platform-vol
           mountPath: /opt/kafka/data
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: kafka-pv-claim
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: kafka-pv-claim
-  labels:
-    app: kafka
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  selector:
-    matchLabels:
-      volume: kafka
+
+  volumeClaimTemplates:
+  - metadata:
+      name: platform-vol
+      annotations:
+        volume.beta.kubernetes.io/storage-class: fast
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
 ---
 apiVersion: v1
 kind: Service

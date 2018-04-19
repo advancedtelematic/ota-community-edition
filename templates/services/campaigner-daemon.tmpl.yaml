@@ -7,27 +7,26 @@ data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
   DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/campaigner
-  DB_USER: campaigner
+  DB_USER: {{ .campaigner_daemon_db_user }}
   DEVICE_REGISTRY_HOST: device-registry
   DEVICE_REGISTRY_PORT: '80'
   DIRECTOR_HOST: director
   DIRECTOR_PORT: '80'
   ENV_PREFIX: {{ .env_prefix }}
   JAVA_OPTS: {{ .campaigner_daemon_java_opts }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
-  KAFKA_HOST: {{ .kafka_host }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
-  MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
   SCHEDULER_BATCH_SIZE: '200'
   SCHEDULER_DELAY: 10 seconds
   SCHEDULER_POLLING_TIMEOUT: 10 seconds
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: campaigner-daemon
 spec:
+  selector:
+    matchLabels:
+      app: campaigner-daemon
   strategy:
     type: Recreate
   template:
@@ -36,19 +35,20 @@ spec:
         app: campaigner-daemon
     spec:
       containers:
-      - image: {{ .campaigner_docker_image }}
-        name: campaigner-daemon
+      - name: campaigner-daemon
+        image: {{ .campaigner_daemon_docker_image }}
+        args:
+        - "-main"
+        - com.advancedtelematic.campaigner.DaemonBoot
         envFrom:
+        - configMapRef:
+            name: kafka-shared
         - configMapRef:
             name: campaigner-daemon-config
         - secretRef:
             name: campaigner-daemon-secret
-        imagePullPolicy: Always
         ports:
         - containerPort: 9001
-        args:
-        - "-main"
-        - com.advancedtelematic.campaigner.DaemonBoot
         resources:
           requests:
             cpu: {{ .campaigner_daemon_cpu }}
@@ -59,8 +59,6 @@ spec:
           httpGet:
             port: 9001
             path: "/health"
-      imagePullSecrets:
-      - name: docker-registry-key
 ---
 apiVersion: v1
 kind: Secret

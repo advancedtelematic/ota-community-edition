@@ -4,10 +4,10 @@ kind: ConfigMap
 metadata:
   name: app-config
 data:
+  AUTH_PLUS_HOST: auth-plus
+  AUTH_PLUS_PORT: '80'
   AUTH_PROTOCOL: none
   AUTH_VERIFICATION: local
-  BIND_HOST: 0.0.0.1
-  BIND_PORT: '9001'
   CAMPAIGNER_HOST: campaigner
   CAMPAIGNER_PORT: '80'
   CRYPT_CREATE_ACCOUNTS: "false"
@@ -18,9 +18,6 @@ data:
   DIRECTOR_PORT: '80'
   ENV_PREFIX: {{ .env_prefix }}
   JAVA_OPTS: {{ .app_java_opts }}
-  KAFKA_HOST: {{ .kafka_host }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
   MESSAGING_MODE: kafka
   OIDC_LOGIN_ACTION: com.advancedtelematic.auth.garage.NoLoginAction
   OIDC_LOGOUT_ACTION: com.advancedtelematic.auth.garage.NoLogoutAction
@@ -32,6 +29,8 @@ data:
   REPORT_METRICS: "false"
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
+  TREEHUB_HOST_PUB: treehub.{{ .ingress_dns_name }}
+  TREEHUB_PORT_PUB: '80'
   TOGGLE_ATS_GARAGE_THEME: "false"
   TOGGLE_AUTO_FEATURE_ACTIVATION: "false"
   TOGGLE_CREDENTIALS_DOWNLOAD: "false"
@@ -39,15 +38,20 @@ data:
   TOGGLE_USER_PROFILE_MENU: "false"
   TUF_REPOSERVER_HOST: tuf-reposerver
   TUF_REPOSERVER_PORT: '80'
+  TUF_REPOSERVER_HOST_PUB: tuf-reposerver.{{.ingress_dns_name}}
+  TUF_REPOSERVER_PORT_PUB: '80'
   WS_HOST: web-events.{{ .ingress_dns_name }}
   WS_PORT: '80'
   WS_SCHEME: ws
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app
 spec:
+  selector:
+    matchLabels:
+      app: app
   strategy:
     type: Recreate
   template:
@@ -58,17 +62,19 @@ spec:
       containers:
       - image: {{ .app_docker_image }}
         name: app
-        envFrom:
-        - configMapRef:
-            name: app-config
-        - secretRef:
-            name: app-secret
         imagePullPolicy: Always
         ports:
         - containerPort: 9001
         args:
         - "-Dhttp.port=9001"
         - "-Dwebsrc.atsgarage=ws://*.{{ .ingress_dns_name }}:80"
+        envFrom:
+        - configMapRef:
+            name: kafka-shared
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secret
         resources:
           requests:
             cpu: {{ .app_cpu }}
@@ -79,8 +85,6 @@ spec:
           httpGet:
             port: 9001
             path: "/health"
-      imagePullSecrets:
-      - name: docker-registry-key
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -88,9 +92,11 @@ metadata:
   name: app
   annotations:
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/limit-whitelist: {{.ingress_acl_whitelist}}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{.ingress_proxy_size}}
 spec:
   rules:
-  - host: app.{{ .ingress_dns_name }}
+  - host: app.{{.ingress_dns_name}}
     http:
       paths:
       - backend:
@@ -103,7 +109,7 @@ metadata:
   name: app-secret
 type: Opaque
 data:
-  JWT_SECRET: {{ .app_jwt_secret | b64enc }}
+  JWT_SECRET: {{ .jwt_secret | b64enc }}
   PLAY_CRYPTO_SECRET: {{ .app_play_crypto_secret | b64enc }}
 ---
 apiVersion: v1

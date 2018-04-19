@@ -5,16 +5,16 @@ metadata:
   name: mysql-config
 data:
 ---
-apiVersion: apps/v1beta2
-kind: Deployment
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: mysql
 spec:
+  serviceName: mysql
+  replicas: 1
   selector:
     matchLabels:
       app: mysql
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
@@ -22,17 +22,13 @@ spec:
     spec:
       containers:
       - image: {{ .mysql_docker_image }}
-        name: mariadb
+        name: mysql
         envFrom:
         - secretRef:
             name: mysql-secret
-        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3306
           name: mysql
-        volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql
         livenessProbe:
           exec:
             command: ["mysqladmin", "ping"]
@@ -46,26 +42,47 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 2
           timeoutSeconds: 1
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
       volumes:
-      - name: mysql-persistent-storage
+      - name: mysql-data
         persistentVolumeClaim:
-          claimName: mysql-pv-claim
+          claimName: mysql-pvc
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mysql-pv-claim
-  labels:
-    app: mysql
+  name: mysql-pvc
 spec:
-  accessModes:
-    - ReadWriteOnce
+  accessModes: [ "ReadWriteOnce" ]
   resources:
     requests:
-      storage: 1Gi
+      storage: 10Gi
+  {{- if .persistent_volumes}}
   selector:
     matchLabels:
-      volume: mysql
+      volume: mysql-pv
+  {{- end}}
+  {{- if .storage_class_name}}
+  storageClassName: {{ .storage_class_name }}
+  {{- end}}
+---
+{{- if .persistent_volumes}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  labels:
+    volume: mysql-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes: [ "ReadWriteOnce" ]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/data/mysql"
+{{- end}}
 ---
 apiVersion: v1
 kind: Secret

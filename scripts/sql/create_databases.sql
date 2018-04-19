@@ -1,8 +1,12 @@
-set global max_connections=200;
+set global max_connections=500;
 
 create database if not exists campaigner;
 create user if not exists 'campaigner'@'%' identified by 'campaigner';
 grant all privileges on `campaigner%`.* to 'campaigner'@'%';
+
+create database if not exists crypt_vault;
+create user if not exists 'crypt_vault'@'%' identified by 'crypt_vault';
+grant all privileges on `crypt_vault%`.* to 'crypt_vault'@'%';
 
 create database if not exists device_registry;
 create user if not exists 'device_registry'@'%' identified by 'device_registry';

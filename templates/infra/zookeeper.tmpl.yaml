@@ -5,7 +5,7 @@ metadata:
   name: zookeeper-config
 data:
   ZK_REPLICAS: "1"
-  ZK_HEAP_SIZE: 250M
+  ZK_HEAP_SIZE: "250M"
   ZK_TICK_TIME: "2000"
   ZK_INIT_LIMIT: "10"
   ZK_SYNC_LIMIT: "5"
@@ -17,13 +17,13 @@ data:
   ZK_SERVER_PORT: "2888"
   ZK_ELECTION_PORT: "3888"
 ---
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zookeeper
 spec:
-  replicas: 1
   serviceName: zookeeper
+  replicas: 1
   selector:
     matchLabels:
       app: zookeeper
@@ -33,17 +33,15 @@ spec:
         app: zookeeper
     spec:
       containers:
-      - image: {{ .zookeeper_docker_image }}
-        imagePullPolicy: IfNotPresent
-        name: zookeeper
+      - name: zookeeper
+        image: {{ .zookeeper_docker_image }}
         envFrom:
         - configMapRef:
             name: zookeeper-config
         command: ['sh', '-c', 'zkGenConfig.sh && exec zkServer.sh start-foreground']
         livenessProbe:
           exec:
-            command:
-            - zkOk.sh
+            command: ["zkOk.sh"]
           failureThreshold: 3
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -58,7 +56,7 @@ spec:
           name: election
         readinessProbe:
           exec:
-            command: ['zkOk.sh']
+            command: ["zkOk.sh"]
           failureThreshold: 3
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -71,31 +69,46 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - mountPath: /var/lib/zookeeper
-          name: data
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
+        - name: zookeeper-data
+          mountPath: /var/lib/zookeeper
       volumes:
-      - name: data
+      - name: zookeeper-data
         persistentVolumeClaim:
-          claimName: zookeeper-pv-claim
+          claimName: zookeeper-pvc
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: zookeeper-pv-claim
-  labels:
-    app: zookeeper
+  name: zookeeper-pvc
 spec:
-  accessModes:
-    - ReadWriteOnce
+  accessModes: [ "ReadWriteOnce" ]
   resources:
     requests:
-      storage: 1Gi
+      storage: 10Gi
+  {{- if .persistent_volumes}}
   selector:
     matchLabels:
-      volume: zookeeper
+      volume: zookeeper-pv
+  {{- end}}
+  {{- if .storage_class_name}}
+  storageClassName: {{ .storage_class_name }}
+  {{- end}}
+---
+{{- if .persistent_volumes}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: zookeeper-pv
+  labels:
+    volume: zookeeper-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes: [ "ReadWriteOnce" ]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/data/zookeeper"
+{{- end}}
 ---
 apiVersion: v1
 kind: Service

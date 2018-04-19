@@ -1,4 +1,1 @@
-.platform.yaml
-.services.yaml
-.vault.yaml
-ota.ce/
+generated/

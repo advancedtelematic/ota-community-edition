@@ -7,12 +7,9 @@ data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
   DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/director
-  DB_USER: director
+  DB_USER: {{ .director_db_user }}
   ENV_PREFIX: {{ .env_prefix }}
   JAVA_OPTS: {{ .director_java_opts }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
-  KAFKA_HOST: {{ .kafka_host }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
   REPORT_METRICS: "false"
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
@@ -21,11 +18,14 @@ data:
   TUF_REPOSERVER_HOST: tuf-reposerver
   TUF_REPOSERVER_PORT: '80'
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: director
 spec:
+  selector:
+    matchLabels:
+      app: director
   strategy:
     type: Recreate
   template:
@@ -34,17 +34,17 @@ spec:
         app: director
     spec:
       containers:
-      - image: {{ .director_docker_image }}
-        name: director
+      - name: director
+        image: {{ .director_docker_image }}
         envFrom:
+        - configMapRef:
+            name: kafka-shared
         - configMapRef:
             name: director-config
         - secretRef:
             name: director-secret
-        imagePullPolicy: Always
         ports:
         - containerPort: 9001
-        args:
         resources:
           requests:
             cpu: {{ .director_cpu }}
@@ -55,23 +55,6 @@ spec:
           httpGet:
             port: 9001
             path: "/health"
-      imagePullSecrets:
-      - name: docker-registry-key
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: director
-  annotations:
-    kubernetes.io/ingress.class: nginx
-spec:
-  rules:
-  - host: director.{{ .ingress_dns_name }}
-    http:
-      paths:
-      - backend:
-          serviceName: director
-          servicePort: 80
 ---
 apiVersion: v1
 kind: Secret

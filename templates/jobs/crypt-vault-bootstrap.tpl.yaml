@@ -1,0 +1,74 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: crypt-vault-bootstrap-job
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: crypt-vault-bootstrap-job
+    spec:
+      containers:
+      - name: crypt-vault-bootstrap-job
+        image: {{ .bootstrap_docker_image }}
+        args: ["ruby", "bootstrap_vault.rb", "/tmp/bootstrap-rules.json", "crypt-vault"]
+        env:
+        - name: "DEBUG"
+          value: "true"
+        volumeMounts:
+        - name: bootstrap-rules
+          mountPath: "/tmp/bootstrap-rules.json"
+          subPath: "bootstrap-rules.json"
+          readOnly: true
+        - name: crypt-policy
+          mountPath: "/tmp/crypt-policy.hcl"
+          subPath: "crypt-policy.hcl"
+          readOnly: true
+        - name: gateway-policy
+          mountPath: "/tmp/gateway-policy.hcl"
+          subPath: "gateway-policy.hcl"
+          readOnly: true
+      restartPolicy: Never
+      serviceAccountName: crypt-vault-bootstrap-account
+      volumes:
+      - name: bootstrap-rules
+        configMap:
+          name: bootstrap-rules
+      - name: crypt-policy
+        configMap:
+          name: crypt-policy
+      - name: gateway-policy
+        configMap:
+          name: gateway-policy
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: crypt-vault-bootstrap-role
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames:
+  - crypt-vault-init
+  - crypt-tokens
+  - gateway-tokens
+  verbs: ["*"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: crypt-vault-bootstrap-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: crypt-vault-bootstrap-role
+subjects:
+- kind: ServiceAccount
+  name: crypt-vault-bootstrap-account
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: crypt-vault-bootstrap-account

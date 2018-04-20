@@ -9,4 +9,4 @@ CN=ota-gateway
 [ext]
 keyUsage=critical, digitalSignature, keyEncipherment, keyAgreement
 extendedKeyUsage=critical, serverAuth
-subjectAltName=DNS:$ENV::SERVERNAME
+subjectAltName=DNS:$ENV::SERVER_NAME

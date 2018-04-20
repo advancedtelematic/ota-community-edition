@@ -9,20 +9,19 @@ data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
   DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/device_registry
-  DB_USER: device_registry
+  DB_USER: {{ .device_registry_db_user }}
   ENV_PREFIX: {{ .env_prefix }}
   JAVA_OPTS: {{ .device_registry_java_opts }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
-  KAFKA_HOST: {{ .kafka_host }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
-  MESSAGING_MODE: kafka
   REPORT_METRICS: "false"
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: device-registry
 spec:
+  selector:
+    matchLabels:
+      app: device-registry
   strategy:
     type: Recreate
   template:
@@ -31,17 +30,17 @@ spec:
         app: device-registry
     spec:
       containers:
-      - image: {{ .device_registry_docker_image }}
-        name: device-registry
+      - name: device-registry
+        image: {{ .device_registry_docker_image }}
         envFrom:
+        - configMapRef:
+            name: kafka-shared
         - configMapRef:
             name: device-registry-config
         - secretRef:
             name: device-registry-secret
-        imagePullPolicy: Always
         ports:
         - containerPort: 9001
-        args:
         resources:
           requests:
             cpu: {{ .device_registry_cpu }}
@@ -52,23 +51,6 @@ spec:
           httpGet:
             port: 9001
             path: "/health"
-      imagePullSecrets:
-      - name: docker-registry-key
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: device-registry
-  annotations:
-    kubernetes.io/ingress.class: nginx
-spec:
-  rules:
-  - host: device-registry.{{ .ingress_dns_name }}
-    http:
-      paths:
-      - backend:
-          serviceName: device-registry
-          servicePort: 80
 ---
 apiVersion: v1
 kind: Secret

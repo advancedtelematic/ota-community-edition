@@ -1,0 +1,43 @@
+{
+  "crypt-vault": {
+    "vault_policies": {
+      "crypt": "/tmp/crypt-policy.hcl",
+      "gateway": "/tmp/gateway-policy.hcl"
+    },
+    "vault_mounts": {
+      "/crypt/keystore": "generic",
+      "/crypt/deviceSigningKeys": "generic"
+    },
+    "vault_tokens": {
+      "crypt": {
+        "policies": ["crypt"],
+        "token_period": "72h",
+        "secret": "crypt-tokens",
+        "environment": "VAULT_TOKEN"
+      },
+      "gateway": {
+        "policies": ["gateway"],
+        "token_period": "72h",
+        "secret": "gateway-tokens",
+        "environment": "VAULT_TOKEN"
+      }
+    }
+  },
+
+  "tuf-vault": {
+    "vault_policies": {
+      "tuf": "/tmp/tuf-policy.hcl"
+    },
+    "vault_mounts": {
+      "/ota-tuf/keys": "generic"
+    },
+    "vault_tokens": {
+      "tuf": {
+        "policies": ["tuf"],
+        "token_period": "72h",
+        "secret": "tuf-tokens",
+        "environment": "TUF_VAULT_TOKEN"
+      }
+    }
+  }
+}

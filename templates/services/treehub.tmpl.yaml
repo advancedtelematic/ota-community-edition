@@ -9,62 +9,51 @@ data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
   DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/treehub
-  DB_USER: treehub
-  DB_PASSWORD: treehub
+  DB_USER: {{ .treehub_db_user }}
   DEVICE_REGISTRY_HOST: device-registry
   DEVICE_REGISTRY_PORT: '80'
   JAVA_OPTS: {{ .treehub_java_opts }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
-  KAFKA_HOST: {{ .kafka_host }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
-  MESSAGING_MODE: kafka
+  REPORT_METRICS: "false"
   SOTA_CORE_HOST: sota-core
   SOTA_CORE_PORT: '80'
   TREEHUB_HOSTNAME: http://treehub.{{ .ingress_dns_name }}/api/v2/mydevice
   TREEHUB_LOCAL_STORE_PATH: "/treehub-objects"
   TREEHUB_STORAGE: local
-  REPORT_METRICS: "false"
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: treehub-pv-claim
-  labels:
-    app: treehub
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  selector:
-    matchLabels:
-      volume: treehub
----
-apiVersion: apps/v1beta2
-kind: Deployment
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: treehub
 spec:
+  serviceName: treehub
+  replicas: 1
   selector:
     matchLabels:
       app: treehub
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
         app: treehub
     spec:
+      {{- if eq .treehub_storage "local"}}
+      initContainers:
+      - name: treehub-init
+        image: {{ .init_docker_image }}
+        command: ["sh", "-c", "chown --recursive 2:2 /treehub-objects"]
+        volumeMounts:
+        - name: treehub-data
+          mountPath: /treehub-objects
+      {{- end}}
       containers:
       - image: {{ .treehub_docker_image }}
         name: treehub
         envFrom:
         - configMapRef:
+            name: kafka-shared
+        - configMapRef:
             name: treehub-config
         - secretRef:
             name: treehub-secret
-        imagePullPolicy: Always
         ports:
         - containerPort: 9001
         resources:
@@ -77,13 +66,15 @@ spec:
           httpGet:
             port: 9001
             path: "/health"
+      {{- if eq .treehub_storage "local"}}
         volumeMounts:
-        - name: objects
-          mountPath: /treehub-objects/object-storage
+        - name: treehub-data
+          mountPath: /treehub-objects
       volumes:
-      - name: objects
+      - name: treehub-data
         persistentVolumeClaim:
-          claimName: treehub-pv-claim
+          claimName: treehub-pvc
+      {{- end}}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -91,7 +82,8 @@ metadata:
   name: treehub
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/proxy-body-size: 30m
+    nginx.ingress.kubernetes.io/limit-whitelist: {{.ingress_acl_whitelist}}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{.ingress_proxy_size}}
 spec:
   rules:
   - host: treehub.{{ .ingress_dns_name }}
@@ -102,14 +94,50 @@ spec:
           servicePort: 80
 ---
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: treehub-pvc
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 10Gi
+  {{- if .persistent_volumes}}
+  selector:
+    matchLabels:
+      volume: treehub-pv
+  {{- end}}
+  {{- if .storage_class_name}}
+  storageClassName: {{ .storage_class_name }}
+  {{- end}}
+---
+{{- if .persistent_volumes}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: treehub-pv
+  labels:
+    volume: treehub-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes: [ "ReadWriteOnce" ]
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/data/treehub"
+{{- end}}
+---
+apiVersion: v1
 kind: Secret
 metadata:
   name: treehub-secret
 type: Opaque
 data:
   DB_PASSWORD: {{ .treehub_db_password | b64enc }}
-  TREEHUB_AWS_ACCESS_KEY: {{ .treehub_aws_key | b64enc }}
-  TREEHUB_AWS_SECRET_KEY: {{ .treehub_aws_secret | b64enc }}
+  {{- if eq .treehub_storage "s3"}}
+  TREEHUB_AWS_ACCESS_KEY: {{.treehub_aws_key | b64enc}}
+  TREEHUB_AWS_SECRET_KEY: {{.treehub_aws_secret | b64enc}}
+  {{- end}}
 ---
 apiVersion: v1
 kind: Service

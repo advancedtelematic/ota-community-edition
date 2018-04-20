@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: pull-images
+spec:
+  selector:
+    matchLabels:
+      app: pull-images
+  template:
+    metadata:
+      labels:
+        app: pull-images
+    spec:
+      initContainers:
+      - name: pull-images
+        image: {{ .default_docker_image }}
+        command:
+        - sh
+        - -c
+        - for image in $(grep -v "^#" /tmp/images.yaml | cut -d' ' -f2); do docker pull "${image}"; done
+        volumeMounts:
+        - name: docker
+          mountPath: /var/run
+        - name: images
+          mountPath: "/tmp/images.yaml"
+          subPath: "images.yaml"
+          readOnly: true
+      containers:
+      - name: pause
+        image: {{ .pause_docker_image }}
+      volumes:
+      - name: docker
+        hostPath:
+          path: /var/run
+      - name: images
+        configMap:
+          name: pull-images

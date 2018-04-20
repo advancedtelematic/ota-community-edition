@@ -7,20 +7,20 @@ data:
   BIND_PORT: '9001'
   DB_MIGRATE: 'true'
   DB_URL: jdbc:mariadb://{{ .mysql_host }}:3306/tuf_keyserver
-  DB_USER: tuf_keyserver
+  DB_USER: {{ .tuf_keyserver_db_user }}
   JAVA_OPTS: {{ .tuf_keyserver_java_opts }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .kafka_host }}:9092
-  KAFKA_HOST: {{ .kafka_host }}:9092
-  KAFKA_TOPIC_SUFFIX: {{ .kafka_topic_suffix }}
   REPORT_METRICS: "false"
   TUF_VAULT_HOST: tuf-vault
   TUF_VAULT_PORT: '80'
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tuf-keyserver
 spec:
+  selector:
+    matchLabels:
+      app: tuf-keyserver
   strategy:
     type: Recreate
   template:
@@ -29,17 +29,20 @@ spec:
         app: tuf-keyserver
     spec:
       containers:
-      - image: {{ .tuf_keyserver_docker_image }}
-        name: tuf-keyserver
+      - name: tuf-keyserver
+        image: {{ .tuf_keyserver_docker_image }}
+        args:
+        - "-main"
+        - com.advancedtelematic.tuf.keyserver.Boot
         envFrom:
+        - configMapRef:
+            name: kafka-shared
         - configMapRef:
             name: tuf-keyserver-config
         - secretRef:
             name: tuf-keyserver-secret
-        imagePullPolicy: Always
-        args:
-        - " -main"
-        - com.advancedtelematic.tuf.keyserver.Boot
+        - secretRef:
+            name: tuf-tokens
         ports:
         - containerPort: 9001
         resources:
@@ -52,23 +55,6 @@ spec:
           httpGet:
             port: 9001
             path: "/health"
-      imagePullSecrets:
-      - name: docker-registry-key
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: tuf-keyserver
-  annotations:
-    kubernetes.io/ingress.class: nginx
-spec:
-  rules:
-  - host: tuf-keyserver.{{ .ingress_dns_name }}
-    http:
-      paths:
-      - backend:
-          serviceName: tuf-keyserver
-          servicePort: 80
 ---
 apiVersion: v1
 kind: Secret
@@ -77,7 +63,6 @@ metadata:
 type: Opaque
 data:
   DB_PASSWORD: {{ .tuf_keyserver_db_password | b64enc }}
-  TUF_VAULT_TOKEN: {{ .tuf_keyserver_vault_token | b64enc }}
 ---
 apiVersion: v1
 kind: Service

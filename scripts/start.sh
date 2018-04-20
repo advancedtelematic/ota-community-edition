@@ -93,8 +93,8 @@ pull_images() {
 }
 
 new_client() {
-  local device_id=${1}
   export DEVICE_UUID=${DEVICE_UUID:-$(uuidgen | tr "[:upper:]" "[:lower:]")}
+  local device_id=${DEVICE_ID:-${DEVICE_UUID}}
   local device_dir="${DEVICES_DIR}/${DEVICE_UUID}"
   mkdir -p "${device_dir}"
 
@@ -327,7 +327,7 @@ case "${command}" in
     start_vaults
     ;;
   "new_client")
-    new_client "${2}"
+    new_client
     ;;
   "new_server")
     new_server

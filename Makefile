@@ -1,9 +1,8 @@
-KUBECTL ?= kubectl
 KUBE_VM ?= virtualbox
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
-.PHONY: help start clean pull-images new-client new-server start-all start-weave \
+.PHONY: help start clean new-client new-server pull-images start-all start-weave \
   start-ingress start-infra start-vaults start-services print-hosts
 .DEFAULT_GOAL := help
 

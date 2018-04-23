@@ -87,6 +87,7 @@ spec:
         volumeMounts:
         - name: kafka-data
           mountPath: /opt/kafka/data
+          subPath: kafka
       volumes:
       - name: kafka-data
         persistentVolumeClaim:

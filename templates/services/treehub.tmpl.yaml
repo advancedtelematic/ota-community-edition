@@ -70,6 +70,7 @@ spec:
         volumeMounts:
         - name: treehub-data
           mountPath: /treehub-objects
+          subPath: treehub-objects
       volumes:
       - name: treehub-data
         persistentVolumeClaim:

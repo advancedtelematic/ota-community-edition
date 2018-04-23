@@ -71,6 +71,7 @@ spec:
         volumeMounts:
         - name: zookeeper-data
           mountPath: /var/lib/zookeeper
+          subPath: zookeeper
       volumes:
       - name: zookeeper-data
         persistentVolumeClaim:

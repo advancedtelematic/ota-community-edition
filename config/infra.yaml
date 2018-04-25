@@ -6,6 +6,6 @@ ingress_proxy_size: 300m
 kafka_host: kafka
 kafka_topic_suffix: ce
 mysql_host: mysql
-persistent_volumes: true
+persistent_volumes_path: /data
 storage_class_name: ""
 zookeeper_host: zookeeper

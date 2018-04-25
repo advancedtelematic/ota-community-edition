@@ -17,7 +17,6 @@ readonly VAULT_SHARES=${VAULT_SHARES:-5}
 readonly VAULT_THRESHOLD=${VAULT_THRESHOLD:-3}
 
 readonly SKIP_CLIENT=${SKIP_CLIENT:-false}
-readonly SKIP_IMAGES=${SKIP_IMAGES:-false}
 readonly SKIP_INGRESS=${SKIP_INGRESS:-false}
 readonly SKIP_WEAVE=${SKIP_WEAVE:-false}
 
@@ -82,17 +81,6 @@ apply_template() {
   local template=$1
   make_template "${template}"
   ${KUBECTL} apply --filename "${CWD}/../generated/${template}"
-}
-
-pull_images() {
-  [[ ${SKIP_IMAGES} == true ]] && return 0;
-
-  ${KUBECTL} get configmap pull-images &>/dev/null || {
-    ${KUBECTL} create configmap --from-file config/images.yaml pull-images
-  }
-
-  apply_template templates/images
-  wait_for_pods pull-images
 }
 
 new_client() {
@@ -233,7 +221,8 @@ start_vaults() {
 
 start_weave() {
   [[ ${SKIP_WEAVE} == true ]] && return 0;
-  apply_template templates/weave
+  local version=$(${KUBECTL} version | base64 | tr -d '\n')
+  ${KUBECTL} apply -f "https://cloud.weave.works/k8s/net?k8s-version=${version}"
 }
 
 start_ingress() {
@@ -310,15 +299,11 @@ case "${command}" in
   "start_all")
     check_dependencies
     start_weave
-    pull_images
     new_server
     start_ingress
     start_infra
     start_vaults
     start_services
-    ;;
-  "start_weave")
-    start_weave
     ;;
   "start_ingress")
     start_ingress
@@ -334,9 +319,6 @@ case "${command}" in
     ;;
   "new_server")
     new_server
-    ;;
-  "pull_images")
-    pull_images
     ;;
   "print_hosts")
     print_hosts

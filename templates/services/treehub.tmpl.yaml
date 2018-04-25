@@ -103,7 +103,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  {{- if .persistent_volumes}}
+  {{- if .persistent_volumes_path}}
   selector:
     matchLabels:
       volume: treehub-pv
@@ -112,7 +112,7 @@ spec:
   storageClassName: {{ .storage_class_name }}
   {{- end}}
 ---
-{{- if .persistent_volumes}}
+{{- if .persistent_volumes_path}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -125,7 +125,7 @@ spec:
   accessModes: [ "ReadWriteOnce" ]
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: "/data/treehub"
+    path: {{ .persistent_volumes_path }}
 {{- end}}
 ---
 apiVersion: v1

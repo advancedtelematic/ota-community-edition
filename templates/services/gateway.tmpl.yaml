@@ -104,6 +104,7 @@ spec:
         secret:
           secretName: gateway-tls
 ---
+{{- if .create_ingress }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -120,6 +121,7 @@ spec:
           serviceName: gateway
           servicePort: 8000
 ---
+{{- end }}
 apiVersion: v1
 kind: Service
 metadata:

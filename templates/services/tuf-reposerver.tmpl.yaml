@@ -58,6 +58,7 @@ spec:
             port: 9001
             path: "/health"
 ---
+{{- if .create_ingress }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -73,6 +74,7 @@ spec:
           serviceName: tuf-reposerver
           servicePort: 80
 ---
+{{- end }}
 apiVersion: v1
 kind: Secret
 metadata:

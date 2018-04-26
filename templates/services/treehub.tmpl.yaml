@@ -84,6 +84,7 @@ spec:
         requests:
           storage: {{ .treehub_disk }}
 ---
+{{- if .create_ingress }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -101,6 +102,7 @@ spec:
           serviceName: treehub
           servicePort: 80
 ---
+{{- end }}
 apiVersion: v1
 kind: Secret
 metadata:

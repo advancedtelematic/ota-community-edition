@@ -50,6 +50,7 @@ spec:
             cpu: {{ .web_events_cpu }}
             memory: {{ .web_events_mem }}
 ---
+{{- if .create_ingress }}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -68,6 +69,7 @@ spec:
           serviceName: web-events
           servicePort: 80
 ---
+{{- end }}
 apiVersion: v1
 kind: Secret
 metadata:

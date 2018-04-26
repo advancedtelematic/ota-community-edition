@@ -43,47 +43,23 @@ spec:
           periodSeconds: 2
           timeoutSeconds: 1
         volumeMounts:
-        - name: mysql-data
+        - name: infra-vol
           mountPath: /var/lib/mysql
           subPath: mysql
-      volumes:
-      - name: mysql-data
-        persistentVolumeClaim:
-          claimName: mysql-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pvc
-spec:
-  accessModes: [ "ReadWriteOnce" ]
-  resources:
-    requests:
-      storage: {{ .mysql_disk }}
-  {{- if .persistent_volumes_path}}
-  selector:
-    matchLabels:
-      volume: mysql-pv
-  {{- end}}
-  {{- if .storage_class_name}}
-  storageClassName: {{ .storage_class_name }}
-  {{- end}}
----
-{{- if .persistent_volumes_path}}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mysql-pv
-  labels:
-    volume: mysql-pv
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes: [ "ReadWriteOnce" ]
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: {{ .persistent_volumes_path }}
-{{- end}}
+
+  volumeClaimTemplates:
+  - metadata:
+      name: infra-vol
+      {{- if .storage_class_name}}
+      annotations:
+        volume.beta.kubernetes.io/storage-class: {{ .storage_class_name }}
+      {{- end}}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .mysql_disk }}
 ---
 apiVersion: v1
 kind: Secret

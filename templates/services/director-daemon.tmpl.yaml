@@ -33,6 +33,10 @@ spec:
       labels:
         app: director-daemon
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       containers:
       - name: director-daemon
         image: {{ .director_daemon_docker_image }}

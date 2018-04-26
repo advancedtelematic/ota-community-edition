@@ -35,6 +35,10 @@ spec:
       labels:
         app: tuf-reposerver
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       containers:
       - name: tuf-reposerver
         image: {{ .tuf_reposerver_docker_image }}

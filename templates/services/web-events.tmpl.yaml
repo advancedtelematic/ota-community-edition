@@ -27,6 +27,10 @@ spec:
       labels:
         app: web-events
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       containers:
       - image: {{ .web_events_docker_image }}
         name: web-events

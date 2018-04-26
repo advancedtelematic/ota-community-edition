@@ -34,6 +34,7 @@ sota_core_mem: 200Mi
 treehub_cpu: 80m
 treehub_java_opts: "-Xmx80m"
 treehub_mem: 100Mi
+treehub_disk: 10Gi
 
 tuf_keyserver_cpu: 80m
 tuf_keyserver_daemon_cpu: 80m

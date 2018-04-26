@@ -102,7 +102,7 @@ spec:
   accessModes: [ "ReadWriteOnce" ]
   resources:
     requests:
-      storage: 10Gi
+      storage: {{ .treehub_disk }}
   {{- if .persistent_volumes_path}}
   selector:
     matchLabels:

@@ -323,6 +323,9 @@ case "${command}" in
   "start_infra")
     start_infra
     ;;
+  "start_services")
+    start_services
+    ;;
   "start_vaults")
     start_vaults
     ;;

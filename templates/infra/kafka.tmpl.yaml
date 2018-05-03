@@ -120,7 +120,7 @@ metadata:
     volume: kafka-pv
 spec:
   capacity:
-    storage: 10Gi
+    storage: {{ .kafka_disk }}
   accessModes: [ "ReadWriteOnce" ]
   persistentVolumeReclaimPolicy: Retain
   hostPath:

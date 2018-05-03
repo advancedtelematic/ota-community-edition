@@ -5,7 +5,10 @@ ingress_dns_name: ota.local
 ingress_proxy_size: 300m
 kafka_host: kafka
 kafka_topic_suffix: ce
+kafka_disk: 10Gi
 mysql_host: mysql
 persistent_volumes_path: /data
+mysql_disk: 10Gi
 storage_class_name: ""
 zookeeper_host: zookeeper
+zookeeper_disk: 10Gi

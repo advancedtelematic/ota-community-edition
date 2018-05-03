@@ -67,6 +67,8 @@ kill_pid() {
 make_template() {
   local template=$1
   local output="${CWD}/../generated/${template}"
+  local extra=""
+  [ -f config/local.yaml ] && extra="--values config/local.yaml"
   mkdir -p "$(dirname "${output}")"
   kops toolbox template \
     --template "${template}" \
@@ -74,6 +76,7 @@ make_template() {
     --values config/infra.yaml \
     --values config/secrets.yaml \
     --values config/resources.yaml \
+    ${extra} \
     --output "${output}"
 }
 

@@ -164,7 +164,7 @@ create_configs() {
 create_databases() {
   local pod
   pod=$(wait_for_pods mysql)
-  ${KUBECTL} cp "${CWD}/sql" "${pod}:/tmp"
+  ${KUBECTL} cp "${CWD}/sql" "${pod}:/tmp/"
   ${KUBECTL} exec "${pod}" -- bash -c "mysql -p${DB_PASS} < /tmp/sql/install_plugins.sql || true" 2>/dev/null
   ${KUBECTL} exec "${pod}" -- bash -c "mysql -p${DB_PASS} < /tmp/sql/create_databases.sql"
 }
@@ -310,6 +310,9 @@ case "${command}" in
     ;;
   "start_infra")
     start_infra
+    ;;
+  "start_services")
+    start_services
     ;;
   "start_vaults")
     start_vaults

@@ -35,7 +35,7 @@ spec:
       initContainers:
       - name: kafka-init
         image: {{ .init_docker_image }}
-        command: ["sh", "-c", "until nc -z {{ .zookeeper_host }} 2181; do sleep 2s; done"]
+        command: ["sh", "-c", "until nc -z -w2 {{ .zookeeper_host }} 2181; do sleep 2s; done"]
       containers:
       - name: kafka
         image: {{ .kafka_docker_image }}
@@ -87,6 +87,7 @@ spec:
         volumeMounts:
         - name: kafka-data
           mountPath: /opt/kafka/data
+          subPath: kafka
       volumes:
       - name: kafka-data
         persistentVolumeClaim:
@@ -101,7 +102,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  {{- if .persistent_volumes}}
+  {{- if .persistent_volumes_path}}
   selector:
     matchLabels:
       volume: kafka-pv
@@ -110,7 +111,7 @@ spec:
   storageClassName: {{ .storage_class_name }}
   {{- end}}
 ---
-{{- if .persistent_volumes}}
+{{- if .persistent_volumes_path}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -123,7 +124,7 @@ spec:
   accessModes: [ "ReadWriteOnce" ]
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: "/data/kafka"
+    path: {{ .persistent_volumes_path }}
 {{- end}}
 ---
 apiVersion: v1

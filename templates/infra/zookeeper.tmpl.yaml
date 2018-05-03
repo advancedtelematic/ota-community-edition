@@ -71,6 +71,7 @@ spec:
         volumeMounts:
         - name: zookeeper-data
           mountPath: /var/lib/zookeeper
+          subPath: zookeeper
       volumes:
       - name: zookeeper-data
         persistentVolumeClaim:
@@ -85,7 +86,7 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  {{- if .persistent_volumes}}
+  {{- if .persistent_volumes_path}}
   selector:
     matchLabels:
       volume: zookeeper-pv
@@ -94,7 +95,7 @@ spec:
   storageClassName: {{ .storage_class_name }}
   {{- end}}
 ---
-{{- if .persistent_volumes}}
+{{- if .persistent_volumes_path}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -107,7 +108,7 @@ spec:
   accessModes: [ "ReadWriteOnce" ]
   persistentVolumeReclaimPolicy: Retain
   hostPath:
-    path: "/data/zookeeper"
+    path: {{ .persistent_volumes_path }}
 {{- end}}
 ---
 apiVersion: v1

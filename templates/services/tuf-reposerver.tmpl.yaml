@@ -12,7 +12,7 @@ data:
   DB_USER: {{ .tuf_reposerver_db_user }}
   JAVA_OPTS: {{ .tuf_reposerver_java_opts }}
   REPORT_METRICS: "false"
-  {{- if .persistent_volumes}}
+  {{- if .persistent_volumes_path}}
   LOCAL_STORAGE_ROOT: {{ .tuf_reposerver_local_storage_root }}
   STORAGE_TYPE: local
   {{- end}}

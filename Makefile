@@ -1,10 +1,9 @@
-KUBECTL ?= kubectl
 KUBE_VM ?= virtualbox
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
-.PHONY: help start clean pull-images new-client new-server start-all start-weave \
-  start-ingress start-infra start-vaults start-services print-hosts
+.PHONY: help start clean new-client new-server start-all start-ingress \
+  start-infra start-vaults start-services print-hosts
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
@@ -20,9 +19,7 @@ clean: cmd-minikube ## Delete minikube and all service data.
 
 new-client: %: start_%       ## Create a new client with a given name.
 new-server: %: start_%       ## Create a new set of server credentials.
-pull-images: %: start_%      ## Pull all Docker images to all nodes.
 start-all: %: start_%        ## Start all infra and OTA+ services.
-start-weave: %: start_%      ## Install Weave Net.
 start-ingress: %: start_%    ## Install Nginx Ingress Controller
 start-infra: %: start_%      ## Create infrastructure configs and apply to the cluster.
 start-vaults: %: start_%     ## Start all vault instances.

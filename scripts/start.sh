@@ -9,12 +9,14 @@ readonly DNS_NAME=${DNS_NAME:-ota.local}
 export   SERVER_NAME=${SERVER_NAME:-ota.ce}
 readonly SERVER_DIR=${SERVER_DIR:-${CWD}/../generated/${SERVER_NAME}}
 readonly DEVICES_DIR=${DEVICES_DIR:-${SERVER_DIR}/devices}
+
+readonly NAMESPACE=${NAMESPACE:-default}
+readonly PROXY_PORT=${PROXY_PORT:-8200}
 readonly DB_PASS=${DB_PASS:-root}
 readonly VAULT_SHARES=${VAULT_SHARES:-5}
 readonly VAULT_THRESHOLD=${VAULT_THRESHOLD:-3}
 
 readonly SKIP_CLIENT=${SKIP_CLIENT:-false}
-readonly SKIP_IMAGES=${SKIP_IMAGES:-false}
 readonly SKIP_INGRESS=${SKIP_INGRESS:-false}
 readonly SKIP_WEAVE=${SKIP_WEAVE:-false}
 
@@ -81,17 +83,6 @@ apply_template() {
   ${KUBECTL} apply --filename "${CWD}/../generated/${template}"
 }
 
-pull_images() {
-  [[ ${SKIP_IMAGES} == true ]] && return 0;
-
-  ${KUBECTL} get configmap pull-images &>/dev/null || {
-    ${KUBECTL} create configmap --from-file config/images.yaml pull-images
-  }
-
-  apply_template templates/images
-  wait_for_pods pull-images
-}
-
 new_client() {
   export DEVICE_UUID=${DEVICE_UUID:-$(uuidgen | tr "[:upper:]" "[:lower:]")}
   local device_id=${DEVICE_ID:-${DEVICE_UUID}}
@@ -107,27 +98,27 @@ new_client() {
   ln -s "${SERVER_DIR}/server_ca.pem" "${device_dir}/ca.pem" || true
   openssl x509 -in "${device_dir}/client.pem" -text -noout
 
-  [[ ${SKIP_CLIENT} == true ]] && return 0
-
-  ${KUBECTL} proxy --port 8200 &
+  ${KUBECTL} proxy --port "${PROXY_PORT}" &
   local pid=$!
   trap "kill_pid ${pid}" EXIT
   sleep 3s
 
-  local addr=${DEVICE_ADDR:-localhost}
-  local port=${DEVICE_PORT:-2222}
+  local api="http://localhost:${PROXY_PORT}/api/v1/namespaces/${NAMESPACE}/services"
+  http PUT "${api}/device-registry/proxy/api/v1/devices" credentials=@"${device_dir}/client.pem" \
+    deviceUuid="${DEVICE_UUID}" deviceId="${device_id}" deviceName="${device_id}" deviceType=Other
+  kill_pid "${pid}"
+
+  [[ ${SKIP_CLIENT} == true ]] && return 0
+
   local gateway=${GATEWAY_ADDR:-$(${KUBECTL} get nodes --output jsonpath \
     --template='{.items[0].status.addresses[?(@.type=="InternalIP")].address}')}
-  local registry="http://localhost:8200/api/v1/namespaces/default/services/registry/proxy/api/v1"
+  local addr=${DEVICE_ADDR:-localhost}
+  local port=${DEVICE_PORT:-2222}
   local options="-o StrictHostKeyChecking=no"
 
-  http PUT "${registry}/devices" deviceUuid="${DEVICE_UUID}" deviceId="${device_id}" \
-    deviceName="${device_id}" deviceType=Other credentials=@"${device_dir}/client.pem"
   ssh ${options} "root@${addr}" -p "${port}" "echo \"${gateway} ota.ce\" >> /etc/hosts"
   scp -P "${port}" ${options} "${device_dir}/client.pem" "root@${addr}:/var/sota/client.pem"
   scp -P "${port}" ${options} "${device_dir}/pkey.pem" "root@${addr}:/var/sota/pkey.pem"
-
-  kill_pid "${pid}"
 }
 
 new_server() {
@@ -180,7 +171,7 @@ create_databases() {
 
 init_vault() {
   local vault=${1}
-  local api="http://localhost:8200/v1"
+  local api="http://localhost:${PROXY_PORT}/v1"
 
   if [[ $(http "${api}/sys/health" | jq '.initialized') = false ]]; then
     local result
@@ -215,7 +206,7 @@ start_vaults() {
 
     local pod
     pod=$(wait_for_pods "${vault}")
-    ${KUBECTL} port-forward "${pod}" 8200:8200 &
+    ${KUBECTL} port-forward "${pod}" "${PROXY_PORT}:${PROXY_PORT}" &
     local pid=$!
     trap "kill_pid ${pid}" EXIT
     sleep 3s
@@ -230,7 +221,8 @@ start_vaults() {
 
 start_weave() {
   [[ ${SKIP_WEAVE} == true ]] && return 0;
-  apply_template templates/weave
+  local version=$(${KUBECTL} version | base64 | tr -d '\n')
+  ${KUBECTL} apply -f "https://cloud.weave.works/k8s/net?k8s-version=${version}"
 }
 
 start_ingress() {
@@ -252,13 +244,13 @@ start_services() {
 get_credentials() {
   ${KUBECTL} get secret "user-keys" &>/dev/null && return 0
 
-  ${KUBECTL} proxy --port 8200 &
+  ${KUBECTL} proxy --port "${PROXY_PORT}" &
   local pid=$!
   trap "kill_pid ${pid}" EXIT
   sleep 3s
 
   local namespace="x-ats-namespace:default"
-  local api="http://localhost:8200/api/v1/namespaces/default/services"
+  local api="http://localhost:${PROXY_PORT}/api/v1/namespaces/${NAMESPACE}/services"
   local keyserver="${api}/tuf-keyserver/proxy"
   local reposerver="${api}/tuf-reposerver/proxy"
   local director="${api}/director/proxy"
@@ -277,8 +269,8 @@ get_credentials() {
 
   retry_command "keys" "http --ignore-stdin --check-status ${keyserver}/api/v1/root/${id}"
   keys=$(http --ignore-stdin --check-status "${keyserver}/api/v1/root/${id}/keys/targets/pairs")
-  echo ${keys} | jq -r 'del(.[0].keyval.private)' | jq -r '.[0]' > "${SERVER_DIR}/targets.pub"
-  echo ${keys} | jq -r 'del(.[0].keyval.public)'  | jq -r '.[0]' > "${SERVER_DIR}/targets.sec"
+  echo ${keys} | jq '.[0] | {keytype, keyval: {public: .keyval.public}}'   > "${SERVER_DIR}/targets.pub"
+  echo ${keys} | jq '.[0] | {keytype, keyval: {private: .keyval.private}}' > "${SERVER_DIR}/targets.sec"
 
   retry_command "root.json" "http --ignore-stdin --check-status -d -o \"${SERVER_DIR}/root.json\" \
     ${reposerver}/api/v1/user_repo/root.json \"${namespace}\""
@@ -307,15 +299,11 @@ case "${command}" in
   "start_all")
     check_dependencies
     start_weave
-    pull_images
     new_server
     start_ingress
     start_infra
     start_vaults
     start_services
-    ;;
-  "start_weave")
-    start_weave
     ;;
   "start_ingress")
     start_ingress
@@ -331,9 +319,6 @@ case "${command}" in
     ;;
   "new_server")
     new_server
-    ;;
-  "pull_images")
-    pull_images
     ;;
   "print_hosts")
     print_hosts

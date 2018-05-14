@@ -92,6 +92,7 @@ new_client() {
   local device_dir="${DEVICES_DIR}/${DEVICE_UUID}"
   mkdir -p "${device_dir}"
 
+  # This is a tag for including a chunk of code in the docs. Don't remove. tag::genclientkeys[]
   openssl ecparam -genkey -name prime256v1 | openssl ec -out "${device_dir}/pkey.ec.pem"
   openssl pkcs8 -topk8 -nocrypt -in "${device_dir}/pkey.ec.pem" -out "${device_dir}/pkey.pem"
   openssl req -new -config "${CWD}/certs/client.cnf" -key "${device_dir}/pkey.pem" -out "${device_dir}/${device_id}.csr"
@@ -100,6 +101,7 @@ new_client() {
   cat "${device_dir}/client.pem" "${DEVICES_DIR}/ca.crt" > "${device_dir}/${device_id}.chain.pem"
   ln -s "${SERVER_DIR}/server_ca.pem" "${device_dir}/ca.pem" || true
   openssl x509 -in "${device_dir}/client.pem" -text -noout
+  # end::genclientkeys[]
 
   ${KUBECTL} proxy --port "${PROXY_PORT}" &
   local pid=$!
@@ -128,6 +130,7 @@ new_server() {
   ${KUBECTL} get secret gateway-tls &>/dev/null && return 0
   mkdir -p "${SERVER_DIR}" "${DEVICES_DIR}"
 
+  # This is a tag for including a chunk of code in the docs. Don't remove. tag::genserverkeys[]
   openssl ecparam -genkey -name prime256v1 | openssl ec -out "${SERVER_DIR}/ca.key"
   openssl req -new -x509 -days 3650 -config "${CWD}/certs/server_ca.cnf" -key "${SERVER_DIR}/ca.key" \
     -out "${SERVER_DIR}/server_ca.pem"
@@ -141,6 +144,7 @@ new_server() {
   openssl ecparam -genkey -name prime256v1 | openssl ec -out "${DEVICES_DIR}/ca.key"
   openssl req -new -x509 -days 3650 -key "${DEVICES_DIR}/ca.key" -config "${CWD}/certs/device_ca.cnf" \
     -out "${DEVICES_DIR}/ca.crt"
+  # end::genserverkeys[]
 
   ${KUBECTL} create secret generic gateway-tls \
     --from-file "${SERVER_DIR}/server.key" \

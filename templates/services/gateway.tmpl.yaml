@@ -52,6 +52,11 @@ data:
         proxy_set_header x-ats-namespace $deviceNamespace;
         proxy_pass http://device-registry;
       }
+      location /system_info/network {
+        rewrite ^/system_info/(.*)$ /api/v1/devices/$deviceUuid/system_info/network break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://device-registry;
+      }
     }
   upstreams.conf: |-
     upstream treehub {

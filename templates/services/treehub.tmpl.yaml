@@ -41,7 +41,7 @@ spec:
         image: {{ .init_docker_image }}
         command: ["sh", "-c", "chown --recursive 2:2 /treehub-objects"]
         volumeMounts:
-        - name: treehub-data
+        - name: infra-vol
           mountPath: /treehub-objects
       {{- end}}
       containers:
@@ -68,14 +68,24 @@ spec:
             path: "/health"
       {{- if eq .treehub_storage "local"}}
         volumeMounts:
-        - name: treehub-data
+        - name: infra-vol
           mountPath: /treehub-objects
           subPath: treehub-objects
-      volumes:
-      - name: treehub-data
-        persistentVolumeClaim:
-          claimName: treehub-pvc
       {{- end}}
+
+  volumeClaimTemplates:
+  - metadata:
+      name: infra-vol
+      {{- if .storage_class_name}}
+      annotations:
+        volume.beta.kubernetes.io/storage-class: {{ .storage_class_name }}
+      {{- end}}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .treehub_disk }}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -93,40 +103,6 @@ spec:
       - backend:
           serviceName: treehub
           servicePort: 80
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: treehub-pvc
-spec:
-  accessModes: [ "ReadWriteOnce" ]
-  resources:
-    requests:
-      storage: {{ .treehub_disk }}
-  {{- if .persistent_volumes_path}}
-  selector:
-    matchLabels:
-      volume: treehub-pv
-  {{- end}}
-  {{- if .storage_class_name}}
-  storageClassName: {{ .storage_class_name }}
-  {{- end}}
----
-{{- if .persistent_volumes_path}}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: treehub-pv
-  labels:
-    volume: treehub-pv
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes: [ "ReadWriteOnce" ]
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: {{ .persistent_volumes_path }}
-{{- end}}
 ---
 apiVersion: v1
 kind: Secret

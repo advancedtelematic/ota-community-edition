@@ -85,47 +85,23 @@ spec:
             cpu: {{ .kafka_cpu }}
             memory: {{ .kafka_mem }}
         volumeMounts:
-        - name: kafka-data
+        - name: infra-vol
           mountPath: /opt/kafka/data
           subPath: kafka
-      volumes:
-      - name: kafka-data
-        persistentVolumeClaim:
-          claimName: kafka-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: kafka-pvc
-spec:
-  accessModes: [ "ReadWriteOnce" ]
-  resources:
-    requests:
-      storage: 10Gi
-  {{- if .persistent_volumes_path}}
-  selector:
-    matchLabels:
-      volume: kafka-pv
-  {{- end}}
-  {{- if .storage_class_name}}
-  storageClassName: {{ .storage_class_name }}
-  {{- end}}
----
-{{- if .persistent_volumes_path}}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: kafka-pv
-  labels:
-    volume: kafka-pv
-spec:
-  capacity:
-    storage: {{ .kafka_disk }}
-  accessModes: [ "ReadWriteOnce" ]
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: {{ .persistent_volumes_path }}
-{{- end}}
+
+  volumeClaimTemplates:
+  - metadata:
+      name: infra-vol
+      {{- if .storage_class_name}}
+      annotations:
+        volume.beta.kubernetes.io/storage-class: {{ .storage_class_name }}
+      {{- end}}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .kafka_disk }}
 ---
 apiVersion: v1
 kind: Service

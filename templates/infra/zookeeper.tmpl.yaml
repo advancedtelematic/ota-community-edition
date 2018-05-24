@@ -69,47 +69,23 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
-        - name: zookeeper-data
+        - name: infra-vol
           mountPath: /var/lib/zookeeper
           subPath: zookeeper
-      volumes:
-      - name: zookeeper-data
-        persistentVolumeClaim:
-          claimName: zookeeper-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: zookeeper-pvc
-spec:
-  accessModes: [ "ReadWriteOnce" ]
-  resources:
-    requests:
-      storage: {{ .zookeeper_disk }}
-  {{- if .persistent_volumes_path}}
-  selector:
-    matchLabels:
-      volume: zookeeper-pv
-  {{- end}}
-  {{- if .storage_class_name}}
-  storageClassName: {{ .storage_class_name }}
-  {{- end}}
----
-{{- if .persistent_volumes_path}}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: zookeeper-pv
-  labels:
-    volume: zookeeper-pv
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes: [ "ReadWriteOnce" ]
-  persistentVolumeReclaimPolicy: Retain
-  hostPath:
-    path: {{ .persistent_volumes_path }}
-{{- end}}
+
+  volumeClaimTemplates:
+  - metadata:
+      name: infra-vol
+      {{- if .storage_class_name}}
+      annotations:
+        volume.beta.kubernetes.io/storage-class: {{ .storage_class_name }}
+      {{- end}}
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .zookeeper_disk }}
 ---
 apiVersion: v1
 kind: Service

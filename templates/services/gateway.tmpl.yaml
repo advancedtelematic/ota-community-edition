@@ -6,7 +6,7 @@ metadata:
 data:
   gateway.conf: |-
     server {
-      error_log  /var/log/nginx/error.log debug;
+      error_log  /var/log/nginx/error.log info;
       listen       8443 ssl;
       server_name ota.ce;
       ssl_certificate     /etc/ssl/gateway/server.chain.pem;

@@ -72,10 +72,10 @@ make_template() {
   mkdir -p "$(dirname "${output}")"
   kops toolbox template \
     --template "${template}" \
+    --values config/config.yaml \
     --values config/images.yaml \
-    --values config/infra.yaml \
-    --values config/secrets.yaml \
     --values config/resources.yaml \
+    --values config/secrets.yaml \
     ${extra} \
     --output "${output}"
 }
@@ -318,11 +318,11 @@ case "${command}" in
   "start_infra")
     start_infra
     ;;
-  "start_services")
-    start_services
-    ;;
   "start_vaults")
     start_vaults
+    ;;
+  "start_services")
+    start_services
     ;;
   "new_client")
     new_client

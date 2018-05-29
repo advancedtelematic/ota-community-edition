@@ -25,16 +25,22 @@ director_java_opts: "-Xmx250m"
 director_mem: 300Mi
 
 kafka_cpu: 80m
+kafka_disk: 10Gi
+kafka_host: kafka
 kafka_mem: 400Mi
+
+mysql_disk: 10Gi
+mysql_host: mysql
 
 sota_core_cpu: 0.1
 sota_core_java_opts: "-Xmx150m"
 sota_core_mem: 200Mi
 
 treehub_cpu: 80m
+treehub_disk: 10Gi
 treehub_java_opts: "-Xmx80m"
 treehub_mem: 100Mi
-treehub_disk: 10Gi
+treehub_storage: local
 
 tuf_keyserver_cpu: 80m
 tuf_keyserver_daemon_cpu: 80m
@@ -55,4 +61,6 @@ web_events_cpu: 80m
 web_events_mem: 250Mi
 
 zookeeper_cpu: 20m
+zookeeper_disk: 10Gi
+zookeeper_host: zookeeper
 zookeeper_mem: 100Mi

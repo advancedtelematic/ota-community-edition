@@ -86,6 +86,16 @@ apply_template() {
   ${KUBECTL} apply --filename "${CWD}/../generated/${template}"
 }
 
+generate_templates() {
+  [[ ${SKIP_INGRESS} == true ]] || make_template templates/ingress
+  make_template templates/infra
+  make_template templates/services
+  for vault in ${VAULTS:-tuf-vault crypt-vault}; do
+    make_template "templates/vaults/${vault}.tmpl.yaml"
+    make_template "templates/jobs/${vault}-bootstrap.tmpl.yaml"
+  done
+}
+
 new_client() {
   export DEVICE_UUID=${DEVICE_UUID:-$(uuidgen | tr "[:upper:]" "[:lower:]")}
   local device_id=${DEVICE_ID:-${DEVICE_UUID}}
@@ -332,6 +342,9 @@ case "${command}" in
     ;;
   "print_hosts")
     print_hosts
+    ;;
+  "templates")
+    generate_templates
     ;;
   *)
     echo "Unknown command: ${command}"

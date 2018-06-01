@@ -64,3 +64,5 @@ zookeeper_cpu: 20m
 zookeeper_disk: 10Gi
 zookeeper_host: zookeeper
 zookeeper_mem: 100Mi
+
+create_ingress: true

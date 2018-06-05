@@ -17,7 +17,6 @@ readonly VAULT_SHARES=${VAULT_SHARES:-5}
 readonly VAULT_THRESHOLD=${VAULT_THRESHOLD:-3}
 
 readonly SKIP_CLIENT=${SKIP_CLIENT:-false}
-readonly SKIP_INGRESS=${SKIP_INGRESS:-false}
 readonly SKIP_WEAVE=${SKIP_WEAVE:-false}
 
 
@@ -64,6 +63,17 @@ kill_pid() {
   kill -9 "${pid}"
 }
 
+skip_ingress() {
+  [ -f config/local.yaml ] && local_yaml="config/local.yaml"
+
+  value=$(cat config/config.yaml \
+      config/images.yaml \
+      config/resources.yaml \
+      config/secrets.yaml \
+      $local_yaml | grep ^create_ingress | tail -n1)
+  echo $value | grep "false"
+}
+
 make_template() {
   local template=$1
   local output="${CWD}/../generated/${template}"
@@ -87,7 +97,7 @@ apply_template() {
 }
 
 generate_templates() {
-  [[ ${SKIP_INGRESS} == true ]] || make_template templates/ingress
+  skip_ingress || make_template templates/ingress
   make_template templates/infra
   make_template templates/services
   for vault in ${VAULTS:-tuf-vault crypt-vault}; do
@@ -243,7 +253,7 @@ start_weave() {
 }
 
 start_ingress() {
-  [[ ${SKIP_INGRESS} == true ]] && return 0;
+  skip_ingress && return 0;
   apply_template templates/ingress
 }
 

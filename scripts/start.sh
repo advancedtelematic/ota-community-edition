@@ -279,8 +279,11 @@ get_credentials() {
   echo ${keys} | jq '.[0] | {keytype, keyval: {public: .keyval.public}}'   > "${SERVER_DIR}/targets.pub"
   echo ${keys} | jq '.[0] | {keytype, keyval: {private: .keyval.private}}' > "${SERVER_DIR}/targets.sec"
 
-  retry_command "root.json" "http --ignore-stdin --check-status -d -o \"${SERVER_DIR}/root.json\" \
-    ${reposerver}/api/v1/user_repo/root.json \"${namespace}\""
+  retry_command "root.json" "http --ignore-stdin --check-status -d \
+    ${reposerver}/api/v1/user_repo/root.json \"${namespace}\"" && \
+    http --ignore-stdin --check-status -d -o "${SERVER_DIR}/root.json" \
+    ${reposerver}/api/v1/user_repo/root.json "${namespace}"
+
   echo "http://tuf-reposerver.${DNS_NAME}" > "${SERVER_DIR}/tufrepo.url"
   echo "https://${SERVER_NAME}:30443" > "${SERVER_DIR}/autoprov.url"
   cat > "${SERVER_DIR}/treehub.json" <<END

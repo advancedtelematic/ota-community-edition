@@ -55,7 +55,7 @@ wait_for_pods() {
 print_hosts() {
   retry_command "ingress" "${KUBECTL} get ingress -o json \
     | jq --exit-status '.items[0].status.loadBalancer.ingress'"
-  ${KUBECTL} get ingress --no-headers | awk '{print $3 " " $2}'
+  ${KUBECTL} get ingress --no-headers | awk -v ip=$(minikube ip) '{print ip " " $2}'
 }
 
 kill_pid() {
@@ -225,6 +225,7 @@ start_vaults() {
     apply_template "templates/jobs/${vault}-bootstrap.tmpl.yaml"
   done
 }
+
 
 start_weave() {
   [[ ${SKIP_WEAVE} == true ]] && return 0;

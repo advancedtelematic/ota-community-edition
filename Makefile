@@ -25,6 +25,7 @@ start-infra: %: start_%      ## Create infrastructure configs and apply to the c
 start-vaults: %: start_%     ## Start all vault instances.
 start-services: %: start_%   ## Start the OTA+ services.
 print-hosts: %: start_%      ## Print the service mappings for /etc/hosts
+templates: %: start_%        ## Generate all the k8s files
 
 start_%: # Pass the target as an argument to start.sh
 	@scripts/start.sh $*

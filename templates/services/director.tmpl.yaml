@@ -33,6 +33,10 @@ spec:
       labels:
         app: director
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       containers:
       - name: director
         image: {{ .director_docker_image }}

@@ -32,6 +32,10 @@ spec:
       labels:
         app: kafka
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       initContainers:
       - name: kafka-init
         image: {{ .init_docker_image }}

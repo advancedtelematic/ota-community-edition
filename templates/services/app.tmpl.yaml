@@ -59,6 +59,10 @@ spec:
       labels:
         app: app
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       containers:
       - image: {{ .app_docker_image }}
         name: app

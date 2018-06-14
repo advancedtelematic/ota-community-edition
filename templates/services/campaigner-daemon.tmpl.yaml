@@ -34,6 +34,10 @@ spec:
       labels:
         app: campaigner-daemon
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       containers:
       - name: campaigner-daemon
         image: {{ .campaigner_daemon_docker_image }}

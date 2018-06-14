@@ -28,6 +28,10 @@ spec:
       labels:
         app: tuf-keyserver-daemon
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       containers:
       - name: tuf-keyserver-daemon
         image: {{ .tuf_keyserver_daemon_docker_image }}

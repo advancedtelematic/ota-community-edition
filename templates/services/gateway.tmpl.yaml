@@ -80,6 +80,10 @@ spec:
       labels:
         app: gateway
     spec:
+{{ if .gke_nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .gke_nodepool }}
+{{ end }}
       containers:
       - name: nginx
         image: {{ .nginx_docker_image }}

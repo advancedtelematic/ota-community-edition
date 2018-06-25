@@ -217,7 +217,7 @@ unseal_vault() {
   if ${KUBECTL} get secrets "${vault}-init" &>/dev/null; then
     ${KUBECTL} get secrets "${vault}-init" -o json |
       jq -r .data.keys |
-      base64 --decode  |
+      base64 -d  |
       awk 'BEGIN {print "export VAULT_ADDR=http://127.0.0.1:8200"}
                  {print "vault unseal "$0}
            END   {print "vault status"}' |

@@ -27,6 +27,10 @@ Create the k8s cluster with:
 ## Deploy In Kubernetes
 
 ~~~
+  # Give yourself the ability to manage RBAC stuff
+  ./contrib/gke/kubectl create clusterrolebinding cluster-admin-binding \
+      --clusterrole=cluster-admin --user $(gcloud config get-value account)
+
   ./contrib/gke/make SERVER_NAME="TODO" DNS_NAME="TODO" new-server
   ./contrib/gke/make start-infra
   ./contrib/gke/make VAULTS="tuf-vault" start-vaults

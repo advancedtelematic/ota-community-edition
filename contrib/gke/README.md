@@ -31,6 +31,8 @@ Create the k8s cluster with:
   ./contrib/gke/kubectl create clusterrolebinding cluster-admin-binding \
       --clusterrole=cluster-admin --user $(gcloud config get-value account)
 
+  # SERVER_NAME = DNS name of gateway as used by aktualizr (ie ota-ce.example.com)
+  # DNS_NAME = DNS root of all services ie "example.com"
   ./contrib/gke/make SERVER_NAME="TODO" DNS_NAME="TODO" new-server
   ./contrib/gke/make start-infra
   ./contrib/gke/make VAULTS="tuf-vault" start-vaults

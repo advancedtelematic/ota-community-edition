@@ -129,7 +129,7 @@ new_client() {
   sleep 3s
 
   local api="http://localhost:${PROXY_PORT}/api/v1/namespaces/${NAMESPACE}/services"
-  http PUT "${api}/device-registry/proxy/api/v1/devices" credentials=@"${device_dir}/client.pem" \
+  http --ignore-stdin PUT "${api}/device-registry/proxy/api/v1/devices" credentials=@"${device_dir}/client.pem" \
     deviceUuid="${DEVICE_UUID}" deviceId="${device_id}" deviceName="${device_id}" deviceType=Other
   kill_pid "${pid}"
 
@@ -200,9 +200,9 @@ init_vault() {
   local vault=${1}
   local api="http://localhost:${PROXY_PORT}/v1"
 
-  if [[ $(http "${api}/sys/health" | jq '.initialized') = false ]]; then
+  if [[ $(http GET "${api}/sys/health" | jq '.initialized') = false ]]; then
     local result
-    result=$(http --check-status PUT "${api}/sys/init" \
+    result=$(http --ignore-stdin --check-status PUT "${api}/sys/init" \
       secret_shares:="${VAULT_SHARES}" secret_threshold:="${VAULT_THRESHOLD}")
     ${KUBECTL} create secret generic "${vault}-init" \
       --from-literal="root=$(echo "${result}" | jq --raw-output '.root_token')" \
@@ -213,7 +213,6 @@ init_vault() {
 unseal_vault() {
   local vault=${1}
   local pod=${2}
-
   if ${KUBECTL} get secrets "${vault}-init" &>/dev/null; then
     ${KUBECTL} get secrets "${vault}-init" -o json |
       jq -r .data.keys |
@@ -285,24 +284,24 @@ get_credentials() {
   local id
   local keys
 
-  retry_command "director" "[[ true = \$(http --print=b ${director}/health \
+  retry_command "director" "[[ true = \$(http --print=b GET ${director}/health \
     | jq --exit-status '.status == \"OK\"') ]]"
-  retry_command "keyserver" "[[ true = \$(http --print=b ${keyserver}/health \
+  retry_command "keyserver" "[[ true = \$(http --print=b GET ${keyserver}/health \
     | jq --exit-status '.status == \"OK\"') ]]"
-  retry_command "reposerver" "[[ true = \$(http --print=b ${reposerver}/health/dependencies \
+  retry_command "reposerver" "[[ true = \$(http --print=b GET ${reposerver}/health/dependencies \
     | jq --exit-status '.[].status == \"up\"') ]]"
 
   id=$(http --ignore-stdin --check-status --print=b POST "${reposerver}/api/v1/user_repo" "${namespace}" | jq --raw-output .)
   http --ignore-stdin --check-status POST "${director}/api/v1/admin/repo" "${namespace}"
 
-  retry_command "keys" "http --ignore-stdin --check-status ${keyserver}/api/v1/root/${id}"
-  keys=$(http --ignore-stdin --check-status "${keyserver}/api/v1/root/${id}/keys/targets/pairs")
+  retry_command "keys" "http --ignore-stdin --check-status GET ${keyserver}/api/v1/root/${id}"
+  keys=$(http --ignore-stdin --check-status GET "${keyserver}/api/v1/root/${id}/keys/targets/pairs")
   echo ${keys} | jq '.[0] | {keytype, keyval: {public: .keyval.public}}'   > "${SERVER_DIR}/targets.pub"
   echo ${keys} | jq '.[0] | {keytype, keyval: {private: .keyval.private}}' > "${SERVER_DIR}/targets.sec"
 
-  retry_command "root.json" "http --ignore-stdin --check-status -d \
+  retry_command "root.json" "http --ignore-stdin --check-status -d GET \
     ${reposerver}/api/v1/user_repo/root.json \"${namespace}\"" && \
-    http --ignore-stdin --check-status -d -o "${SERVER_DIR}/root.json" \
+    http --ignore-stdin --check-status -d -o "${SERVER_DIR}/root.json" GET \
     ${reposerver}/api/v1/user_repo/root.json "${namespace}"
 
   echo "http://tuf-reposerver.${DNS_NAME}" > "${SERVER_DIR}/tufrepo.url"

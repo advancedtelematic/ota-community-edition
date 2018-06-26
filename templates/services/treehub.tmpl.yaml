@@ -74,7 +74,6 @@ spec:
         volumeMounts:
         - name: treehub-claim
           mountPath: /treehub-objects
-          subPath: treehub-objects
       {{- end}}
   volumeClaimTemplates:
   - metadata:

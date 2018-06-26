@@ -264,8 +264,20 @@ start_infra() {
 }
 
 start_services() {
+  configure_db_encryption
   apply_template templates/services
   get_credentials
+}
+
+configure_db_encryption() {
+  ${KUBECTL} get secret "tuf-keyserver-encryption" &>/dev/null && return 0
+
+  local salt=$(openssl rand -base64 8)
+  local key=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w64 | head -n1)
+
+  ${KUBECTL} create secret generic "tuf-keyserver-encryption" \
+    --from-literal="DB_ENCRYPTION_SALT=${salt}" \
+    --from-literal="DB_ENCRYPTION_PASSWORD=${key}"
 }
 
 get_credentials() {
@@ -284,12 +296,14 @@ get_credentials() {
   local id
   local keys
 
+  pod=$(wait_for_pods director-daemon)
+  pod=$(wait_for_pods tuf-keyserver-daemon)
   retry_command "director" "[[ true = \$(http --print=b GET ${director}/health \
     | jq --exit-status '.status == \"OK\"') ]]"
   retry_command "keyserver" "[[ true = \$(http --print=b GET ${keyserver}/health \
     | jq --exit-status '.status == \"OK\"') ]]"
   retry_command "reposerver" "[[ true = \$(http --print=b GET ${reposerver}/health/dependencies \
-    | jq --exit-status '.[].status == \"up\"') ]]"
+    | jq --exit-status '.status == \"OK\"') ]]"
 
   id=$(http --ignore-stdin --check-status --print=b POST "${reposerver}/api/v1/user_repo" "${namespace}" | jq --raw-output .)
   http --ignore-stdin --check-status POST "${director}/api/v1/admin/repo" "${namespace}"

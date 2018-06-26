@@ -10,8 +10,10 @@ data:
   DB_USER: {{ .tuf_keyserver_daemon_db_user }}
   JAVA_OPTS: {{ .tuf_keyserver_java_opts }}
   REPORT_METRICS: "false"
+{{ if contains .tuf_keyserver_daemon_docker_image ":0.3.0" }}
   TUF_VAULT_HOST: tuf-vault
   TUF_VAULT_PORT: '80'
+{{ end }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -45,8 +47,13 @@ spec:
             name: tuf-keyserver-daemon-config
         - secretRef:
             name: tuf-keyserver-daemon-secret
+{{ if contains .tuf_keyserver_daemon_docker_image ":0.3.0" }}
         - secretRef:
             name: tuf-tokens
+{{ else }}
+        - secretRef:
+            name: tuf-keyserver-encryption
+{{ end }}
         ports:
         - containerPort: 9001
         resources:

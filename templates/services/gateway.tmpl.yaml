@@ -88,9 +88,6 @@ spec:
       - name: nginx
         image: {{ .nginx_docker_image }}
         command: ["nginx-debug", "-g", "daemon off;"]
-        envFrom:
-        - secretRef:
-            name: gateway-tokens
         ports:
         - containerPort: 80
         - containerPort: 8443

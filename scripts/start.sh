@@ -177,7 +177,7 @@ create_configs() {
     ${KUBECTL} create configmap bootstrap-rules --from-file config/vaults/bootstrap-rules.json
   }
 
-  declare -a policies=(tuf crypt gateway)
+  declare -a policies=(tuf crypt)
   for policy in "${policies[@]}"; do
     ${KUBECTL} get configmap "${policy}-policy" &>/dev/null || {
       ${KUBECTL} create configmap --from-file "config/vaults/${policy}-policy.hcl" "${policy}-policy"

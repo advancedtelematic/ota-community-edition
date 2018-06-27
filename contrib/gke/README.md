@@ -36,7 +36,7 @@ Create the k8s cluster with:
   ./contrib/gke/make SERVER_NAME="TODO" DNS_NAME="TODO" new-server
   ./contrib/gke/make start-infra
   ./contrib/gke/make VAULTS="tuf-vault" start-vaults
-  ./contrib/gke/make start-services
+  ./contrib/gke/make SERVER_NAME="TODO" DNS_NAME="TODO" start-services
 ~~~
 
 ## Cleaning Up

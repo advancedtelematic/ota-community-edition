@@ -89,7 +89,8 @@ However, OTA Community Edition supports only [**provisioning with device credent
 
 You must supply your yocto build with the credentials.zip, and specify that you want to provision with device credentials. Add the following lines to the `local.conf` of your Yocto build:
 
-    SOTA_CLIENT_PROV = "aktualizr-implicit-prov"
+    SOTA_CLIENT_PROV = "aktualizr-device-prov"
+    SOTA_DEPLOY_CREDENTIALS = "0"
     SOTA_PACKED_CREDENTIALS = "/path/to/ota.ce/generated/credentials.zip"
 
 Note that, if your build machine is different from the machine where minikube is running, you'll need to forward ports on the minikube machine and modify the build machine's hosts file as described above.

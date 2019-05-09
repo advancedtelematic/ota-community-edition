@@ -1,34 +1,24 @@
-KUBE_VM ?= virtualbox
-KUBE_CPU ?= 2
-KUBE_MEM ?= 8192
-
-.PHONY: help start clean new-client new-server start-all start-ingress \
-  start-infra start-vaults start-services print-hosts
+.PHONY: help pull_images start_all start_weave start_ingress start_infra print_hosts \
+  start_monitoring start_vaults start_services compress_logs delete_services delete_infra \
+	compress_logs restart_all restart_vaults
 .DEFAULT_GOAL := help
 
-help: ## Print this message and exit.
+help: ## Print this message and exit
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%20s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-start: cmd-minikube ## Start minikube and all OTA+ services.
-	@minikube ip 2>/dev/null || minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
-	@scripts/start.sh start-all
-
-clean: cmd-minikube ## Delete minikube and all service data.
-	@minikube delete >/dev/null || true
-	@rm -rf generated/
-
-new-client: %: start_%       ## Create a new client with a given name.
-new-server: %: start_%       ## Create a new set of server credentials.
-start-all: %: start_%        ## Start all infra and OTA+ services.
-start-ingress: %: start_%    ## Install Nginx Ingress Controller
-start-infra: %: start_%      ## Create infrastructure configs and apply to the cluster.
-start-vaults: %: start_%     ## Start all vault instances.
-start-services: %: start_%   ## Start the OTA+ services.
-print-hosts: %: start_%      ## Print the service mappings for /etc/hosts
-templates: %: start_%        ## Generate all the k8s files
+start_all: %: start_%                 ## Apply infra and service configs to a new cluster.
+start_weave: %: start_%               ## Install Weave Net.
+start_ingress: %: start_%             ## Install Nginx Ingress Controller
+start_infra: %: start_%               ## Create infrastructure configs and apply to the cluster.
+start_services: %: start_%            ## Start the OTA+ services.
+print_hosts: %: start_%               ## Print the service mappings for /etc/hosts
+new_client: %: start_%                ## Provision new client via SSH
+new_local_client: %: start_%          ## Provision new local client
+delete_infra: %: start_%              ## helm delete the infra charts.
+delete_services: %: start_%           ## helm delete the OTA+ services.
 
 start_%: # Pass the target as an argument to start.sh
 	@scripts/start.sh $*
 
-cmd-%: # Check that a command exists.
-	@: $(if $$(command -v ${*} 2>/dev/null),,$(error Please install "${*}" first))
+docker_start_%: ## Start a local docker container.
+	@scripts/docker_start.sh $*

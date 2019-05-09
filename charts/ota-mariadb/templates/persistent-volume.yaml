@@ -1,0 +1,21 @@
+{{- if .Values.persistence.createVolumes }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ template "ota-mariadb.fullname" . }}
+  labels:
+    app: {{ template "ota-mariadb.name" . }}
+    volume: {{ template "ota-mariadb.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  capacity:
+    storage: {{ .Values.persistence.size | quote }}
+  accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: {{ .Values.persistence.hostPath | quote }}
+{{- end}}

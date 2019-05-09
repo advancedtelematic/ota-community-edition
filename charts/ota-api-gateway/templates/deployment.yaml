@@ -1,0 +1,53 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "ota-api-gateway.fullname" . }}
+  labels:
+    app: {{ template "ota-api-gateway.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-api-gateway.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      {{- if .Values.privateRegistry }}
+      imagePullSecrets:
+      - name: {{ .Values.registryPullSecret }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: jwt-signing-key
+                key: jwt-signing-key
+          - name: K8S_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          envFrom:
+          - configMapRef:
+              name: {{ template "ota-api-gateway.fullname" . }}
+          ports:
+            - containerPort: {{ .Values.service.apiGatewayInternalPort }}
+              name: api-gateway
+          livenessProbe:
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            httpGet:
+              path: /health
+              port: {{ .Values.service.apiGatewayInternalPort }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}

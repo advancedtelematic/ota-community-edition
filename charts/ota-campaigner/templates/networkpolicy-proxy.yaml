@@ -1,0 +1,16 @@
+{{- if .Values.proxy.allow }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ template "ota-campaigner.fullname" . }}-allow-proxy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ template "ota-campaigner.name" . }}
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 100.0.0.0/8
+    ports:
+    - port: {{ .Values.configMap.BIND_PORT }}
+{{- end }}

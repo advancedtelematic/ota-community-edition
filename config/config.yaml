@@ -1,7 +1,0 @@
----
-env_prefix: ce
-ingress_acl_whitelist: 0.0.0.0/0
-ingress_dns_name: ota.local
-ingress_proxy_size: 300m
-storage_class_name: standard
-gke_nodepool: false

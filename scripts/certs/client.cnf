@@ -4,7 +4,7 @@ distinguished_name = dn
 req_extensions = ext
 
 [dn]
-CN=$ENV::DEVICE_UUID
+CN=local-env::DEVICE_UUID
 
 [ext]
 keyUsage=critical, digitalSignature

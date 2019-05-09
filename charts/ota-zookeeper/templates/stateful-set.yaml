@@ -1,0 +1,77 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: {{ template "ota-zookeeper.fullname" . }}
+  labels:
+    app: {{ template "ota-zookeeper.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  serviceName: {{ template "ota-zookeeper.fullname" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "ota-zookeeper.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-zookeeper.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ template "ota-zookeeper.fullname" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ template "ota-zookeeper.fullname" . }}
+        command: ['sh', '-c', 'zkGenConfig.sh && exec zkServer.sh start-foreground']
+        livenessProbe:
+          exec:
+            command: ["zkOk.sh"]
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        ports:
+        - containerPort: {{ .Values.service.client.internalPort }}
+          name: client
+        - containerPort: {{ .Values.service.peer.internalPort }}
+          name: peer
+        - containerPort: {{ .Values.service.election.internalPort }}
+          name: election
+        readinessProbe:
+          exec:
+            command: ["zkOk.sh"]
+          failureThreshold: 3
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - name: zookeeper-data
+          mountPath: /var/lib/zookeeper
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: zookeeper-data
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ template "ota-zookeeper.fullname" . }}
+      {{- else if .Values.persistence.azureDisk }}
+        azureDisk:
+          kind: Managed
+          diskName: zookeeper-disk
+          diskURI: {{ .Values.persistence.azureDiskUri }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}

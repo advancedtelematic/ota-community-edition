@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-mariadb-bootstrap.fullname" . }}
+  labels:
+    app: {{ template "ota-mariadb-bootstrap.name" . }}
+    chart: {{ template "ota-mariadb-bootstrap.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  MYSQL_HOST: {{ .Values.configMap.MYSQL_HOST | quote }}
+  MYSQL_PORT: {{ .Values.configMap.MYSQL_PORT | quote }}
+  MYSQL_USER: {{ .Values.configMap.MYSQL_USER | quote }}

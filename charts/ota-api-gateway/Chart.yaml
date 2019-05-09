@@ -1,0 +1,4 @@
+apiVersion: v1
+description: ota-api-gateway chart
+name: ota-api-gateway
+version: 0.1.20

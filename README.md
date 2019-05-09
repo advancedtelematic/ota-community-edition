@@ -29,9 +29,19 @@ current repository:
 * [minikube](https://github.com/kubernetes/minikube)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (version >= 1.9)
 * [kops](https://github.com/kubernetes/kops) (version >= 1.9)
+* [helm](https://helm.sh/)
 * [jq](https://stedolan.github.io/jq/)
 * [httpie](https://httpie.org/)
 * [VirtualBox](https://www.virtualbox.org/)
+* [Aktualizr](https://github.com/advancedtelematic/aktualizr/releases/)
+* [Garage Deploy](https://github.com/advancedtelematic/aktualizr/releases/)
+
+This should install all the requirements on MacOS:
+```bash
+brew update
+brew cask install minikube
+brew install kubernetes-helm kops httpie jq yq
+```
 
 ## Usage
 
@@ -41,23 +51,31 @@ It is self-documenting, run `make` to see a list of the available commands.
 
 ### Getting started
 
-1. **Start all services**
+1. **Start minikube**
 
-   Run `make start` to start all services inside minikube. See [troubleshooting](#troubleshooting) if it fails at first.
+   `minikube start --cpus 4 --memory 8096`
 
-2. **Update your hosts file**
+2. **Define domain**
 
-   OTA CE running in kubernetes has a single ingress point; it routes traffic to the appropriate pod/microservice based on the host name. That means that you need to either set up a DNS server pointing to the right place, or just edit your hosts file. We suggest going with the hosts file initially. Run `make print-hosts` to print a list of entries to add to your `/etc/hosts` file.
+   `export DOMAIN=ota.local`
 
-3. **Visit the Admin User Interface**
+3. **Start all services**
+
+   Run `make start_all` to start all services inside minikube. See [troubleshooting](#troubleshooting) if it fails at first.
+
+4. **Update your hosts file**
+
+   OTA CE running in kubernetes has a single ingress point; it routes traffic to the appropriate pod/microservice based on the host name. That means that you need to either set up a DNS server pointing to the right place, or just edit your hosts file. We suggest going with the hosts file initially. Run `make print_hosts` to print a list of entries to add to your `/etc/hosts` file.
+
+5. **Visit the Admin User Interface**
 
    The OTA Community Edition Admin UI should now be available to view in your browser at http://app.ota.local (by default).
 
-4. (optional) **Forward ports in VirtualBox to make OTA CE accessible outside of localhost**
+6. (optional) **Forward ports in VirtualBox to make OTA CE accessible outside of localhost**
 
    Unless you're just testing on your local machine, you'll probably want to access OTA CE from somewhere else on your network. Assuming your minikube is using virtualbox as the backend (this is the default setup), you can use virtualbox to forward the relevant ports. To allow devices to connect, you'll need to forward port 30443, and to expose the Admin UI you'll need to forward port 80. You can do this from the command line:
 
-```
+```bash
 # For the clients
 vboxmanage controlvm "minikube" natpf1 "client_forwarding_rule,tcp,,30443,,30443"
 # To access the UI
@@ -66,7 +84,7 @@ vboxmanage controlvm "minikube" natpf1 "adminui_forwarding_rule,tcp,,80,,80"
 
 You will also need to modify the hosts file on any other computer that you want to use the Admin UI from. Note that the IP you give it won't be the minikube IP (normally 192.168.99.100); it will be the external IP address of the machine you are running minikube on. For example:
 
-```
+```bash
 export OTA_CE_IP=external_ip_of_ota_machine
 sudo cat <<EOF >> /etc/hosts
 ${OTA_CE_IP} app.ota.local
@@ -94,17 +112,31 @@ You must supply your yocto build with the credentials.zip, and specify that you 
 
 Note that, if your build machine is different from the machine where minikube is running, you'll need to forward ports on the minikube machine and modify the build machine's hosts file as described above.
 
-Once your build is complete and the device (virtual or real) is running, you can generate device credentials, register them, and copy them to the device with `make new-client`. You'll need to specify a device name, the IP and SSH port of the device, and the IP address of the OTA CE instance. For example, if your OTA CE machine is running at 192.168.1.99 and you've built a Raspberry Pi image that's running at 192.168.1.50, you could do the following:
+Once your build is complete and the device (virtual or real) is running, you can generate device credentials, register them, and copy them to the device with `make new_client`. You'll need to specify a device name, the IP and SSH port of the device, and the IP address of the OTA CE instance. For example, if your OTA CE machine is running at 192.168.1.99 and you've built a Raspberry Pi image that's running at 192.168.1.50, you could do the following:
 
-```
+```bash
 export DEVICE_ID=raspberrypi_1
 export DEVICE_ADDR=192.168.1.50
 export DEVICE_PORT=22
 export GATEWAY_ADDR=192.168.1.99
-make new-client
+make new_client
 ```
 
 This will also modify the hosts file on the client so it's able to connect.
+
+You can also provision locally installed `aktualizr`. Firstly, download and install `aktualizr` and `garage_deploy` from [Releases page](https://github.com/advancedtelematic/aktualizr/releases). Then you need to set location of `aktualizr`, `aktualizr-cert-provider` tools and a directory for collecting configuration files:
+
+```bash
+export CLIENT_CONFIG_BASE_DIR="/localtest"
+export AKTUALIZR_PATH="/usr/bin/aktualizr"
+export CERT_PROVIDER_PATH="/usr/bin/aktualizr-cert-provider"
+```
+
+The following command generates configuration files, keys, certificates and executes `aktualizr`:
+
+```bash
+make new_local_client
+```
 
 ## Troubleshooting
 
@@ -117,6 +149,25 @@ Try re-running `make start` if you receive any of the following errors:
 140680409176832:error:0EFFF068:configuration file routines:CRYPTO_internal:variable has no valu
 e:conf/conf_def.c:563:line 12
 error: error reading ota.ce/server.chain.pem: no such file or directory`
+
+Install `libvirt-bin` package if you get the following error on Ubuntu Linux:
+```bash
+Starting local Kubernetes cluster...
+E0702 14:20:58.188937   10881 start.go:83] Error starting host: Error creating new host: dial tcp: missing address. Retrying.
+E0702 14:20:58.203473   10881 start.go:83] Error starting host: Error creating new host: dial tcp: missing address. Retrying.
+E0702 14:20:58.224836   10881 start.go:83] Error starting host: Error creating new host: dial tcp: missing address. Retrying.
+E0702 14:20:58.224878   10881 start.go:89] Error starting host:  Error creating new host: dial tcp: missing address
+Error creating new host: dial tcp: missing address
+Error creating new host: dial tcp: missing address
+```
+
+Important note: upgrade `bash` if you get the error:
+```bash
+$ make start_all
+scripts/start.sh: line 76: declare: -A: invalid option
+declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
+make: *** [start_start_all] Error 2
+```
 
 If your device isn't connecting, verify that the virtualbox port forwarding of port 30443 is set up correctly.
 

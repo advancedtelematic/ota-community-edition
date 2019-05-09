@@ -1,0 +1,4 @@
+apiVersion: v1
+description: ota-kafka-chart
+name: ota-kafka
+version: 0.1.1

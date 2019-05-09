@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-api-gateway.fullname" . }}
+  labels:
+    app: {{ template "ota-api-gateway.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  DIRECTOR_HOST: {{ .Values.configMap.DIRECTOR_HOST | quote }}
+  DIRECTOR_PORT: {{ .Values.configMap.DIRECTOR_PORT | quote }}
+  JWT_ISS_PATTERN: {{ .Values.configMap.JWT_ISS_PATTERN | quote }}
+  TREEHUB_HOST: {{ .Values.configMap.TREEHUB_HOST | quote }}
+  TREEHUB_HOST_PUB: {{ .Values.configMap.TREEHUB_HOST_PUB | quote }}
+  TREEHUB_PORT: {{ .Values.configMap.TREEHUB_PORT | quote }}
+  TREEHUB_PORT_PUB: {{ .Values.configMap.TREEHUB_PORT_PUB | quote }}
+  TUF_REPOSERVER_HOST: {{ .Values.configMap.TUF_REPOSERVER_HOST | quote }}
+  TUF_REPOSERVER_HOST_PUB: {{ .Values.configMap.TUF_REPOSERVER_HOST_PUB | quote }}
+  TUF_REPOSERVER_PORT: {{ .Values.configMap.TUF_REPOSERVER_PORT | quote }}
+  TUF_REPOSERVER_PORT_PUB: {{ .Values.configMap.TUF_REPOSERVER_PORT_PUB | quote }}
+  NGINX_DEBUG_LEVEL: {{ .Values.configMap.NGINX_DEBUG_LEVEL | quote }}

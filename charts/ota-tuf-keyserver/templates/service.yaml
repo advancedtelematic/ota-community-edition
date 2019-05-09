@@ -1,0 +1,20 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "ota-tuf-keyserver.fullname" . }}
+  labels:
+    app: {{ template "ota-tuf-keyserver.name" . }}
+    chart: {{ template "ota-tuf-keyserver.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "ota-tuf-keyserver.name" . }}
+    release: {{ .Release.Name }}

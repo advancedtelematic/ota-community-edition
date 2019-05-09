@@ -1,0 +1,24 @@
+{{- if .Values.configMap.app.enabled -}}
+{{- if .Values.configMap.atsgarage.enabled -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-app.fullname" . }}-atsgarage
+  labels:
+    app: {{ template "ota-app.name" . }}
+    chart: {{ template "ota-app.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  AUTH0_CALLBACK_URL: {{ .Values.configMap.atsgarage.AUTH0_CALLBACK_URL | quote }}
+  AUTH0_DB_CONNECTION: {{ .Values.configMap.atsgarage.AUTH0_DB_CONNECTION | quote }}
+  AUTH0_SIGN_UP_URL: {{ .Values.configMap.atsgarage.AUTH0_SIGN_UP_URL | quote }}
+  AUTH0_TOKEN_AUDIENCE: {{ .Values.configMap.atsgarage.AUTH0_TOKEN_AUDIENCE | quote }}
+  OIDC_CONFIG_URL: {{ .Values.configMap.atsgarage.OIDC_CONFIG_URL | quote }}
+  OIDC_ISSUER: {{ .Values.configMap.atsgarage.OIDC_ISSUER | quote }}
+  OIDC_LOGIN_ACTION: "com.advancedtelematic.auth.garage.LoginAction"
+  OIDC_LOGOUT_ACTION: "com.advancedtelematic.auth.garage.LogoutAction"
+  OIDC_NS_PROVIDER: "com.advancedtelematic.auth.oidc.NamespaceFromUserProfile
+{{- end -}}
+{{- end -}}

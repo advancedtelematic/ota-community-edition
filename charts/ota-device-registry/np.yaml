@@ -1,0 +1,15 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: ota-device-registry-1-sit-allow-proxy
+spec:
+  podSelector:
+    matchLabels:
+      app: ota-device-registry
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 100.0.0.0/8
+    ports:
+    - port: 80
+

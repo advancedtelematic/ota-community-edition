@@ -1,0 +1,43 @@
+replicaCount: 1
+
+initImage:
+  repository: busybox
+  tag: 1.28.0
+  pullPolicy: IfNotPresent
+
+image:
+  repository: confluentinc/cp-kafka
+  tag: 4.0.0
+  pullPolicy: IfNotPresent
+
+configMap:
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+  KAFKA_ZOOKEEPER_CONNECT: "ota-zookeeper:2181"
+  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
+  KAFKA_HOST: ota-kafka:9092
+  KAFKA_TOPIC_SUFFIX: lt
+  ZOOKEEPER_HOST: "ota-zookeeper"
+
+service:
+  name: kafka
+  type: ClusterIP
+  externalPort: 9092
+  internalPort: 9092
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 1024Mi
+
+persistence:
+  enabled: true
+  createVolumes: true
+  hostPath: "/data/kafka"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  awsEnabled: false
+  awsStorageClassName: example

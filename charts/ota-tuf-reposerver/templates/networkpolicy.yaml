@@ -1,0 +1,16 @@
+{{- if and (eq .Values.service.publicTufReposerverType "LoadBalancer") .Values.deployPublic }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ template "ota-tuf-reposerver.fullname" . }}-allow-app-traffic
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ template "ota-tuf-reposerver.name" . }}
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - port: {{ .Values.configMap.BIND_PORT }}
+{{- end }}

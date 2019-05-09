@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-app.fullname" . }}
+  labels:
+    app: {{ template "ota-app.name" . }}
+    chart: {{ template "ota-app.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  API_GATEWAY_HOST: {{ .Values.configMap.API_GATEWAY_HOST | quote }}
+  API_GATEWAY_PORT: {{ .Values.configMap.API_GATEWAY_PORT | quote }}
+  API_GATEWAY_SCHEME: {{ .Values.configMap.API_GATEWAY_SCHEME | quote }}
+  AUTH0_DOMAIN: {{ .Values.configMap.AUTH0_DOMAIN | quote }}
+  {{- if .Values.configMap.atsgarage.enabled }}
+  {{- else }}
+  OIDC_LOGIN_ACTION: "com.advancedtelematic.auth.garage.NoLoginAction"
+  OIDC_LOGOUT_ACTION: "com.advancedtelematic.auth.garage.NoLogoutAction"
+  OIDC_NS_PROVIDER: "com.advancedtelematic.auth.oidc.ConfiguredNamespace"
+  PLAY_HTTP_SESSION_SECURE: "false"
+  {{- end }}
+  AUDITOR_HOST: {{ .Values.configMap.AUDITOR_HOST | quote }}
+  AUDITOR_PORT: {{ .Values.configMap.AUDITOR_PORT | quote }}
+  AUTH_PLUS_HOST: {{ .Values.configMap.AUTH_PLUS_HOST | quote }}
+  AUTH_PLUS_PORT: {{ .Values.configMap.AUTH_PLUS_PORT | quote }}
+  AUTH_PLUS_SCHEME: {{ .Values.configMap.AUTH_PLUS_SCHEME | quote }}
+  CAMPAIGNER_HOST: {{ .Values.configMap.CAMPAIGNER_HOST | quote }}
+  CAMPAIGNER_PORT: {{ .Values.configMap.CAMPAIGNER_PORT | quote }}
+  CRYPT_HOST: {{ .Values.configMap.CRYPT_HOST | quote }}
+  CRYPT_PORT: {{ .Values.configMap.CRYPT_PORT | quote }}
+  DEVICE_GATEWAY_PORT: {{ .Values.configMap.DEVICE_GATEWAY_PORT | quote }}
+  DEVICE_REGISTRY_HOST: {{ .Values.configMap.DEVICE_REGISTRY_HOST | quote }}
+  DEVICE_REGISTRY_PORT: {{ .Values.configMap.DEVICE_REGISTRY_PORT | quote }}
+  DIRECTOR_HOST: {{ .Values.configMap.DIRECTOR_HOST | quote }}
+  DIRECTOR_PORT: {{ .Values.configMap.DIRECTOR_PORT | quote }}
+  ENV_PREFIX: {{ .Values.configMap.ENV_PREFIX | quote }}
+  JAVA_OPTS: {{ .Values.configMap.JAVA_OPTS | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.KAFKA_BOOTSTRAP_SERVERS | quote }}
+  KAFKA_HOST: {{ .Values.configMap.KAFKA_HOST | quote }}
+  KAFKA_TOPIC_SUFFIX: {{ .Values.configMap.KAFKA_TOPIC_SUFFIX | quote }}
+  LOG_APPENDER: {{ .Values.configMap.LOG_APPENDER | quote }}
+  REPORT_METRICS: {{ .Values.configMap.REPORT_METRICS | quote }}
+  SOTA_CORE_HOST: {{ .Values.configMap.SOTA_CORE_HOST | quote }}
+  SOTA_CORE_PORT: {{ .Values.configMap.SOTA_CORE_PORT | quote }}
+  TOGGLE_ATS_GARAGE_THEME: {{ .Values.configMap.TOGGLE_ATS_GARAGE_THEME | quote }}
+  TOGGLE_AUTO_FEATURE_ACTIVATION: {{ .Values.configMap.TOGGLE_AUTO_FEATURE_ACTIVATION | quote }}
+  TOGGLE_CREDENTIALS_DOWNLOAD: {{ .Values.configMap.TOGGLE_CREDENTIALS_DOWNLOAD | quote }}
+  TOGGLE_USER_PROFILE_MENU: {{ .Values.configMap.TOGGLE_USER_PROFILE_MENU | quote }}
+  TREEHUB_HOST_PUB: {{ .Values.configMap.TREEHUB_HOST_PUB | quote }}
+  TREEHUB_PORT_PUB: {{ .Values.configMap.TREEHUB_PORT_PUB | quote }}
+  TREEHUB_SCHEME_PUB: {{ .Values.configMap.TREEHUB_SCHEME_PUB | quote }}
+  TUF_KEYSERVER_HOST: {{ .Values.configMap.TUF_KEYSERVER_HOST | quote }}
+  TUF_KEYSERVER_PORT: {{ .Values.configMap.TUF_KEYSERVER_PORT | quote }}
+  TUF_REPOSERVER_HOST: {{ .Values.configMap.TUF_REPOSERVER_HOST | quote }}
+  TUF_REPOSERVER_HOST_PUB: {{ .Values.configMap.TUF_REPOSERVER_HOST_PUB | quote }}
+  TUF_REPOSERVER_PORT: {{ .Values.configMap.TUF_REPOSERVER_PORT | quote }}
+  TUF_REPOSERVER_PORT_PUB: {{ .Values.configMap.TUF_REPOSERVER_PORT_PUB | quote }}
+  TUF_REPOSERVER_SCHEME_PUB: {{ .Values.configMap.TUF_REPOSERVER_SCHEME_PUB | quote }}
+  USER_PROFILE_HOST: {{ .Values.configMap.USER_PROFILE_HOST | quote }}
+  USER_PROFILE_PORT: {{ .Values.configMap.USER_PROFILE_PORT | quote }}
+  WS_HOST: {{ .Values.configMap.WS_HOST | quote }}
+  WS_PORT: {{ .Values.configMap.WS_PORT | quote }}
+  WS_SCHEME: {{ .Values.configMap.WS_SCHEME | quote }}
+  rootLevel: {{ .Values.configMap.rootLevel | quote }}

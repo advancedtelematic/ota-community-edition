@@ -1,0 +1,4 @@
+apiVersion: v1
+description: ota-zookeeper chart
+name: ota-zookeeper
+version: 0.1.1

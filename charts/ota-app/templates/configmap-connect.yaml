@@ -1,0 +1,19 @@
+{{- if .Values.configMap.connect.enabled -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-app.fullname" . }}-connect
+  labels:
+    app: {{ template "ota-app.name" . }}
+    chart: {{ template "ota-app.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  AUTH0_CALLBACK_URL: {{ .Values.configMap.connect.AUTH0_CALLBACK_URL | quote }}
+  OIDC_CONFIG_URL: {{ .Values.configMap.connect.OIDC_CONFIG_URL | quote }}
+  OIDC_ISSUER: {{ .Values.configMap.connect.OIDC_ISSUER | quote }}
+  OIDC_LOGIN_ACTION: "com.advancedtelematic.auth.oidc.LoginAction"
+  OIDC_LOGOUT_ACTION: "com.advancedtelematic.auth.oidc.LogoutAction"
+  OIDC_NS_PROVIDER: "com.advancedtelematic.auth.oidc.NamespaceFromUserProfile
+{{- end -}}

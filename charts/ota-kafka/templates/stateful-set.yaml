@@ -1,0 +1,96 @@
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: {{ template "ota-kafka.fullname" . }}
+  labels:
+    app: {{ template "ota-kafka.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  serviceName: kafka
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "ota-kafka.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-kafka.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+      - name: kafka-init
+        image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
+        imagePullPolicy: {{ .Values.initImage.pullPolicy }}
+        command: ["sh", "-c", "until nc -z {{ .Values.configMap.ZOOKEEPER_HOST }} 2181; do sleep 2s; done"]
+      containers:
+      - name: {{ template "ota-kafka.name" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ template "ota-kafka.fullname" . }}
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        command:
+        - sh
+        - -c
+        - |
+          rm -rf /opt/kafka/data/lost+found && \
+          unset KAFKA_PORT && \
+          export KAFKA_ADVERTISED_HOST_NAME=${POD_IP} && \
+          export KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${POD_IP}:9092 && \
+          export KAFKA_BROKER_ID=${HOSTNAME##*-} && \
+          export KAFKA_LOG_DIRS=/opt/kafka/data && \
+          /etc/confluent/docker/run
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: {{ .Values.service.internalPort }}
+          timeoutSeconds: 5
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        readinessProbe:
+          exec:
+            command:
+            - kafka-topics
+            - --zookeeper
+            - {{ .Values.configMap.KAFKA_ZOOKEEPER_CONNECT }}
+            - --list
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - name: kafka-data
+          mountPath: /opt/kafka/data
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: kafka-data
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ template "ota-kafka.fullname" . }}
+      {{- else if .Values.persistence.azureDisk }}
+        azureDisk:
+          kind: Managed
+          diskName: kafka-disk
+          diskURI: {{ .Values.persistence.azureDiskUri }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}

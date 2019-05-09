@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "ota-web-events.fullname" . }}
+  labels:
+    app: {{ template "ota-web-events.name" . }}
+    chart: {{ template "ota-web-events.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "ota-web-events.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-web-events.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        {{- if .Values.prometheus.scrape }}
+        prometheus.io/scrape: "true"
+        {{- end }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+          {{- if .Values.withAuthPlus }}
+          - name: AUTH_PLUS_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: auth-plus-client-web-events
+                key: client_id
+          - name: AUTH_PLUS_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: auth-plus-client-web-events
+                key: client_secret
+          {{- end }}
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: jwt-signing-key
+                key: jwt-signing-key
+          envFrom:
+          - configMapRef:
+              name: {{ template "ota-web-events.fullname" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - containerPort: {{ .Values.configMap.BIND_PORT }}
+            name: http
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          livenessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            httpGet:
+              port: {{ .Values.configMap.BIND_PORT }}
+              path: "/health"
+        {{- if .Values.privateRegistry }}
+        imagePullSecrets:
+        - name: {{ .Values.registryPullSecret }}
+        {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

@@ -1,0 +1,54 @@
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "ota-campaigner.fullname" . }}
+  labels:
+    app: {{ template "ota-campaigner.name" . }}
+    chart: {{ template "ota-campaigner.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-campaigner.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        {{- if .Values.prometheus.scrape }}
+        prometheus.io/scrape: "true"
+        {{- end }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          envFrom:
+          - configMapRef:
+              name: {{ template "ota-campaigner.fullname" . }}
+          - secretRef:
+              name: {{ template "ota-campaigner.fullname" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.configMap.BIND_PORT }}
+              name: http
+          livenessProbe:
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            httpGet:
+              path: "/health"
+              port: {{ .Values.configMap.BIND_PORT }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

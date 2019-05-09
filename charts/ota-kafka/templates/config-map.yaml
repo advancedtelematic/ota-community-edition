@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-kafka.fullname" . }}
+  labels:
+    app: {{ template "ota-kafka.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: {{ .Values.configMap.KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR | quote }}
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: {{ .Values.configMap.KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR | quote }}
+  KAFKA_ZOOKEEPER_CONNECT: {{ .Values.configMap.KAFKA_ZOOKEEPER_CONNECT | quote }}

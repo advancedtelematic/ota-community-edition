@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-zookeeper.fullname" . }}
+  labels:
+    app: {{ template "ota-zookeeper.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  ZK_REPLICAS: {{ .Values.configMap.ZK_REPLICAS | quote }}
+  ZK_HEAP_SIZE: {{ .Values.configMap.ZK_HEAP_SIZE | quote }}
+  ZK_TICK_TIME: {{ .Values.configMap.ZK_TICK_TIME | quote }}
+  ZK_INIT_LIMIT: {{ .Values.configMap.ZK_INIT_LIMIT | quote }}
+  ZK_SYNC_LIMIT: {{ .Values.configMap.ZK_SYNC_LIMIT | quote }}
+  ZK_MAX_CLIENT_CNXNS: {{ .Values.configMap.ZK_MAX_CLIENT_CNXNS | quote }}
+  ZK_SNAP_RETAIN_COUNT: {{ .Values.configMap.ZK_SNAP_RETAIN_COUNT | quote }}
+  ZK_PURGE_INTERVAL: {{ .Values.configMap.ZK_PURGE_INTERVAL | quote }}
+  ZK_LOG_LEVEL: {{ .Values.configMap.ZK_LOG_LEVEL | quote }}
+  ZK_CLIENT_PORT: {{ .Values.configMap.ZK_CLIENT_PORT | quote }}
+  ZK_SERVER_PORT: {{ .Values.configMap.ZK_SERVER_PORT | quote }}
+  ZK_ELECTION_PORT: {{ .Values.configMap.ZK_ELECTION_PORT | quote }}

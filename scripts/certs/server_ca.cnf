@@ -10,3 +10,8 @@ CN = ota-server-CA
 basicConstraints=CA:TRUE
 keyUsage = keyCertSign
 extendedKeyUsage = critical, serverAuth
+
+[v3_ca]
+basicConstraints = CA:true
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid

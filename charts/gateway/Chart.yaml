@@ -1,0 +1,4 @@
+apiVersion: v1
+description: nginx as replacement for dev-gw
+name: gateway
+version: 0.1.0

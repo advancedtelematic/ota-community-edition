@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-config
+data:
+  gateway.conf: |-
+    server {
+      error_log  /var/log/nginx/error.log info;
+      listen       8443 ssl;
+      server_name ota.ce;
+      ssl_certificate     /etc/ssl/gateway/server.chain.pem;
+      ssl_certificate_key /etc/ssl/gateway/server.key;
+      ssl_verify_client on;
+      ssl_verify_depth 10;
+      ssl_client_certificate /etc/ssl/gateway/ca.crt;
+      if ($ssl_client_s_dn ~ "CN=(.*)$") {
+        set $deviceUuid $1;
+      }
+      if ($ssl_client_s_dn !~ "CN=(.*)$") {
+        set $deviceUuid $ssl_client_s_dn;
+      }
+      set $deviceNamespace "default";
+      location /treehub/ {
+        rewrite ^/treehub/(.*)$ /api/v2/$1 break;
+        proxy_set_header x-ats-device-uuid $deviceUuid;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://ota-treehub-internal;
+      }
+      location /director/ {
+        rewrite ^/director/(.*)$ /api/v1/device/${deviceUuid}/$1 break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://ota-director;
+      }
+      location /repo/ {
+        rewrite ^/repo/(.*)$ /api/v1/user_repo/$1 break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://ota-tuf-reposerver;
+      }
+      location /core/system_info {
+        rewrite ^/core/(.*)$ /api/v1/mydevice/$deviceUuid/$1 break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://ota-device-registry;
+      }
+      location /core/installed {
+        rewrite ^/core/(.*)$ /api/v1/mydevice/$deviceUuid/packages break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://ota-device-registry;
+      }
+    }
+  upstreams.conf: |-
+    upstream ota-treehub-internal {
+      server ota-treehub-internal:80;
+    }
+    upstream ota-director {
+      server ota-director:80;
+    }
+    upstream ota-tuf-reposerver {
+      server ota-tuf-reposerver:80;
+    }

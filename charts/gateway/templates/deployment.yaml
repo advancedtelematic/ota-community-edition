@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+spec:
+  selector:
+    matchLabels:
+      app: gateway
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:{{ .Values.image.tag }}
+          command: ["nginx-debug", "-g", "daemon off;"]
+          ports:
+            - containerPort: 80
+            - containerPort: 8443
+          volumeMounts:
+            - name: gateway-config
+              mountPath: /etc/nginx/conf.d/
+            - name: gateway-tls
+              mountPath: /etc/ssl/gateway/
+              readOnly: true
+      volumes:
+        - name: gateway-config
+          configMap:
+            name: gateway-config
+        - name: gateway-tls
+          secret:
+            secretName: gateway-tls

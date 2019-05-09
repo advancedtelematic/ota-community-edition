@@ -1,0 +1,84 @@
+{{- if .Values.configMap.connect.enabled -}}
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "ota-app.fullname" . }}-connect
+  labels:
+    app: {{ template "ota-app.name" . }}
+    chart: {{ template "ota-app.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "ota-app.name" . }}-connect
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-app.name" . }}-connect
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-connect
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          env:
+          {{- if .Values.withAuthPlus }}
+          - name: AUTHPLUS_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: auth-plus-client-app
+                key: client_id
+          - name: AUTHPLUS_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: auth-plus-client-app
+                key: client_secret
+          {{- end}}
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: jwt-signing-key
+                key: jwt-signing-key
+          envFrom:
+          - configMapRef:
+              name: {{ template "ota-app.fullname" . }}
+          - secretRef:
+              name: {{ template "ota-app.fullname" . }}
+          - configMapRef:
+              name: {{ template "ota-app.fullname" . }}-connect
+          - secretRef:
+              name: {{ template "ota-app.fullname" . }}-connect
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - containerPort: {{ .Values.service.internalPort }}
+          args:
+          - "-Dhttp.port={{ .Values.service.internalPort }}"
+          - "-Dwebsrc.atsgarage={{ .Values.configMap.WS_SCHEME }}://{{ .Values.configMap.WS_HOST }}:{{ .Values.configMap.WS_PORT }}"
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          livenessProbe:
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            httpGet:
+              port: {{ .Values.service.internalPort }}
+              path: "/health"
+        {{- if .Values.privateRegistry }}
+        imagePullSecrets:
+        - name: {{ .Values.registryPullSecret }}
+        {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+{{- end }}

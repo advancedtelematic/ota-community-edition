@@ -4,9 +4,9 @@ distinguished_name = dn
 req_extensions = ext
 
 [dn]
-CN=ota-gateway
+CN=ota.ce
 
 [ext]
 keyUsage=critical, digitalSignature, keyEncipherment, keyAgreement
 extendedKeyUsage=critical, serverAuth
-subjectAltName=DNS:$ENV::SERVER_NAME
+

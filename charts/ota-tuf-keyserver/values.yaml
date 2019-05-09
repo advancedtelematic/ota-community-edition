@@ -1,0 +1,42 @@
+replicaCount: 1
+image:
+  repository: advancedtelematic/tuf-keyserver
+  tag: latest
+  pullPolicy: Always
+
+configMap:
+  BIND_PORT: '9001'
+  BIND_HOST: '0.0.0.0'
+  DB_MIGRATE: 'true'
+  DB_URL: jdbc:mariadb://ota-mariadb:3306/tuf_keyserver
+  DB_USER: tuf_keyserver
+  JAVA_OPTS: -XshowSettings:vm -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2
+  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
+  KAFKA_HOST: ota-kafka:9092
+  KAFKA_TOPIC_SUFFIX: ota
+  LOG_APPENDER: async_json
+  REPORT_METRICS: "false"
+  ATS_HTTP_TRACING: "true"
+  ZIPKIN_URI: "http://ota-zipkin:9411"
+
+secret:
+  DB_PASSWORD: tuf_keyserver
+  DB_ENCRYPTION_PASSWORD: h3pJZd9PvB47lvMcpnp0SS92jNYoB050Ke4dN1wYB4N36w5RjYZfcWj1Pg7Hbths
+  DB_ENCRYPTION_SALT: EoKxIawx0Y4=
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  hosts:
+    - tuf-keyserver.ota.local
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  tls: []
+
+resources:
+  requests:
+    cpu: 80m
+    memory: 300Mi

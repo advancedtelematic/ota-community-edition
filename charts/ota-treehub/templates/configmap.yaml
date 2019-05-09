@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-treehub.fullname" . }}
+  labels:
+    app: {{ template "ota-treehub.name" . }}
+    chart: {{ template "ota-treehub.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  AKKA_HTTP_MAX_CONTENT_LENGTH: {{ .Values.configMap.AKKA_HTTP_MAX_CONTENT_LENGTH | quote }}
+  AKKA_HTTP_REQUEST_TIMEOUT: {{ .Values.configMap.AKKA_HTTP_REQUEST_TIMEOUT | quote }}
+  AKKA_HTTP_IDLE_TIMEOUT: {{ .Values.configMap.AKKA_HTTP_IDLE_TIMEOUT | quote }}
+  AUTH_PROTOCOL: {{ .Values.configMap.AUTH_PROTOCOL | quote }}
+  AUTH_VERIFICATION: {{ .Values.configMap.AUTH_VERIFICATION | quote }}
+  AUTH_PLUS_HOST: {{ .Values.configMap.AUTH_PLUS_HOST | quote }}
+  AUTH_PLUS_PORT: {{ .Values.configMap.AUTH_PLUS_PORT | quote }}
+  AUTH_PLUS_SCHEME: {{ .Values.configMap.AUTH_PLUS_SCHEME | quote }}
+  BIND_HOST: {{ .Values.configMap.BIND_HOST | quote }}
+  BIND_PORT: {{ .Values.configMap.BIND_PORT | quote }}
+  DB_MIGRATE: {{ .Values.configMap.DB_MIGRATE | quote }}
+  DB_URL: {{ .Values.configMap.DB_URL | quote }}
+  DB_USER: {{ .Values.configMap.DB_USER | quote }}
+  DEVICE_REGISTRY_HOST: {{ .Values.configMap.DEVICE_REGISTRY_HOST | quote }}
+  DEVICE_REGISTRY_PORT: {{ .Values.configMap.DEVICE_REGISTRY_PORT | quote }}
+  JAVA_OPTS: {{ .Values.configMap.JAVA_OPTS | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.KAFKA_BOOTSTRAP_SERVERS | quote }}
+  KAFKA_HOST: {{ .Values.configMap.KAFKA_HOST | quote }}
+  KAFKA_TOPIC_SUFFIX: {{ .Values.configMap.KAFKA_TOPIC_SUFFIX | quote }}
+  LOG_APPENDER: {{ .Values.configMap.LOG_APPENDER | quote }}
+  MESSAGING_MODE: {{ .Values.configMap.MESSAGING_MODE | quote }}
+  SOTA_CORE_HOST: {{ .Values.configMap.SOTA_CORE_HOST | quote }}
+  SOTA_CORE_PORT: {{ .Values.configMap.SOTA_CORE_PORT | quote }}
+  TREEHUB_HOSTNAME: {{ .Values.configMap.TREEHUB_HOSTNAME | quote }}
+  TREEHUB_STORAGE: {{ .Values.configMap.TREEHUB_STORAGE | quote }}
+  {{- if eq .Values.configMap.TREEHUB_STORAGE "local" }}
+  TREEHUB_LOCAL_STORE_PATH: {{ .Values.configMap.TREEHUB_LOCAL_STORE_PATH | quote }}
+  {{- else if eq .Values.configMap.TREEHUB_STORAGE "s3" }}
+  TREEHUB_AWS_BUCKET_ID: {{ .Values.configMap.TREEHUB_AWS_BUCKET_ID | quote }}
+  DELTAS_AWS_BUCKET_ID: {{ .Values.configMap.DELTAS_AWS_BUCKET_ID | quote }}
+  TREEHUB_AWS_REGION: {{ .Values.configMap.TREEHUB_AWS_REGION | quote }}
+  {{- end }}
+  REPORT_METRICS: {{ .Values.configMap.REPORT_METRICS | quote }}
+  {{- if eq .Values.configMap.REPORT_METRICS "true" }}
+  INFLUXDB_HOST: {{ .Values.configMap.INFLUXDB_HOST | quote }}
+  INFLUXDB_PORT: {{ .Values.configMap.INFLUXDB_PORT | quote }}
+  {{- end }}

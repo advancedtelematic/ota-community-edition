@@ -1,0 +1,16 @@
+{{- if eq .Values.service.type "LoadBalancer" }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ template "ota-api-gateway.fullname" . }}-allow-app-traffic
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ template "ota-api-gateway.name" . }}
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - port: {{ .Values.service.apiGatewayInternalPort }}
+{{- end }}

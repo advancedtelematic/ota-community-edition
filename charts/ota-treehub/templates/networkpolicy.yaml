@@ -1,0 +1,16 @@
+{{- if eq .Values.service.publicTreehubType "LoadBalancer" }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ template "ota-treehub.fullname" . }}-allow-app-traffic
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ template "ota-treehub.name" . }}
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - port: {{ .Values.configMap.BIND_PORT }}
+{{- end }}

@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "ota-device-registry.fullname" . }}
+  labels:
+    app: {{ template "ota-device-registry.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-device-registry.name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+          - configMapRef:
+              name: {{ template "ota-device-registry.fullname" . }}
+          - secretRef:
+              name: {{ template "ota-device-registry.fullname" . }}
+          ports:
+            - containerPort: {{ .Values.configMap.BIND_PORT }}
+          livenessProbe:
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            httpGet:
+              path: /health
+              port: {{ .Values.configMap.BIND_PORT }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.configMap.BIND_PORT }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+{{- if .Values.privateRegistry }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+{{- end }}

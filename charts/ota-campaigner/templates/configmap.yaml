@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-campaigner.fullname" . }}
+  labels:
+    app: {{ template "ota-campaigner.name" . }}
+    chart: {{ template "ota-campaigner.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  BIND_PORT: {{ .Values.configMap.BIND_PORT | quote }}
+  DB_MIGRATE: {{ .Values.configMap.DB_MIGRATE | quote }}
+  DB_URL: {{ .Values.configMap.DB_URL | quote }}
+  DB_USER: {{ .Values.configMap.DB_USER | quote }}
+  DEVICE_REGISTRY_HOST: {{ .Values.configMap.DEVICE_REGISTRY_HOST | quote }}
+  DEVICE_REGISTRY_PORT: {{ .Values.configMap.DEVICE_REGISTRY_PORT | quote }}
+  DIRECTOR_HOST: {{ .Values.configMap.DIRECTOR_HOST | quote }}
+  DIRECTOR_PORT: {{ .Values.configMap.DIRECTOR_PORT | quote }}
+  ENV_PREFIX: {{ .Values.configMap.ENV_PREFIX | quote }}
+  JAVA_OPTS: {{ .Values.configMap.JAVA_OPTS | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.KAFKA_BOOTSTRAP_SERVERS | quote }}
+  KAFKA_HOST: {{ .Values.configMap.KAFKA_HOST | quote }}
+  KAFKA_TOPIC_SUFFIX: {{ .Values.configMap.KAFKA_TOPIC_SUFFIX | quote }}
+  MESSAGING_MODE: {{ .Values.configMap.MESSAGING_MODE | quote }}
+  LOG_APPENDER: {{ .Values.configMap.LOG_APPENDER | quote }}
+  REPORT_METRICS: {{ .Values.configMap.REPORT_METRICS | quote }}
+  SCHEDULER_BATCH_SIZE: {{ .Values.configMap.SCHEDULER_BATCH_SIZE | quote }}
+  SCHEDULER_DELAY: {{ .Values.configMap.SCHEDULER_DELAY | quote }}
+  SCHEDULER_POLLING_TIMEOUT: {{ .Values.configMap.SCHEDULER_POLLING_TIMEOUT | quote }}
+  USER_PROFILE_HOST: {{ .Values.configMap.USER_PROFILE_HOST | quote }}
+  USER_PROFILE_PORT: {{ .Values.configMap.USER_PROFILE_PORT | quote }}

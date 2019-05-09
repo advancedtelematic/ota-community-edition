@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "ota-web-events.fullname" . }}
+  labels:
+    app: {{ template "ota-web-events.name" . }}
+    chart: {{ template "ota-web-events.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- if .Values.service.internal }}
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    {{- end }}
+    {{- if .Values.service.sslCert }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.service.sslCert | quote }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: {{ .Values.service.sslPorts | quote }}
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    {{- end }}
+    {{- if .Values.service.dnsName }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.service.dnsName | quote }}
+    {{- end }}
+
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "ota-web-events.name" . }}
+    release: {{ .Release.Name }}

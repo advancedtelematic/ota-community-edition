@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: mariadb
+  tag: 10.3.13
+  pullPolicy: IfNotPresent
+
+secret:
+  MYSQL_ROOT_PASSWORD: root
+
+service:
+  name: mariadb
+  type: ClusterIP
+  externalPort: 3306
+  internalPort: 3306
+
+ingress:
+  enabled: false
+
+resources: {}
+
+persistence:
+  enabled: true
+  createVolumes: true
+  hostPath: "/data/mariadb"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  awsEnabled: false
+  awsStorageClassName: example

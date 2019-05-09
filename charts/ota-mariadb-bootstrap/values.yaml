@@ -1,0 +1,26 @@
+replicaCount: 1
+
+image:
+  repository: advancedtelematic/mariadb-envsubst
+  tag: 10.2.12
+  pullPolicy: IfNotPresent
+
+configMap:
+  MYSQL_HOST: ota-mariadb
+  MYSQL_PORT: "3306"
+  MYSQL_USER: root
+
+secret:
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_PASSWORD: root
+  AUDITOR_DB_PASS: auditor
+  CAMPAIGNER_DB_PASS: campaigner
+  CRYPT_VAULT_DB_PASS: crypt_vault
+  DELTA_BUILDER_DB_PASS: delta_builder
+  DEVICE_REGISTRY_DB_PASS: device_registry
+  DIRECTOR_DB_PASS: director
+  SOTA_CORE_DB_PASS: sota_core
+  TREEHUB_DB_PASS: treehub
+  TUF_KEYSERVER_DB_PASS: tuf_keyserver
+  TUF_REPOSERVER_DB_PASS: tuf_reposerver
+  USER_PROFILE_DB_PASS: user_profile

@@ -1,0 +1,52 @@
+replicaCount: 1
+
+image:
+  repository: gcr.io/google_samples/k8szk
+  tag: v2
+  pullPolicy: IfNotPresent
+
+configMap:
+  ZK_REPLICAS: "1"
+  ZK_HEAP_SIZE: "250M"
+  ZK_TICK_TIME: "2000"
+  ZK_INIT_LIMIT: "10"
+  ZK_SYNC_LIMIT: "5"
+  ZK_MAX_CLIENT_CNXNS: "60"
+  ZK_SNAP_RETAIN_COUNT: "3"
+  ZK_PURGE_INTERVAL: "1"
+  ZK_LOG_LEVEL: INFO
+  ZK_CLIENT_PORT: "2181"
+  ZK_SERVER_PORT: "2888"
+  ZK_ELECTION_PORT: "3888"
+
+service:
+  type: ClusterIP
+  client:
+    name: client
+    externalPort: 2181
+    internalPort: 2181
+  peer:
+    name: peer
+    externalPort: 2888
+    internalPort: 2888
+  election:
+    name: elction
+    externalPort: 3888
+    internalPort: 3888
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 1024Mi
+
+persistence:
+  enabled: true
+  createVolumes: true
+  hostPath: "/data/zookeeper"
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  awsEnabled: false
+  awsStorageClassName: example

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-mariadb-bootstrap.fullname" . }}-files
+  labels:
+    app: {{ template "ota-mariadb-bootstrap.name" . }}
+    chart: {{ template "ota-mariadb-bootstrap.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  create_databases.sql.tpl: |
+{{ .Files.Get "files/create_databases.sql.tpl" | indent 4 }}
+  install_plugins.sql.tpl: |
+{{ .Files.Get "files/install_plugins.sql.tpl" | indent 4 }}
+  entrypoint.sh: |
+{{ .Files.Get "files/entrypoint.sh" | indent 4 }}
+  wait.sh: |
+{{ .Files.Get "files/wait.sh" | indent 4 }}

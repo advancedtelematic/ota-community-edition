@@ -1,0 +1,27 @@
+= OTA Community Edition Guide Overview
+ifndef::env-site,env-github[]
+include::_attributes.adoc[]
+endif::[]
+// Settings
+:idprefix:
+:idseparator: -
+
+This is version *{page-component-version}* of the OTA Community Edition Guide in the OTA Community Edition repo.
+
+== Page source
+
+This page is sourced from [.path]_ota-community-edition/docs/modules/ota-ce-guide/pages/overview.adoc_.
+
+== Cross reference syntax to target this page
+
+To create a cross reference *to this page from another page in the OTA Community Edition Guide*, the xref syntax would be `\xref:overview.adoc[]`.
+
+To create a cross reference *to this page from a page in the ROOT module of the OTA Community Edition*, the xref syntax would be `\xref:ota-ce-guide:overview.adoc[]`.
+
+=== Always target the latest version of this page
+
+To create a cross reference *to the latest version of this page from a page in the Aktualizr repo (separate component)*, the xref syntax would be `\xref:ota-ce:ota-ce-guide:overview.adoc[]`.
+
+=== Target a specific version of this page
+
+To create a cross reference *to version 1.0 of this page from a page in the Aktualizr repo (separate component)*, the xref syntax would be `\xref:1.0@ota-ce:ota-ce-guide:overview.adoc[]`.

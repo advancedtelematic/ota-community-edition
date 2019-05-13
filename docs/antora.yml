@@ -1,0 +1,6 @@
+name: ota-ce
+title: OTA Community Edition Guide
+version: dev
+nav:
+- modules/ROOT/nav.adoc
+- modules/ota-ce-guide/nav.adoc

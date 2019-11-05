@@ -27,8 +27,8 @@ The following software tools are required to run the scripts in the
 current repository:
 
 * [minikube](https://github.com/kubernetes/minikube)
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (version >= 1.9)
-* [kops](https://github.com/kubernetes/kops) (version >= 1.9)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (version >= 1.16)
+* [kops](https://github.com/kubernetes/kops) (version >= 1.16)
 * [jq](https://stedolan.github.io/jq/)
 * [httpie](https://httpie.org/)
 * [VirtualBox](https://www.virtualbox.org/)

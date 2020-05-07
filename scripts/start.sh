@@ -225,7 +225,7 @@ configure_db_encryption() {
   ${KUBECTL} get secret "tuf-keyserver-encryption" &>/dev/null && return 0
 
   local salt=$(openssl rand -base64 8)
-  local key=$(tr -cd '[:alnum:]' < /dev/urandom | fold -w64 | head -n1)
+  local key=$(LC_CTYPE=C tr -cd '[:alnum:]' < /dev/urandom | fold -w64 | head -n1)
 
   ${KUBECTL} create secret generic "tuf-keyserver-encryption" \
     --from-literal="DB_ENCRYPTION_SALT=${salt}" \

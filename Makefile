@@ -3,7 +3,7 @@ KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
 
 .PHONY: help start clean new-client new-server start-all start-ingress \
-  start-infra start-vaults start-services print-hosts
+  start-infra start-services print-hosts
 .DEFAULT_GOAL := help
 
 help: ## Print this message and exit.
@@ -22,7 +22,6 @@ new-server: %: start_%       ## Create a new set of server credentials.
 start-all: %: start_%        ## Start all infra and OTA+ services.
 start-ingress: %: start_%    ## Install Nginx Ingress Controller
 start-infra: %: start_%      ## Create infrastructure configs and apply to the cluster.
-start-vaults: %: start_%     ## Start all vault instances.
 start-services: %: start_%   ## Start the OTA+ services.
 print-hosts: %: start_%      ## Print the service mappings for /etc/hosts
 templates: %: start_%        ## Generate all the k8s files

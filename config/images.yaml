@@ -10,16 +10,15 @@ pause_docker_image: gcr.io/google_containers/pause:3.0
 zookeeper_docker_image: gcr.io/google_samples/k8szk:v2
 
 # service images
-app_docker_image: advancedtelematic/ota-plus-web:0.7.3-16-g30b1c15
+app_docker_image: advancedtelematic/ota-plus-web:f5d02d1a7cc284397e07b1b79104cbeccac78078
 bootstrap_docker_image: advancedtelematic/bootstrap_ota_kube:2.1
-campaigner_docker_image: advancedtelematic/campaigner:0.0.1-71-gf80181b
+campaigner_docker_image: advancedtelematic/campaigner:ebc1f5771021ef40fff63f966178da34a5d7ecd9
 campaigner_daemon_docker_image: advancedtelematic/campaigner:0.0.1-71-gf80181b
-crypt_vault_docker_image: advancedtelematic/crypto-vault:0.3
-device_registry_docker_image: advancedtelematic/device-registry:0.0.1-27-gf10bc67
-director_daemon_docker_image: advancedtelematic/director:0.2.0-27-gcd592e6
-director_docker_image: advancedtelematic/director:0.2.0-27-gcd592e6
-treehub_docker_image: advancedtelematic/treehub:0.1.18
-tuf_keyserver_daemon_docker_image: advancedtelematic/tuf-keyserver:0.3.0-16-gfde0883
-tuf_keyserver_docker_image: advancedtelematic/tuf-keyserver:0.3.0-16-gfde0883
-tuf_reposerver_docker_image: advancedtelematic/tuf-reposerver:0.3.0-16-gfde0883
-web_events_docker_image: advancedtelematic/web-events:0.0.13
+device_registry_docker_image: advancedtelematic/device-registry:5494d76722fd6a31a50645c9fd296030d0021958
+director_daemon_docker_image: advancedtelematic/director-v2:eb75c8bd21b36e7809397cecf9fc652d611e49d3
+director_docker_image: advancedtelematic/director-v2:eb75c8bd21b36e7809397cecf9fc652d611e49d3
+treehub_docker_image: advancedtelematic/treehub:96fa7bfb72cec63947fbc40127bbb86983fdda3b
+tuf_keyserver_daemon_docker_image: advancedtelematic/tuf-keyserver:1d0d714a6ff42d2f041fa1bfd0eb2330ccbbf836
+tuf_keyserver_docker_image: advancedtelematic/tuf-keyserver:1d0d714a6ff42d2f041fa1bfd0eb2330ccbbf836
+tuf_reposerver_docker_image: advancedtelematic/tuf-reposerver:1d0d714a6ff42d2f041fa1bfd0eb2330ccbbf836
+web_events_docker_image: advancedtelematic/web-events:caed58ec6c814f4df72d5c1e5c5c68c9856fd3c0

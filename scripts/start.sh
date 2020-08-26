@@ -13,8 +13,6 @@ readonly DEVICES_DIR=${DEVICES_DIR:-${SERVER_DIR}/devices}
 readonly NAMESPACE=${NAMESPACE:-default}
 readonly PROXY_PORT=${PROXY_PORT:-8200}
 readonly DB_PASS=${DB_PASS:-root}
-readonly VAULT_SHARES=${VAULT_SHARES:-5}
-readonly VAULT_THRESHOLD=${VAULT_THRESHOLD:-3}
 
 readonly SKIP_CLIENT=${SKIP_CLIENT:-false}
 readonly SKIP_WEAVE=${SKIP_WEAVE:-false}
@@ -100,10 +98,6 @@ generate_templates() {
   skip_ingress || make_template templates/ingress
   make_template templates/infra
   make_template templates/services
-  for vault in ${VAULTS:-crypt-vault}; do
-    make_template "templates/vaults/${vault}.tmpl.yaml"
-    make_template "templates/jobs/${vault}-bootstrap.tmpl.yaml"
-  done
 }
 
 new_client() {
@@ -175,22 +169,6 @@ new_server() {
     --from-file "${SERVER_DIR}/devices/ca.crt"
 }
 
-create_configs() {
-  ${KUBECTL} get configmap bootstrap-rules &>/dev/null || {
-    ${KUBECTL} create configmap bootstrap-rules --from-file config/vaults/bootstrap-rules.json
-  }
-
-  declare -a policies=(tuf crypt)
-  for policy in "${policies[@]}"; do
-    ${KUBECTL} get configmap "${policy}-policy" &>/dev/null || {
-      ${KUBECTL} create configmap --from-file "config/vaults/${policy}-policy.hcl" "${policy}-policy"
-    }
-    ${KUBECTL} get secret "${policy}-tokens" &>/dev/null || {
-      ${KUBECTL} create secret generic "${policy}-tokens"
-    }
-  done
-}
-
 create_databases() {
   local pod
   pod=$(wait_for_pods mysql)
@@ -198,56 +176,6 @@ create_databases() {
   ${KUBECTL} exec "${pod}" -- bash -c "mysql -p${DB_PASS} < /tmp/sql/install_plugins.sql || true" 2>/dev/null
   ${KUBECTL} exec "${pod}" -- bash -c "mysql -p${DB_PASS} < /tmp/sql/create_databases.sql"
 }
-
-init_vault() {
-  local vault=${1}
-  local api="http://localhost:${PROXY_PORT}/v1"
-
-  if [[ $(http GET "${api}/sys/health" | jq '.initialized') = false ]]; then
-    local result
-    result=$(http --ignore-stdin --check-status PUT "${api}/sys/init" \
-      secret_shares:="${VAULT_SHARES}" secret_threshold:="${VAULT_THRESHOLD}")
-    ${KUBECTL} create secret generic "${vault}-init" \
-      --from-literal="root=$(echo "${result}" | jq --raw-output '.root_token')" \
-      --from-literal="keys=$(echo "${result}" | jq --raw-output '.keys[]')"
-  fi
-}
-
-unseal_vault() {
-  local vault=${1}
-  local pod=${2}
-  if ${KUBECTL} get secrets "${vault}-init" &>/dev/null; then
-    ${KUBECTL} get secrets "${vault}-init" -o json |
-      jq -r .data.keys |
-      base64 --decode  |
-      awk 'BEGIN {print "export VAULT_ADDR=http://127.0.0.1:8200"}
-                 {print "vault unseal "$0}
-           END   {print "vault status"}' |
-      ${KUBECTL} exec -i "${pod}" sh
-  fi
-}
-
-start_vaults() {
-  create_configs
-
-  for vault in ${VAULTS:-crypt-vault}; do
-    apply_template "templates/vaults/${vault}.tmpl.yaml"
-
-    local pod
-    pod=$(wait_for_pods "${vault}")
-    ${KUBECTL} port-forward "${pod}" "${PROXY_PORT}:${PROXY_PORT}" &
-    local pid=$!
-    trap "kill_pid ${pid}" EXIT
-    sleep 3s
-
-    init_vault "${vault}"
-    unseal_vault "${vault}" "${pod}"
-    kill_pid "${pid}"
-
-    apply_template "templates/jobs/${vault}-bootstrap.tmpl.yaml"
-  done
-}
-
 
 start_weave() {
   [[ ${SKIP_WEAVE} == true ]] && return 0;
@@ -349,7 +277,6 @@ case "${command}" in
     new_server
     start_ingress
     start_infra
-    start_vaults
     start_services
     ;;
   "start_ingress")
@@ -357,9 +284,6 @@ case "${command}" in
     ;;
   "start_infra")
     start_infra
-    ;;
-  "start_vaults")
-    start_vaults
     ;;
   "start_services")
     start_services

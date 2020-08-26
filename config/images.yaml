@@ -14,7 +14,6 @@ app_docker_image: advancedtelematic/ota-plus-web:0.7.3-16-g30b1c15
 bootstrap_docker_image: advancedtelematic/bootstrap_ota_kube:2.1
 campaigner_docker_image: advancedtelematic/campaigner:0.0.1-71-gf80181b
 campaigner_daemon_docker_image: advancedtelematic/campaigner:0.0.1-71-gf80181b
-crypt_vault_docker_image: advancedtelematic/crypto-vault:0.3
 device_registry_docker_image: advancedtelematic/device-registry:0.0.1-27-gf10bc67
 director_daemon_docker_image: advancedtelematic/director:0.2.0-27-gcd592e6
 director_docker_image: advancedtelematic/director:0.2.0-27-gcd592e6

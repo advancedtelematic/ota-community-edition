@@ -10,9 +10,6 @@ campaigner_daemon_mem: 250Mi
 campaigner_java_opts: '-Xmx200m'
 campaigner_mem: 250Mi
 
-crypt_vault_cpu: 80m
-crypt_vault_mem: 40Mi
-
 device_registry_cpu: 80m
 device_registry_java_opts: "-Xmx250m"
 device_registry_mem: 300Mi
@@ -53,9 +50,6 @@ tuf_reposerver_cpu: 80m
 tuf_reposerver_java_opts: "-Xmx250m"
 tuf_reposerver_local_storage_root: "/tmp/tuf-targets"
 tuf_reposerver_mem: 300Mi
-
-tuf_vault_cpu: 80m
-tuf_vault_mem: 40Mi
 
 web_events_cpu: 80m
 web_events_mem: 250Mi

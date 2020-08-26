@@ -52,7 +52,7 @@ wait_for_pods() {
 print_hosts() {
   retry_command "ingress" "${KUBECTL} get ingress -o json \
     | jq --exit-status '.items[0].status.loadBalancer.ingress'"
-  ${KUBECTL} get ingress --no-headers | awk -v ip=$(minikube ip) '{print ip " " $2}'
+  ${KUBECTL} get ingress -o json  | jq -r '.items[].spec.rules[].host' | awk -v ip=$(minikube ip) '{print ip " " $1}'
 }
 
 kill_pid() {
@@ -124,7 +124,7 @@ new_client() {
 
   local api="http://localhost:${PROXY_PORT}/api/v1/namespaces/${NAMESPACE}/services"
   http --ignore-stdin PUT "${api}/device-registry/proxy/api/v1/devices" credentials=@"${device_dir}/client.pem" \
-    deviceUuid="${DEVICE_UUID}" deviceId="${device_id}" deviceName="${device_id}" deviceType=Other
+    uuid="${DEVICE_UUID}" deviceId="${device_id}" deviceName="${device_id}" deviceType=Other
   kill_pid "${pid}"
 
   [[ ${SKIP_CLIENT} == true ]] && return 0

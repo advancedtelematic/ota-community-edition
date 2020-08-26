@@ -100,7 +100,7 @@ generate_templates() {
   skip_ingress || make_template templates/ingress
   make_template templates/infra
   make_template templates/services
-  for vault in ${VAULTS:-tuf-vault crypt-vault}; do
+  for vault in ${VAULTS:-crypt-vault}; do
     make_template "templates/vaults/${vault}.tmpl.yaml"
     make_template "templates/jobs/${vault}-bootstrap.tmpl.yaml"
   done
@@ -227,7 +227,7 @@ unseal_vault() {
 start_vaults() {
   create_configs
 
-  for vault in ${VAULTS:-tuf-vault crypt-vault}; do
+  for vault in ${VAULTS:-crypt-vault}; do
     apply_template "templates/vaults/${vault}.tmpl.yaml"
 
     local pod

@@ -30,6 +30,13 @@ data:
         proxy_pass http://treehub;
       }
 
+      location /campaigner/ {
+        rewrite ^/campaigner/(.*)$ /api/v2/device/$1 break;
+        proxy_set_header x-ats-device-uuid $deviceUuid;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://campaigner;
+      }
+
       location /director/ {
         rewrite ^/director/(.*)$ /api/v1/device/${deviceUuid}/$1 break;
         proxy_set_header x-ats-namespace $deviceNamespace;
@@ -42,13 +49,26 @@ data:
         proxy_pass http://repo;
       }
 
-      location /core/system_info {
+      location /system_info/ {
+        rewrite ^/core/(.*)$ /api/v1/devices/$deviceUuid/system_info/$1 break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://device-registry;
+      }
+
+      location /core/ {
         rewrite ^/core/(.*)$ /api/v1/mydevice/$deviceUuid/$1 break;
         proxy_set_header x-ats-namespace $deviceNamespace;
         proxy_pass http://device-registry;
       }
+
       location /core/installed {
         rewrite ^/core/(.*)$ /api/v1/mydevice/$deviceUuid/packages break;
+        proxy_set_header x-ats-namespace $deviceNamespace;
+        proxy_pass http://device-registry;
+      }
+
+      location /events/ {
+        rewrite ^/core/(.*)$ /api/v1/devices/$deviceUuid/$1 break;
         proxy_set_header x-ats-namespace $deviceNamespace;
         proxy_pass http://device-registry;
       }
@@ -64,6 +84,14 @@ data:
 
     upstream repo {
       server tuf-reposerver:80;
+    }
+
+    upstream device-registry {
+      server device-registry:80;
+    }
+
+    upstream campaigner {
+      server campaigner:80;
     }
 ---
 apiVersion: apps/v1

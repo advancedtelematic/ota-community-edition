@@ -22,22 +22,5 @@
         "environment": "VAULT_TOKEN"
       }
     }
-  },
-
-  "tuf-vault": {
-    "vault_policies": {
-      "tuf": "/tmp/tuf-policy.hcl"
-    },
-    "vault_mounts": {
-      "/ota-tuf/keys": "generic"
-    },
-    "vault_tokens": {
-      "tuf": {
-        "policies": ["tuf"],
-        "token_period": "72h",
-        "secret": "tuf-tokens",
-        "environment": "TUF_VAULT_TOKEN"
-      }
-    }
   }
 }

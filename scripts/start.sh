@@ -142,8 +142,11 @@ new_client() {
   local options="-o StrictHostKeyChecking=no"
 
   ssh ${options} "root@${addr}" -p "${port}" "echo \"${gateway} ota.ce\" >> /etc/hosts"
-  scp -P "${port}" ${options} "${device_dir}/client.pem" "root@${addr}:/var/sota/client.pem"
-  scp -P "${port}" ${options} "${device_dir}/pkey.pem" "root@${addr}:/var/sota/pkey.pem"
+  # TODO: is this the correct server/root CA cert?
+  scp -P "${port}" ${options} "${SERVER_DIR}/server_ca.pem" "root@${addr}:/var/sota/import/root.crt"
+  scp -P "${port}" ${options} "${device_dir}/client.pem" "root@${addr}:/var/sota/import/client.pem"
+  scp -P "${port}" ${options} "${device_dir}/pkey.pem" "root@${addr}:/var/sota/import/pkey.pem"
+  scp -P "${port}" ${options} "${SERVER_DIR}/autoprov.url" "root@${addr}:/var/sota/import/gateway.url"
 }
 
 new_server() {

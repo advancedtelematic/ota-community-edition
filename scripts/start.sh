@@ -37,6 +37,21 @@ retry_command() {
   done
 }
 
+http_2xx_or_4xx() {
+    local cmd=$*
+    
+    if eval "http ${cmd}"; then
+        return $?
+    else
+        local ec=$?
+        if [[ $ec -eq 4 ]] || [[ $ec -eq 2 ]]; then
+            return 0
+        else
+            return $ec
+        fi
+    fi
+}
+
 first_pod() {
   local app=${1}
   ${KUBECTL} get pods --selector=app="${app}" --output jsonpath='{.items[0].metadata.name}'
@@ -62,7 +77,8 @@ kill_pid() {
 }
 
 skip_ingress() {
-  [ -f config/local.yaml ] && local_yaml="config/local.yaml"
+    local local_yaml=""
+    [ -f config/local.yaml ] && local_yaml="config/local.yaml"
 
   value=$(cat config/config.yaml \
       config/images.yaml \
@@ -236,10 +252,15 @@ get_credentials() {
   retry_command "reposerver" "[[ true = \$(http --print=b GET ${reposerver}/health/dependencies \
     | jq --exit-status '.status == \"OK\"') ]]"
 
-  id=$(http --ignore-stdin --check-status --print=b POST "${reposerver}/api/v1/user_repo" "${namespace}" | jq --raw-output .)
-  http --ignore-stdin --check-status POST "${director}/api/v1/admin/repo" "${namespace}"
+  http_2xx_or_4xx --ignore-stdin --check-status POST "${reposerver}/api/v1/user_repo" "${namespace}"
 
-  retry_command "keys" "http --ignore-stdin --check-status GET ${keyserver}/api/v1/root/${id}"
+  id=$(http --ignore-stdin --check-status --print=h GET http://tuf-reposerver.ota.local/api/v1/user_repo/root.json x-ats-namespace:default | grep x-ats-tuf-repo-id | awk '{print $2}' | tr -d '\r')
+
+  http_2xx_or_4xx --ignore-stdin --check-status POST "${director}/api/v1/admin/repo" "${namespace}"
+
+  echo "http -vv --ignore-stdin --check-status GET ${keyserver}/api/v1/root/WAT1${id}WAT2"
+
+  retry_command "keys" "http -vv --ignore-stdin --check-status GET ${keyserver}/api/v1/root/${id}"
   keys=$(http --ignore-stdin --check-status GET "${keyserver}/api/v1/root/${id}/keys/targets/pairs")
   echo ${keys} | jq '.[0] | {keytype, keyval: {public: .keyval.public}}'   > "${SERVER_DIR}/targets.pub"
   echo ${keys} | jq '.[0] | {keytype, keyval: {private: .keyval.private}}' > "${SERVER_DIR}/targets.sec"

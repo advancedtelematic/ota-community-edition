@@ -258,9 +258,7 @@ get_credentials() {
 
   http_2xx_or_4xx --ignore-stdin --check-status POST "${director}/api/v1/admin/repo" "${namespace}"
 
-  echo "http -vv --ignore-stdin --check-status GET ${keyserver}/api/v1/root/WAT1${id}WAT2"
-
-  retry_command "keys" "http -vv --ignore-stdin --check-status GET ${keyserver}/api/v1/root/${id}"
+  retry_command "keys" "http --ignore-stdin --check-status GET ${keyserver}/api/v1/root/${id}"
   keys=$(http --ignore-stdin --check-status GET "${keyserver}/api/v1/root/${id}/keys/targets/pairs")
   echo ${keys} | jq '.[0] | {keytype, keyval: {public: .keyval.public}}'   > "${SERVER_DIR}/targets.pub"
   echo ${keys} | jq '.[0] | {keytype, keyval: {private: .keyval.private}}' > "${SERVER_DIR}/targets.sec"

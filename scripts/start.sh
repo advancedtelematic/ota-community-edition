@@ -259,7 +259,8 @@ get_credentials() {
 
   http_2xx_or_4xx --ignore-stdin --check-status POST "${reposerver}/api/v1/user_repo" "${namespace}"
 
-  id=$(http --ignore-stdin --check-status --print=h GET http://tuf-reposerver.ota.local/api/v1/user_repo/root.json x-ats-namespace:default | grep x-ats-tuf-repo-id | awk '{print $2}' | tr -d '\r')
+  id=$(http --ignore-stdin --check-status --print=h GET "${reposerver}/api/v1/user_repo/root.json" "${namespace}" | grep -i x-ats-tuf-repo-id | awk '{print $2}' | tr -d '\r')
+  echo "id=${id}"
 
   http_2xx_or_4xx --ignore-stdin --check-status POST "${director}/api/v1/admin/repo" "${namespace}"
 

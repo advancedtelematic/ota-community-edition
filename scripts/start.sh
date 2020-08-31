@@ -125,7 +125,9 @@ new_client() {
   # This is a tag for including a chunk of code in the docs. Don't remove. tag::genclientkeys[]
   openssl ecparam -genkey -name prime256v1 | openssl ec -out "${device_dir}/pkey.ec.pem"
   openssl pkcs8 -topk8 -nocrypt -in "${device_dir}/pkey.ec.pem" -out "${device_dir}/pkey.pem"
-  openssl req -new -config "${CWD}/certs/client.cnf" -key "${device_dir}/pkey.pem" -out "${device_dir}/${device_id}.csr"
+  openssl req -new -key "${device_dir}/pkey.pem" \
+    -config <(sed "s/\$ENV::DEVICE_UUID/${DEVICE_UUID}/g" "${CWD}/certs/client.cnf") \
+    -out "${device_dir}/${device_id}.csr"
   openssl x509 -req -days 365 -extfile "${CWD}/certs/client.ext" -in "${device_dir}/${device_id}.csr" \
     -CAkey "${DEVICES_DIR}/ca.key" -CA "${DEVICES_DIR}/ca.crt" -CAcreateserial -out "${device_dir}/client.pem"
   cat "${device_dir}/client.pem" "${DEVICES_DIR}/ca.crt" > "${device_dir}/${device_id}.chain.pem"
@@ -169,8 +171,11 @@ new_server() {
     -out "${SERVER_DIR}/server_ca.pem"
 
   openssl ecparam -genkey -name prime256v1 | openssl ec -out "${SERVER_DIR}/server.key"
-  openssl req -new -config "${CWD}/certs/server.cnf" -key "${SERVER_DIR}/server.key" -out "${SERVER_DIR}/server.csr"
-  openssl x509 -req -days 3650 -extfile "${CWD}/certs/server.ext" -in "${SERVER_DIR}/server.csr" -CAcreateserial \
+  openssl req -new -key "${SERVER_DIR}/server.key" \
+    -config <(sed "s/\$ENV::SERVER_NAME/${SERVER_NAME}/g" "${CWD}/certs/server.cnf") \
+    -out "${SERVER_DIR}/server.csr"
+  openssl x509 -req -days 3650 -in "${SERVER_DIR}/server.csr" -CAcreateserial \
+    -extfile <(sed "s/\$ENV::SERVER_NAME/${SERVER_NAME}/g" "${CWD}/certs/server.ext") \
     -CAkey "${SERVER_DIR}/ca.key" -CA "${SERVER_DIR}/server_ca.pem" -out "${SERVER_DIR}/server.crt"
   cat "${SERVER_DIR}/server.crt" "${SERVER_DIR}/server_ca.pem" > "${SERVER_DIR}/server.chain.pem"
 

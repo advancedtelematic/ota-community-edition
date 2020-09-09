@@ -259,6 +259,7 @@ get_credentials() {
 
   http_2xx_or_4xx --ignore-stdin --check-status POST "${reposerver}/api/v1/user_repo" "${namespace}"
 
+  sleep 5s
   id=$(http --ignore-stdin --check-status --print=h GET "${reposerver}/api/v1/user_repo/root.json" "${namespace}" | grep -i x-ats-tuf-repo-id | awk '{print $2}' | tr -d '\r')
   echo "id=${id}"
 

@@ -39,7 +39,7 @@ The single entry point to the scripts is the `Makefile`.
 
 It is self-documenting, run `make` to see a list of the available commands.
 
-### Getting started
+### Getting started with Minikube
 
 1. **Start all services**
 
@@ -106,6 +106,15 @@ make new-client
 ```
 
 This will also modify the hosts file on the client so it's able to connect.
+
+### Getting started with your own Kubernetes cluster
+
+You can start OTA CE with `make start-ota`. This will run OTA CE in the cluster
+configured in your `kubectl` config. However, OTA CE in its default
+configuration is intended to work with Minikube, so you will need to
+reconfigure it for your own environment. For example, `config/config.yaml:4`
+sets the hostname for configuring the ingress resources. Depending on your
+environment may need to make other changes.
 
 ## Troubleshooting
 

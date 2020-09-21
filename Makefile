@@ -1,6 +1,7 @@
 KUBE_VM ?= virtualbox
 KUBE_CPU ?= 2
 KUBE_MEM ?= 8192
+KUBE_VER ?= v1.18.3
 
 .PHONY: help start clean new-client new-server start-all start-ingress \
   start-infra start-services print-hosts
@@ -10,7 +11,7 @@ help: ## Print this message and exit.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%20s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 start-minikube: cmd-minikube ## Start minikube.
-	@minikube ip 2>/dev/null || minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
+	@minikube ip 2>/dev/null || minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM) --kubernetes-version ${KUBE_VER}
 
 start-ota: start-all ## Start all infra and OTA+ services.
 

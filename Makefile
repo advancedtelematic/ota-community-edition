@@ -9,9 +9,12 @@ KUBE_MEM ?= 8192
 help: ## Print this message and exit.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%20s\033[0m : %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-start: cmd-minikube ## Start minikube and all OTA+ services.
+start-minikube: cmd-minikube ## Start minikube.
 	@minikube ip 2>/dev/null || minikube start --vm-driver $(KUBE_VM) --cpus $(KUBE_CPU) --memory $(KUBE_MEM)
-	@scripts/start.sh start-all
+
+start-ota: start-all ## Start all infra and OTA+ services.
+
+start: start-minikube start-ota ## Start minikube and all OTA+ services.
 
 clean: cmd-minikube ## Delete minikube and all service data.
 	@minikube delete >/dev/null || true

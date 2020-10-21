@@ -1,0 +1,33 @@
+{{- if and .Values.deployPublic .Values.ingress.enabled -}}
+{{- $serviceName := include "ota-tuf-reposerver.servicename" . -}}
+{{- $servicePort := .Values.service.publicTufReposerverPort -}}
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "ota-tuf-reposerver.fullname" . }}
+  labels:
+    app: {{ template "ota-tuf-reposerver.name" . }}
+    chart: {{ template "ota-tuf-reposerver.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    {{- range $host := .Values.ingress.hosts }}
+    - host: {{ $host }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ $serviceName }}
+              servicePort: {{ $servicePort }}
+    {{- end -}}
+  {{- if .Values.ingress.tls }}
+  tls:
+{{ toYaml .Values.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}

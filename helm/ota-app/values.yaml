@@ -1,0 +1,115 @@
+replicaCount: 1
+
+image:
+  repository: advancedtelematic/ota-plus-web
+  tag: latest
+  pullPolicy: Always
+
+configMap:
+  API_GATEWAY_HOST: api
+  API_GATEWAY_PORT: '80'
+  API_GATEWAY_SCHEME: 'http'
+  AUTH0_CALLBACK_URL: https://app-here.ota.local/callback
+  AUTH0_HIDE_SIGN_UP_BUTTON: true
+  OIDC_CONFIG_URL: https://stg.account.api.here.com
+  OIDC_ISSUER: https://st.p.account.here.com
+  OIDC_LOGIN_ACTION: "com.advancedtelematic.auth.NoLoginAction"
+  OIDC_LOGOUT_ACTION: "com.advancedtelematic.auth.NoLogoutAction"
+  OIDC_NS_PROVIDER: "com.advancedtelematic.auth.oidc.NamespaceFromUserProfile"
+  AUDITOR_HOST: ota-auditor
+  AUDITOR_PORT: '80'
+  CAMPAIGNER_HOST: ota-campaigner
+  CAMPAIGNER_PORT: '80'
+  CRYPT_HOST: ota-crypt
+  CRYPT_PORT: '80'
+  DEVICE_GATEWAY_PORT: '8000'
+  DEVICE_REGISTRY_HOST: ota-device-registry
+  DEVICE_REGISTRY_PORT: '80'
+  DIRECTOR_HOST: ota-director
+  DIRECTOR_PORT: '80'
+  NAMESPACE_DIRECTOR_MODULE: ""
+  ENV_PREFIX: ota_
+  JAVA_OPTS: -Xmx300m
+  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
+  KAFKA_HOST: ota-kafka:9092
+  KAFKA_TOPIC_SUFFIX: ota
+  LOG_APPENDER: async_json
+  OMNITURE_SRC_URL: "https://tags.tiqcdn.com/utag/here/otaconnect/dev/utag.js"
+  PLAY_HTTP_SESSION_SECURE: false
+  REPORT_METRICS: false
+  TOGGLE_ATS_GARAGE_THEME: 'true'
+  TOGGLE_AUTO_FEATURE_ACTIVATION: 'true'
+  TOGGLE_CREDENTIALS_DOWNLOAD: 'true'
+  TOGGLE_USER_PROFILE_MENU: 'true'
+  TREEHUB_HOST_PUB: treehub.ota.local
+  TREEHUB_PORT_PUB: '80'
+  TREEHUB_SCHEME_PUB: 'http'
+  TUF_KEYSERVER_HOST: ota-tuf-keyserver
+  TUF_KEYSERVER_PORT: '80'
+  TUF_REPOSERVER_HOST: ota-tuf-reposerver-internal
+  TUF_REPOSERVER_HOST_PUB: ota-tuf-reposerver.ota.local
+  TUF_REPOSERVER_PORT: '80'
+  TUF_REPOSERVER_PORT_PUB: '80'
+  TUF_REPOSERVER_SCHEME_PUB: 'http'
+  USER_PROFILE_HOST: ota-user-profile
+  USER_PROFILE_PORT: '80'
+  WS_HOST: web-events.ota.local
+  WS_PORT: '80'
+  WS_SCHEME: ws
+  ZIPKIN_URI: "http://ota-zipkin:9411"
+  rootLevel: DEBUG
+
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 9001
+  # These can be set when using the LoadBalancer type on a non-local setup:
+  # internal: true
+  # sslCert: arn:aws:iam::123456787890:server-certificate/cert-name
+  # sslPorts: "*"
+  # dnsName: app.ota.local
+  # dnsNameConnect: connect.ota.local
+  # annotations: {}
+
+secret:
+  PLAY_CRYPTO_SECRET: youshouldreplacethiswithsomeotherlongsecret
+  AUTH0_CLIENT_ID: someID
+  AUTH0_CLIENT_SECRET: someSecret
+  OIDC_KEYSET: '{"keys": []}'
+
+  # "youshouldreplacethiswithsomeotherlongsecret" as base64, since
+  # that is how Auth+ wants it:
+  JWT_SECRET: eW91c2hvdWxkcmVwbGFjZXRoaXN3aXRoc29tZW90aGVybG9uZ3NlY3JldA==
+
+nameOverride: ""
+fullnameOverride: ""
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "300m"
+  path: /
+  hosts:
+    - app.ota.local
+  tls: []
+
+resources:
+  requests:
+    cpu: 80m
+    memory: 350Mi
+
+privateRegistry: false
+
+registryPullSecret: docker-registry-key
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+pdb:
+  enabled: false
+  maxUnavailable:
+  minAvailable:

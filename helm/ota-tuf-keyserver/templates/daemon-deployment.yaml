@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "ota-tuf-keyserver.fullname" . }}-daemon
+  labels:
+    app: {{ template "ota-tuf-keyserver.name" . }}-daemon
+    chart: {{ template "ota-tuf-keyserver.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount.daemon }}
+  selector:
+    matchLabels:
+      app: {{ template "ota-tuf-keyserver.name" . }}-daemon
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-tuf-keyserver.name" . }}-daemon
+        release: {{ .Release.Name }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-daemon
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          envFrom:
+          - configMapRef:
+              name: {{ template "ota-tuf-keyserver.fullname" . }}
+          - secretRef:
+              name: {{ template "ota-tuf-keyserver.fullname" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.configMap.BIND_PORT }}
+              name: http
+          args:
+            - "-main"
+            - com.advancedtelematic.tuf.keyserver.daemon.KeyGenerationDaemon
+          livenessProbe:
+            initialDelaySeconds: 300
+            periodSeconds: 30
+            httpGet:
+              path: "/health"
+              port: {{ .Values.configMap.BIND_PORT }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

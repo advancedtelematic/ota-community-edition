@@ -1,0 +1,43 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "ota-treehub.fullname" . }}
+  labels:
+    app: {{ template "ota-treehub.name" . }}
+    chart: {{ template "ota-treehub.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- if .Values.service.internal }}
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    {{- end }}
+    {{- if .Values.service.sslCert }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: {{ .Values.service.sslCert | quote }}
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: {{ .Values.service.sslPorts | quote }}
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "120"
+    {{- end }}
+    {{- if .Values.service.dnsName }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.service.dnsName | quote }}
+    {{- end }}
+
+spec:
+  type: {{ .Values.service.publicTreehubType }}
+  ports:
+    - port: {{ .Values.service.publicTreehubPort }}
+      {{- if .Values.service.apiGateway.enabled }}
+      targetPort: {{ .Values.service.apiGateway.podPort }}
+      {{- else }}
+      targetPort: http
+      {{- end }}
+      protocol: TCP
+      name: http
+  {{- if .Values.service.apiGateway.enabled }}
+  selector:
+    app: {{ .Values.service.apiGateway.selector.app }}
+  {{- else }}
+  selector:
+    app: {{ template "ota-treehub.name" . }}
+    release: {{ .Release.Name }}
+  {{- end }}

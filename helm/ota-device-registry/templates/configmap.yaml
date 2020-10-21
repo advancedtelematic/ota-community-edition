@@ -1,0 +1,32 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-device-registry.fullname" . }}
+  labels:
+    app: {{ template "ota-device-registry.name" . }}
+    chart: {{ template "ota-device-registry.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  AUTH_PROTOCOL: {{ .Values.configMap.AUTH_PROTOCOL | quote }}
+  AUDITOR_HOST: {{ .Values.configMap.AUDITOR_HOST | quote }}
+  AUDITOR_PORT: {{ .Values.configMap.AUDITOR_PORT | quote }}
+  BIND_HOST: {{ .Values.configMap.BIND_HOST | quote }}
+  BIND_PORT: {{ .Values.configMap.BIND_PORT | quote }}
+  DB_MIGRATE: {{ .Values.configMap.DB_MIGRATE | quote }}
+  DB_URL: {{ .Values.configMap.DB_URL | quote }}
+  DB_USER: {{ .Values.configMap.DB_USER | quote }}
+  DIRECTOR_HOST: {{ .Values.configMap.DIRECTOR_HOST | quote }}
+  DIRECTOR_PORT: {{ .Values.configMap.DIRECTOR_PORT | quote }}
+  ENV_PREFIX: {{ .Values.configMap.ENV_PREFIX | quote }}
+  JAVA_OPTS: {{ .Values.configMap.JAVA_OPTS | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.KAFKA_BOOTSTRAP_SERVERS | quote }}
+  KAFKA_HOST: {{ .Values.configMap.KAFKA_HOST | quote }}
+  KAFKA_TOPIC_SUFFIX: {{ .Values.configMap.KAFKA_TOPIC_SUFFIX | quote }}
+  LOG_APPENDER: {{ .Values.configMap.LOG_APPENDER | quote }}
+  REPORT_METRICS: {{ .Values.configMap.REPORT_METRICS | quote }}
+  ATS_HTTP_TRACING: {{ .Values.configMap.ATS_HTTP_TRACING | quote }}
+  {{- if eq .Values.configMap.ATS_HTTP_TRACING "true" }}
+  ZIPKIN_URI:  {{ .Values.configMap.ZIPKIN_URI | quote }}
+  {{- end }}

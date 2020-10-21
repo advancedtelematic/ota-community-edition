@@ -1,0 +1,29 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-tuf-keyserver.fullname" . }}
+  labels:
+    app: {{ template "ota-tuf-keyserver.name" . }}
+    chart: {{ template "ota-tuf-keyserver.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  BIND_PORT: {{ .Values.configMap.BIND_PORT | quote }}
+  BIND_HOST: {{ .Values.configMap.BIND_HOST | quote }}
+  DB_MIGRATE: {{ .Values.configMap.DB_MIGRATE | quote }}
+  DB_URL: {{ .Values.configMap.DB_URL | quote }}
+  DB_USER: {{ .Values.configMap.DB_USER | quote }}
+  JAVA_OPTS: {{ .Values.configMap.JAVA_OPTS | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.KAFKA_BOOTSTRAP_SERVERS | quote }}
+  KAFKA_HOST: {{ .Values.configMap.KAFKA_HOST | quote }}
+  KAFKA_TOPIC_SUFFIX: {{ .Values.configMap.KAFKA_TOPIC_SUFFIX | quote }}
+  LOG_APPENDER: {{ .Values.configMap.LOG_APPENDER | quote }}
+  REPORT_METRICS: {{ .Values.configMap.REPORT_METRICS | quote }}
+  ATS_HTTP_TRACING: {{ .Values.configMap.ATS_HTTP_TRACING | quote }}
+  AKKA_HTTP_MAX_CONNECTIONS: {{ .Values.configMap.AKKA_HTTP_MAX_CONNECTIONS | quote }}
+  AKKA_HTTP_CLIENT_MAX_CONNECTIONS: {{ .Values.configMap.AKKA_HTTP_CLIENT_MAX_CONNECTIONS | quote }}
+  AKKA_HTTP_CLIENT_MAX_OPEN_REQUESTS: {{ .Values.configMap.AKKA_HTTP_CLIENT_MAX_OPEN_REQUESTS | quote }}
+  {{- if eq .Values.configMap.ATS_HTTP_TRACING "true" }}
+  ZIPKIN_URI:  {{ .Values.configMap.ZIPKIN_URI | quote }}
+  {{- end }}

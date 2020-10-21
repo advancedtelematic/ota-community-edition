@@ -1,0 +1,99 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "ota-treehub.fullname" . }}-internal
+  labels:
+    app: {{ template "ota-treehub.name" . }}-internal
+    chart: {{ template "ota-treehub.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "ota-treehub.name" . }}-internal
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "ota-treehub.name" . }}-internal
+        release: {{ .Release.Name }}
+      annotations:
+        {{- if .Values.prometheus.scrape }}
+        prometheus.io/scrape: "true"
+        {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+    spec:
+      {{- if eq .Values.configMap.TREEHUB_STORAGE "local" }}
+      initContainers:
+      - name: treehub-init
+        image: busybox:1.28.0
+        command: ["sh", "-c", "chown --recursive 2:2 {{ .Values.configMap.TREEHUB_LOCAL_STORE_PATH }}"]
+        volumeMounts:
+        - name: objects
+          mountPath: /treehub-objects
+      {{- end}}
+      containers:
+        - name: {{ .Chart.Name }}-internal
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          envFrom:
+          - configMapRef:
+              name: {{ template "ota-treehub.fullname" . }}
+          - secretRef:
+              name: {{ template "ota-treehub.fullname" . }}
+          env:
+          - name: 'AUTH_PROTOCOL'
+            value: 'none'
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - containerPort: {{ .Values.configMap.BIND_PORT }}
+            name: http
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          livenessProbe:
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            httpGet:
+              port: {{ .Values.configMap.BIND_PORT }}
+              path: "/health"
+          {{- if eq .Values.configMap.TREEHUB_STORAGE "local" }}
+          volumeMounts:
+          - name: objects
+            mountPath: "/treehub-objects"
+          {{- end }}
+        {{- if .Values.privateRegistry }}
+        imagePullSecrets:
+        - name: {{ .Values.registryPullSecret }}
+        {{- end }}
+      volumes:
+      - name: objects
+      {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ template "ota-treehub.fullname" . }}
+      {{- else if .Values.persistence.azureFile }}
+        azureFile:
+          secretName: ota-share
+          shareName: ota-share
+          readOnly: false
+      {{- else if .Values.persistence.azureDisk }}
+        azureDisk:
+          kind: Managed
+          diskName: ota-disk
+          diskURI: {{ .Values.persistence.azureDiskUri }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

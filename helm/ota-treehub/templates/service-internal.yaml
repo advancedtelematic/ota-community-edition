@@ -1,0 +1,20 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "ota-treehub.fullname" . }}-internal
+  labels:
+    app: {{ template "ota-treehub.name" . }}-internal
+    chart: {{ template "ota-treehub.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.internalTreehubType }}
+  ports:
+    - port: {{ .Values.service.internalTreehubPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "ota-treehub.name" . }}-internal
+    release: {{ .Release.Name }}

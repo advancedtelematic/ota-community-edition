@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "ota-web-events.fullname" . }}
+  labels:
+    app: {{ template "ota-web-events.name" . }}
+    chart: {{ template "ota-web-events.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  AUTH_PROTOCOL: {{ .Values.configMap.AUTH_PROTOCOL | quote }}
+  AUTH_VERIFICATION: {{ .Values.configMap.AUTH_VERIFICATION | quote }}
+  AUTH_PLUS_HOST: {{ .Values.configMap.AUTH_PLUS_HOST | quote }}
+  AUTH_PLUS_PORT: {{ .Values.configMap.AUTH_PLUS_PORT | quote }}
+  AUTH_PLUS_SCHEME: {{ .Values.configMap.AUTH_PLUS_SCHEME | quote }}
+  BIND_HOST: {{ .Values.configMap.BIND_HOST | quote }}
+  BIND_PORT: {{ .Values.configMap.BIND_PORT | quote }}
+  ENV_PREFIX: {{ .Values.configMap.ENV_PREFIX | quote }}
+  JAVA_OPTS: {{ .Values.configMap.JAVA_OPTS | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.KAFKA_BOOTSTRAP_SERVERS | quote }}
+  KAFKA_HOST: {{ .Values.configMap.KAFKA_HOST | quote }}
+  KAFKA_TOPIC_SUFFIX: {{ .Values.configMap.KAFKA_TOPIC_SUFFIX | quote }}
+  LOG_APPENDER: {{ .Values.configMap.LOG_APPENDER | quote }}
+  PACKAGES_VERSION_FORMAT: {{ .Values.configMap.PACKAGES_VERSION_FORMAT | quote }}
+  REPORT_METRICS: {{ .Values.configMap.REPORT_METRICS | quote }}

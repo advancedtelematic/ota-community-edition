@@ -1,0 +1,23 @@
+{{- if .Values.persistence.enabled }}
+{{- if .Values.persistence.createVolumes }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ template "ota-tuf-reposerver.fullname" . }}
+  labels:
+    app: {{ template "ota-tuf-reposerver.name" . }}
+    volume: {{ template "ota-tuf-reposerver.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  capacity:
+    storage: {{ .Values.persistence.size | quote }}
+  accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: {{ .Values.persistence.hostPath | quote }}
+{{- end}}
+{{- end}}

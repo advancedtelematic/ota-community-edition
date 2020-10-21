@@ -1,0 +1,70 @@
+replicaCount: 1
+
+image:
+  repository: advancedtelematic/web-events
+  tag: latest
+  pullPolicy: Always
+
+configMap:
+  AUTH_PROTOCOL: oauth.accesstoken
+  AUTH_VERIFICATION: local
+  AUTH_PLUS_HOST: ota-auth-plus
+  AUTH_PLUS_PORT: "80"
+  AUTH_PLUS_SCHEME: "http"
+  BIND_HOST: 0.0.0.0
+  BIND_PORT: '9001'
+  ENV_PREFIX: ota_
+  JAVA_OPTS: -XshowSettings:vm -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2
+  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
+  KAFKA_HOST: ota-kafka:9092
+  KAFKA_TOPIC_SUFFIX: ota
+  LOG_APPENDER: async_json
+  PACKAGES_VERSION_FORMAT: ".+"
+  REPORT_METRICS: "false"
+
+service:
+  type: ClusterIP
+  port: 80
+  # These can be set when using the LoadBalancer type on a non-local setup:
+  # internal: true
+  # sslCert: arn:aws:iam::123456787890:server-certificate/cert-name
+  # sslPorts: "*"
+  # dnsName: web-events.ota.local
+
+secret: {}
+  # AUTH_PLUS_CLIENT_ID: authPlusWebEventsId
+  # AUTH_PLUS_CLIENT_SECRET: authPlusWebEventsSecret
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  path: /
+  hosts:
+    - web-events.ota.local
+  tls: []
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 350Mi
+
+prometheus:
+  scrape: false
+
+privateRegistry: false
+
+registryPullSecret: docker-registry-key
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+withAuthPlus: true
+
+pdb:
+  enabled: false
+  maxUnavailable:
+  minAvailable:

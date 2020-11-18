@@ -8,11 +8,6 @@ image:
 configMap:
   AKKA_HTTP_HOST_CONNECTION_POOL_IDLE_TIMEOUT: "30 s"
   AKKA_HTTP_SERVER_IDLE_TIMEOUT: "60 s"
-  AUTH_PROTOCOL: oauth.accesstoken
-  AUTH_VERIFICATION: none
-  AUTH_PLUS_HOST: ota-auth-plus
-  AUTH_PLUS_PORT: "80"
-  AUTH_PLUS_SCHEME: "http"
   BIND_PORT: '9001'
   BIND_HOST: '0.0.0.0'
   DB_MIGRATE: 'true'

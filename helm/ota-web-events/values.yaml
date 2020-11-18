@@ -8,9 +8,6 @@ image:
 configMap:
   AUTH_PROTOCOL: oauth.accesstoken
   AUTH_VERIFICATION: local
-  AUTH_PLUS_HOST: ota-auth-plus
-  AUTH_PLUS_PORT: "80"
-  AUTH_PLUS_SCHEME: "http"
   BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
   ENV_PREFIX: ota_

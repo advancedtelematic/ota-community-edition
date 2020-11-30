@@ -26,6 +26,10 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
+    {{- if .Values.registryPullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.registryPullSecret }}
+    {{- end }}
       containers:
         - name: {{ .Chart.Name }}-daemon
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

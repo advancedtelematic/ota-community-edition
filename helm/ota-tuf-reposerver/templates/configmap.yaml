@@ -11,11 +11,6 @@ metadata:
 data:
   AKKA_HTTP_HOST_CONNECTION_POOL_IDLE_TIMEOUT: {{ .Values.configMap.AKKA_HTTP_HOST_CONNECTION_POOL_IDLE_TIMEOUT | quote }}
   AKKA_HTTP_SERVER_IDLE_TIMEOUT: {{ .Values.configMap.AKKA_HTTP_SERVER_IDLE_TIMEOUT | quote }}
-  AUTH_PROTOCOL: {{ .Values.configMap.AUTH_PROTOCOL | quote }}
-  AUTH_VERIFICATION: {{ .Values.configMap.AUTH_VERIFICATION | quote }}
-  AUTH_PLUS_HOST: {{ .Values.configMap.AUTH_PLUS_HOST | quote }}
-  AUTH_PLUS_PORT: {{ .Values.configMap.AUTH_PLUS_PORT | quote }}
-  AUTH_PLUS_SCHEME: {{ .Values.configMap.AUTH_PLUS_SCHEME | quote }}
   BIND_PORT: {{ .Values.configMap.BIND_PORT | quote }}
   DB_MIGRATE: {{ .Values.configMap.DB_MIGRATE | quote }}
   DB_URL: {{ .Values.configMap.DB_URL | quote }}

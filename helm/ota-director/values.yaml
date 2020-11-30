@@ -53,6 +53,8 @@ resources:
     cpu: 200m
     memory: 200Mi
 
+registryPullSecret: docker-registry-key
+
 pdb:
   enabled: false
   maxUnavailable:

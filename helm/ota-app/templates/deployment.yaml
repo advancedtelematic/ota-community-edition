@@ -24,6 +24,10 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
+    {{- if .Values.registryPullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.registryPullSecret }}
+    {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -52,10 +56,6 @@ spec:
             httpGet:
               port: {{ .Values.service.internalPort }}
               path: "/health"
-        {{- if .Values.privateRegistry }}
-        imagePullSecrets:
-        - name: {{ .Values.registryPullSecret }}
-        {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

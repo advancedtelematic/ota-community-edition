@@ -49,8 +49,6 @@ resources:
 prometheus:
   scrape: false
 
-privateRegistry: false
-
 registryPullSecret: docker-registry-key
 
 nodeSelector: {}

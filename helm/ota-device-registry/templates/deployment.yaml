@@ -24,6 +24,10 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
+    {{- if .Values.registryPullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.registryPullSecret }}
+    {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -59,7 +63,3 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
-{{- if .Values.privateRegistry }}
-      imagePullSecrets:
-      - name: {{ .Values.imagePullSecrets }}
-{{- end }}

@@ -49,8 +49,6 @@ resources:
     cpu: 80m
     memory: 300Mi
 
-privateRegistry: false
-
 registryPullSecrets: docker-registry-key
 
 nodeSelector: {}

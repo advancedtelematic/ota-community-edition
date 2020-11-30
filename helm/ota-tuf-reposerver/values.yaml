@@ -94,3 +94,5 @@ pdb:
 prometheus:
   scrape: "true"
   port: 9001
+
+registryPullSecret: docker-registry-key

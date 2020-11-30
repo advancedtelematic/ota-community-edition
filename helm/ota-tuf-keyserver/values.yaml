@@ -51,3 +51,5 @@ pdb:
   enabled: false
   maxUnavailable:
   minAvailable:
+
+registryPullSecret: docker-registry-key

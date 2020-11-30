@@ -26,6 +26,10 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
     spec:
+    {{- if .Values.registryPullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.registryPullSecret }}
+    {{- end }}
       {{- if eq .Values.configMap.TREEHUB_STORAGE "local" }}
       initContainers:
       - name: treehub-init
@@ -63,10 +67,6 @@ spec:
           - name: objects
             mountPath: "/treehub-objects"
           {{- end }}
-        {{- if .Values.privateRegistry }}
-        imagePullSecrets:
-        - name: {{ .Values.registryPullSecret }}
-        {{- end }}
       volumes:
       - name: objects
       {{- if .Values.persistence.enabled }}

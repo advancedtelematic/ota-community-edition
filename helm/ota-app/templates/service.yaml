@@ -21,9 +21,8 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: {{ .Values.service.dnsName | quote }}
     {{- end }}
     {{- if .Values.service.annotations }}
-    {{ toYaml .Values.service.annotations | indent 4}}
+    {{ toYaml .Values.service.annotations }}
     {{- end }}
-
 spec:
   type: {{ .Values.service.type }}
   ports:

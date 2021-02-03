@@ -69,9 +69,12 @@ ingress:
   tls: []
 
 resources:
+  limits:
+    cpu: 1
+    memory: 1.1Gi
   requests:
-    cpu: 80m
-    memory: 300Mi
+    cpu: 800m
+    memory: 1Gi
 
 persistence:
   enabled: true

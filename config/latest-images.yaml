@@ -2,7 +2,7 @@ tuf-reposerver: advancedtelematic/tuf-reposerver:f6061318845fda2413fc8dbd3c27417
 web-events: advancedtelematic/web-events:b2eac7851275bd2caf2ec38000193a45a2d1e5de
 director: advancedtelematic/director-v2:439ba2ad56a584916174dbb36561cb0d80e918f0
 tuf-keyserver: advancedtelematic/tuf-keyserver:67546531299488922eec90d239b61777947aeda4
-app: advancedtelematic/ota-plus-web:83999c8137814f6271c203358f57634d10344112
+app: advancedtelematic/ota-plus-web:df037b7f01a949ae9592af903bb69b37a2cf15ba
 campaigner: advancedtelematic/campaigner:0b0707be76957a4902623b73bb4e8fa90fd569f7
 device-registry: advancedtelematic/device-registry:8f40116f988dcb89babc0bd2b2a0fe5ba315b0dd
 treehub: advancedtelematic/treehub:a34c250106feccf7ec04fe398ca82bd7104a7c45

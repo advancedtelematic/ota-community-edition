@@ -5,6 +5,11 @@ image:
   tag: latest
   pullPolicy: Always
 
+HorizontalPodAutoscaler:
+  averageUtilization: 65
+  maxReplicas: 3
+  minReplicas: 2
+
 configMap:
   AKKA_HTTP_MAX_CONTENT_LENGTH: "3GB"
   AKKA_HTTP_REQUEST_TIMEOUT: "2 minutes"

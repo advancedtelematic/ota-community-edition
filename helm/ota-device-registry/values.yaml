@@ -7,6 +7,11 @@ image:
   tag: latest
   pullPolicy: Always
 
+HorizontalPodAutoscaler:
+  averageUtilization: 65
+  maxReplicas: 5
+  minReplicas: 4
+
 configMap:
   AUTH_PROTOCOL: 'none'
   AUDITOR_HOST: ota-auditor

@@ -1,0 +1,18 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ template "ota-treehub.fullname" . }}-internal
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "ota-treehub.fullname" . }}-internal
+  minReplicas: {{ .Values.HorizontalPodAutoscaler.minReplicas }}
+  maxReplicas: {{ .Values.HorizontalPodAutoscaler.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.HorizontalPodAutoscaler.averageUtilization }}

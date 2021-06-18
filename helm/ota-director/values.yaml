@@ -7,6 +7,11 @@ image:
   tag: latest
   pullPolicy: Always
 
+HorizontalPodAutoscaler:
+  averageUtilization: 65
+  maxReplicas: 5
+  minReplicas: 4
+
 configMap:
   BIND_PORT: '9001'
   BIND_HOST: '0.0.0.0'

@@ -1,4 +1,4 @@
-tuf-reposerver: advancedtelematic/tuf-reposerver:6871768ccf43227971a8b226d5df37e6eca8052b
+tuf-reposerver: advancedtelematic/tuf-reposerver:29f592227c60e1994def3f53f84d3dd8beb4b788
 web-events: advancedtelematic/web-events:b2eac7851275bd2caf2ec38000193a45a2d1e5de
 director: advancedtelematic/director-v2:439ba2ad56a584916174dbb36561cb0d80e918f0
 tuf-keyserver: advancedtelematic/tuf-keyserver:67546531299488922eec90d239b61777947aeda4

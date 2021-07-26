@@ -8,8 +8,8 @@ image:
   pullPolicy: Always
 
 HorizontalPodAutoscaler:
-  averageUtilization: 65
-  maxReplicas: 5
+  averageUtilization: 35
+  maxReplicas: 8
   minReplicas: 4
 
 configMap:

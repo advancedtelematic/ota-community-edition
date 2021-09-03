@@ -4,5 +4,5 @@ director: advancedtelematic/director-v2:439ba2ad56a584916174dbb36561cb0d80e918f0
 tuf-keyserver: advancedtelematic/tuf-keyserver:67546531299488922eec90d239b61777947aeda4
 app: advancedtelematic/ota-plus-web:212edf5938451ead3fd80875de83a41379014a5c
 campaigner: advancedtelematic/campaigner:b894eaec164fced05aca90a37d989100da0907c4
-device-registry: advancedtelematic/device-registry:556572051e54b01eae99de9780422a1bdd64dd6b
+device-registry: advancedtelematic/device-registry:76f758a985ec075193c6423ae855aa490a89be23
 treehub: advancedtelematic/treehub:a34c250106feccf7ec04fe398ca82bd7104a7c45

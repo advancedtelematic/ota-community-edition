@@ -54,6 +54,13 @@ spec:
           ports:
           - containerPort: {{ .Values.configMap.BIND_PORT }}
             name: http
+          readinessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: 5
+            httpGet:
+              path: /health
+              port: {{ .Values.configMap.BIND_PORT }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           livenessProbe:

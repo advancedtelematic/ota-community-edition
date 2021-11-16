@@ -10,6 +10,9 @@ HorizontalPodAutoscaler:
   maxReplicas: 3
   minReplicas: 2
 
+readinessProbe:
+  initialDelaySeconds: 20
+
 configMap:
   AKKA_HTTP_MAX_CONTENT_LENGTH: "3GB"
   AKKA_HTTP_REQUEST_TIMEOUT: "2 minutes"

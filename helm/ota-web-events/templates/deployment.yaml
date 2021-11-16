@@ -33,18 +33,6 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           env:
-          {{- if .Values.withAuthPlus }}
-          - name: AUTH_PLUS_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: auth-plus-client-web-events
-                key: client_id
-          - name: AUTH_PLUS_CLIENT_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: auth-plus-client-web-events
-                key: client_secret
-          {{- end }}
           - name: JWT_SECRET
             valueFrom:
               secretKeyRef:

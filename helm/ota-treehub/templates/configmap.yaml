@@ -12,7 +12,6 @@ data:
   AKKA_HTTP_MAX_CONTENT_LENGTH: {{ .Values.configMap.AKKA_HTTP_MAX_CONTENT_LENGTH | quote }}
   AKKA_HTTP_REQUEST_TIMEOUT: {{ .Values.configMap.AKKA_HTTP_REQUEST_TIMEOUT | quote }}
   AKKA_HTTP_IDLE_TIMEOUT: {{ .Values.configMap.AKKA_HTTP_IDLE_TIMEOUT | quote }}
-  AUTH_PROTOCOL: {{ .Values.configMap.AUTH_PROTOCOL | quote }}
   BIND_HOST: {{ .Values.configMap.BIND_HOST | quote }}
   BIND_PORT: {{ .Values.configMap.BIND_PORT | quote }}
   DB_MIGRATE: {{ .Values.configMap.DB_MIGRATE | quote }}

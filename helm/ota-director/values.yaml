@@ -58,6 +58,11 @@ resources:
     cpu: 200m
     memory: 200Mi
 
+daemonResources:
+  requests:
+    cpu: 200m
+    memory: 200Mi
+
 registryPullSecret: docker-registry-key
 
 pdb:

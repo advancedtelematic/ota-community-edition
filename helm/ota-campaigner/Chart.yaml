@@ -1,4 +1,4 @@
 apiVersion: v1
 description: ota-campaigner chart
 name: ota-campaigner
-version: 0.3.0
+version: 0.3.1

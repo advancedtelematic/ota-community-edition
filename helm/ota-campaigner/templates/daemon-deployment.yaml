@@ -52,7 +52,7 @@ spec:
               path: "/health"
               port: {{ .Values.configMap.BIND_PORT }}
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+{{ toYaml .Values.daemonResources | indent 12 }}
     {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

@@ -53,6 +53,11 @@ resources:
     cpu: 80m
     memory: 250Mi
 
+daemonResources:
+  requests:
+    cpu: 80m
+    memory: 250Mi
+
 prometheus:
   scrape: false
 

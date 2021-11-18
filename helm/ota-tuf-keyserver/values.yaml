@@ -52,6 +52,11 @@ resources:
     cpu: 80m
     memory: 300Mi
 
+daemonResources:
+  requests:
+    cpu: 80m
+    memory: 300Mi
+
 pdb:
   enabled: false
   maxUnavailable:

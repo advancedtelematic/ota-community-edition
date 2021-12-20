@@ -2,7 +2,7 @@
 {{- $serviceName := include "ota-tuf-reposerver.servicename" . -}}
 {{- $servicePort := .Values.service.publicTufReposerverPort -}}
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ template "ota-tuf-reposerver.fullname" . }}
@@ -21,10 +21,13 @@ spec:
     - host: {{ $host }}
       http:
         paths:
-          - path: /
+          - pathType: ImplementationSpecific
+            path: /
             backend:
-              serviceName: {{ $serviceName }}
-              servicePort: {{ $servicePort }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
     {{- end -}}
   {{- if .Values.ingress.tls }}
   tls:

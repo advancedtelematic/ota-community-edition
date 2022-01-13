@@ -16,7 +16,6 @@ data:
   DB_URL: {{ .Values.configMap.DB_URL | quote }}
   DB_USER: {{ .Values.configMap.DB_USER | quote }}
   JAVA_OPTS: {{ .Values.configMap.JAVA_OPTS | quote }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.KAFKA_BOOTSTRAP_SERVERS | quote }}
   KAFKA_HOST: {{ .Values.configMap.KAFKA_HOST | quote }}
   KAFKA_TOPIC_SUFFIX: {{ .Values.configMap.KAFKA_TOPIC_SUFFIX | quote }}
   LOG_APPENDER: {{ .Values.configMap.LOG_APPENDER | quote }}

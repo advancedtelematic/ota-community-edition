@@ -14,7 +14,6 @@ configMap:
   DB_URL: jdbc:mariadb://ota-mariadb:3306/tuf_reposerver
   DB_USER: tuf_reposerver
   JAVA_OPTS: '-XshowSettings:vm -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2'
-  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
   KAFKA_HOST: ota-kafka:9092
   KAFKA_TOPIC_SUFFIX: ota
   LOG_APPENDER: async_json
@@ -35,8 +34,6 @@ secret:
   DB_PASSWORD: tuf_reposerver
   TUF_REPOSERVER_AWS_ACCESS_KEY: AKIA01234567890ABCD
   TUF_REPOSERVER_AWS_SECRET_KEY: abcdefghijklmnopqrstuvwxyz1234567890ABCD
-  # AUTHPLUS_CLIENT_ID: authPlusTufReposerverId
-  # AUTHPLUS_CLIENT_SECRET: authPlusTufReposerverSecret
 
 service:
   publicTufReposerverType: ClusterIP

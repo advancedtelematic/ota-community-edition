@@ -10,13 +10,10 @@ configMap:
   AUTH_VERIFICATION: local
   BIND_HOST: 0.0.0.0
   BIND_PORT: '9001'
-  ENV_PREFIX: ota_
   JAVA_OPTS: -XshowSettings:vm -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2
-  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
   KAFKA_HOST: ota-kafka:9092
   KAFKA_TOPIC_SUFFIX: ota
   LOG_APPENDER: async_json
-  PACKAGES_VERSION_FORMAT: ".+"
   REPORT_METRICS: "false"
 
 service:
@@ -29,8 +26,6 @@ service:
   # dnsName: web-events.ota.local
 
 secret: {}
-  # AUTH_PLUS_CLIENT_ID: authPlusWebEventsId
-  # AUTH_PLUS_CLIENT_SECRET: authPlusWebEventsSecret
 
 ingress:
   enabled: true

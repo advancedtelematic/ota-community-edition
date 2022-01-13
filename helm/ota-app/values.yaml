@@ -6,9 +6,6 @@ image:
   pullPolicy: Always
 
 configMap:
-  API_GATEWAY_HOST: api
-  API_GATEWAY_PORT: '80'
-  API_GATEWAY_SCHEME: 'http'
   AUTH0_CALLBACK_URL: https://app-here.ota.local/callback
   AUTH0_HIDE_SIGN_UP_BUTTON: true
   OIDC_CONFIG_URL: https://stg.account.api.here.com
@@ -27,10 +24,7 @@ configMap:
   DEVICE_REGISTRY_PORT: '80'
   DIRECTOR_HOST: ota-director
   DIRECTOR_PORT: '80'
-  NAMESPACE_DIRECTOR_MODULE: ""
-  ENV_PREFIX: ota_
   JAVA_OPTS: -Xmx300m
-  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
   KAFKA_HOST: ota-kafka:9092
   KAFKA_TOPIC_SUFFIX: ota
   LOG_APPENDER: async_json
@@ -41,16 +35,10 @@ configMap:
   TOGGLE_AUTO_FEATURE_ACTIVATION: 'true'
   TOGGLE_CREDENTIALS_DOWNLOAD: 'true'
   TOGGLE_USER_PROFILE_MENU: 'true'
-  TREEHUB_HOST_PUB: treehub.ota.local
-  TREEHUB_PORT_PUB: '80'
-  TREEHUB_SCHEME_PUB: 'http'
   TUF_KEYSERVER_HOST: ota-tuf-keyserver
   TUF_KEYSERVER_PORT: '80'
   TUF_REPOSERVER_HOST: ota-tuf-reposerver-internal
-  TUF_REPOSERVER_HOST_PUB: ota-tuf-reposerver.ota.local
   TUF_REPOSERVER_PORT: '80'
-  TUF_REPOSERVER_PORT_PUB: '80'
-  TUF_REPOSERVER_SCHEME_PUB: 'http'
   USER_PROFILE_HOST: ota-user-profile
   USER_PROFILE_PORT: '80'
   WS_HOST: web-events.ota.local

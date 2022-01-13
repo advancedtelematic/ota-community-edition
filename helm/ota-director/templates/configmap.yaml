@@ -15,17 +15,13 @@ data:
   DB_URL: {{ .Values.configMap.DB_URL | quote }}
   DB_USER: {{ .Values.configMap.DB_USER | quote }}
   DB_NUM_THREADS: {{ .Values.configMap.DB_NUM_THREADS | quote }}
-  ENV_PREFIX: {{ .Values.configMap.ENV_PREFIX | quote }}
   JAVA_OPTS: {{ .Values.configMap.JAVA_OPTS | quote }}
-  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.configMap.KAFKA_BOOTSTRAP_SERVERS | quote }}
   KAFKA_HOST: {{ .Values.configMap.KAFKA_HOST | quote }}
   KAFKA_TOPIC_SUFFIX: {{ .Values.configMap.KAFKA_TOPIC_SUFFIX | quote }}
   LOG_APPENDER: {{ .Values.configMap.LOG_APPENDER | quote }}
   REPORT_METRICS: {{ .Values.configMap.REPORT_METRICS | quote }}
   TUF_KEYSERVER_HOST: {{ .Values.configMap.TUF_KEYSERVER_HOST | quote }}
   TUF_KEYSERVER_PORT: {{ .Values.configMap.TUF_KEYSERVER_PORT | quote }}
-  TUF_REPOSERVER_HOST: {{ .Values.configMap.TUF_REPOSERVER_HOST | quote }}
-  TUF_REPOSERVER_PORT: {{ .Values.configMap.TUF_REPOSERVER_PORT | quote }}
   ALLOW_ECU_REPLACEMENT: {{ .Values.configMap.ALLOW_ECU_REPLACEMENT | quote }}
   AKKA_HTTP_MAX_CONNECTIONS: {{ .Values.configMap.AKKA_HTTP_MAX_CONNECTIONS | quote }}
   AKKA_HTTP_CLIENT_MAX_CONNECTIONS: {{ .Values.configMap.AKKA_HTTP_CLIENT_MAX_CONNECTIONS | quote }}

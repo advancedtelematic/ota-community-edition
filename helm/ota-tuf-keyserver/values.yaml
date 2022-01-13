@@ -19,7 +19,6 @@ configMap:
   DB_URL: jdbc:mariadb://ota-mariadb:3306/tuf_keyserver
   DB_USER: tuf_keyserver
   JAVA_OPTS: -XshowSettings:vm -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2
-  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
   KAFKA_HOST: ota-kafka:9092
   KAFKA_TOPIC_SUFFIX: ota
   LOG_APPENDER: async_json

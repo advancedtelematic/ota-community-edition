@@ -16,9 +16,7 @@ configMap:
   DEVICE_REGISTRY_PORT: '80'
   DIRECTOR_HOST: ota-director
   DIRECTOR_PORT: '80'
-  ENV_PREFIX: ota_
   JAVA_OPTS: '-Xmx200m'
-  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
   KAFKA_HOST: ota-kafka:9092
   KAFKA_TOPIC_SUFFIX: ota
   MESSAGING_MODE: kafka

@@ -14,18 +14,12 @@ HorizontalPodAutoscaler:
 
 configMap:
   AUTH_PROTOCOL: 'none'
-  AUDITOR_HOST: ota-auditor
-  AUDITOR_PORT: 80
   BIND_HOST: 0.0.0.0
   BIND_PORT: 9001
   DB_MIGRATE: true
   DB_URL: jdbc:mariadb://ota-mariadb:3306/device_registry
   DB_USER: device_registry
-  DIRECTOR_HOST: ota-director
-  DIRECTOR_PORT: 80
-  ENV_PREFIX: ota_
   JAVA_OPTS: -XshowSettings:vm -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2
-  KAFKA_BOOTSTRAP_SERVERS: ota-kafka:9092
   KAFKA_HOST: ota-kafka:9092
   KAFKA_TOPIC_SUFFIX: ota
   LOG_APPENDER: async_json

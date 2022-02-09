@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
-  init_image: busybox:1.28.0
-  repository: advancedtelematic/tuf-reposerver
+  init_image: hcr.data.here.com/ota_saas/busybox:1.28.0
+  repository: hcr.data.here.com/ota_saas/tuf-reposerver
   tag: latest
   pullPolicy: Always
 

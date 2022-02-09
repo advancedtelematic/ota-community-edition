@@ -33,7 +33,7 @@ spec:
       {{- if eq .Values.configMap.TREEHUB_STORAGE "local" }}
       initContainers:
       - name: treehub-init
-        image: busybox:1.28.0
+        image: hcr.data.here.com/ota_saas/busybox:1.28.0
         command: ["sh", "-c", "chown --recursive 2:2 {{ .Values.configMap.TREEHUB_LOCAL_STORE_PATH }}"]
         volumeMounts:
         - name: objects

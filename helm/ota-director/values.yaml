@@ -3,7 +3,7 @@ replicaCount:
   daemon: 1
 
 image:
-  repository: advancedtelematic/director-v2
+  repository: hcr.data.here.com/ota_saas/director-v2
   tag: latest
   pullPolicy: Always
 

@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: advancedtelematic/ota-plus-web
+  repository: hcr.data.here.com/ota_saas/ota-plus-web
   tag: latest
   pullPolicy: Always
 

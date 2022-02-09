@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: advancedtelematic/web-events
+  repository: hcr.data.here.com/ota_saas/web-events
   tag: latest
   pullPolicy: Always
 

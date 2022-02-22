@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: hcr.data.here.com/ota_saas/treehub
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 HorizontalPodAutoscaler:
   averageUtilization: 65

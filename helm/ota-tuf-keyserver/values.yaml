@@ -5,7 +5,7 @@ replicaCount:
 image:
   repository: hcr.data.here.com/ota_saas/tuf-keyserver
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 HorizontalPodAutoscaler:
   averageUtilizationCPU: 65

@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: hcr.data.here.com/ota_saas/web-events
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 configMap:
   AUTH_PROTOCOL: oauth.accesstoken

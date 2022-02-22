@@ -3,7 +3,7 @@ image:
   init_image: hcr.data.here.com/ota_saas/busybox:1.28.0
   repository: hcr.data.here.com/ota_saas/tuf-reposerver
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 configMap:
   AKKA_HTTP_HOST_CONNECTION_POOL_IDLE_TIMEOUT: "30 s"

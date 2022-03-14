@@ -1,4 +1,4 @@
-tuf-reposerver: hcr.data.here.com/ota_saas/tuf-reposerver:94b87444064a8aa45ab5e83984207f96cf08aef3
+tuf-reposerver: hcr.data.here.com/ota_saas/tuf-reposerver:d949664e5a5b37223c3872cdb2eb44f740be8331
 web-events: hcr.data.here.com/ota_saas/web-events:1fb65702956ddf3e9efa3d0e0ae7d6b7f4dbd24d
 director: hcr.data.here.com/ota_saas/director-v2:9cd9fd777883875db83fd25b8f004b0dd38c8c20
 tuf-keyserver: hcr.data.here.com/ota_saas/tuf-keyserver:d949664e5a5b37223c3872cdb2eb44f740be8331

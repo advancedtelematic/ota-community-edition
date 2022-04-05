@@ -3,6 +3,6 @@ web-events: hcr.data.here.com/ota_saas/web-events:1fb65702956ddf3e9efa3d0e0ae7d6
 director: hcr.data.here.com/ota_saas/director-v2:cbcba418f9e233f83831ef8619a18de19d08ff36
 tuf-keyserver: hcr.data.here.com/ota_saas/tuf-keyserver:d949664e5a5b37223c3872cdb2eb44f740be8331
 app: hcr.data.here.com/ota_saas/ota-plus-web:ef5f41532923fefeff48bba9eb356154df470a26
-campaigner: hcr.data.here.com/ota_saas/campaigner:a2dd2b2be87f223aff55f01824f62d9f7b9305f3
+campaigner: hcr.data.here.com/ota_saas/campaigner:efd1f49417af8824ba62995d9fcd647717d6ce88
 device-registry: hcr.data.here.com/ota_saas/device-registry:6861ba9ecf59e561117099ea37388a571fd498a0
 treehub: hcr.data.here.com/ota_saas/treehub:1e0573d3f71e5feb8a629f31a930a6d609cd2a5a

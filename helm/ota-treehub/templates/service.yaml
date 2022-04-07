@@ -24,6 +24,9 @@ metadata:
 
 spec:
   type: {{ .Values.service.publicTreehubType }}
+  {{- if .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.publicTreehubPort }}
       {{- if .Values.service.apiGateway.enabled }}

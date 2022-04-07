@@ -25,6 +25,9 @@ metadata:
 
 spec:
   type: {{ .Values.service.publicTufReposerverType }}
+  {{- if .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
   ports:
     - port: {{ .Values.service.publicTufReposerverPort }}
       {{- if .Values.service.apiGateway.enabled }}

@@ -5,6 +5,10 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+lifecycle:
+  preStopTimeSec: 15
+  terminationGracePeriodSeconds: 30 # 30 sec is used by default
+
 configMap:
   AKKA_HTTP_HOST_CONNECTION_POOL_IDLE_TIMEOUT: "30 s"
   AKKA_HTTP_SERVER_IDLE_TIMEOUT: "60 s"

@@ -5,6 +5,10 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+lifecycle:
+  preStopTimeSec: 15
+  terminationGracePeriodSeconds: 30 # 30 sec is used by default
+
 HorizontalPodAutoscaler:
   averageUtilization: 65
   maxReplicas: 3

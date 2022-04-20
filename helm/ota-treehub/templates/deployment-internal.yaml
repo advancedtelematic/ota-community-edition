@@ -39,9 +39,14 @@ spec:
         - name: objects
           mountPath: /treehub-objects
       {{- end}}
+      terminationGracePeriodSeconds: {{ .Values.lifecycle.terminationGracePeriodSeconds }}
       containers:
         - name: {{ .Chart.Name }}-internal
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "{{ .Values.lifecycle.preStopTimeSec }}"]
           envFrom:
           - configMapRef:
               name: {{ template "ota-treehub.fullname" . }}

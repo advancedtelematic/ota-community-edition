@@ -28,6 +28,7 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.registryPullSecret }}
     {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.lifecycle.terminationGracePeriodSeconds }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -37,6 +38,10 @@ spec:
               secretKeyRef:
                 name: jwt-signing-key
                 key: jwt-signing-key
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "{{ .Values.lifecycle.preStopTimeSec }}"]
           envFrom:
           - configMapRef:
               name: {{ template "ota-app.fullname" . }}

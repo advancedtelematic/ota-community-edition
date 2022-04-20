@@ -30,9 +30,14 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.registryPullSecret }}
     {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.lifecycle.terminationGracePeriodSeconds }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "{{ .Values.lifecycle.preStopTimeSec }}"]
           envFrom:
           - configMapRef:
               name: {{ template "ota-campaigner.fullname" . }}

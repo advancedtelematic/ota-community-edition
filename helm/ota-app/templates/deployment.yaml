@@ -61,6 +61,13 @@ spec:
             httpGet:
               port: {{ .Values.service.internalPort }}
               path: "/health"
+          readinessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: 10
+            httpGet:
+              path: "/health"
+              port: {{ .Values.service.internalPort }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

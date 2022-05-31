@@ -6,8 +6,11 @@ image:
   pullPolicy: IfNotPresent
 
 lifecycle:
-  preStopTimeSec: 15
+  preStopTimeSec: 25
   terminationGracePeriodSeconds: 30 # 30 sec is used by default
+
+readinessProbe:
+  initialDelaySeconds: 5
 
 configMap:
   AKKA_HTTP_HOST_CONNECTION_POOL_IDLE_TIMEOUT: "30 s"

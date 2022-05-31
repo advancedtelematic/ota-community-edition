@@ -6,8 +6,11 @@ image:
   pullPolicy: IfNotPresent
 
 lifecycle:
-  preStopTimeSec: 15
+  preStopTimeSec: 25
   terminationGracePeriodSeconds: 30 # 30 sec is used by default
+
+readinessProbe:
+  initialDelaySeconds: 5
 
 configMap:
   AUTH0_CALLBACK_URL: https://app-here.ota.local/callback

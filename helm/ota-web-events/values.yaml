@@ -5,6 +5,9 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
+readinessProbe:
+  initialDelaySeconds: 5
+
 configMap:
   AUTH_PROTOCOL: oauth.accesstoken
   AUTH_VERIFICATION: local

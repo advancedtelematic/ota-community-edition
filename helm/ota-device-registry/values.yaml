@@ -8,8 +8,11 @@ image:
   pullPolicy: IfNotPresent
 
 lifecycle:
-  preStopTimeSec: 15
+  preStopTimeSec: 25
   terminationGracePeriodSeconds: 30 # 30 sec is used by default
+
+readinessProbe:
+  initialDelaySeconds: 5
 
 HorizontalPodAutoscaler:
   averageUtilization: 65

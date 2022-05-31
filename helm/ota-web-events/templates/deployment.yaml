@@ -53,6 +53,13 @@ spec:
             httpGet:
               port: {{ .Values.configMap.BIND_PORT }}
               path: "/health"
+          readinessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: 10
+            httpGet:
+              path: "/health"
+              port: {{ .Values.configMap.BIND_PORT }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

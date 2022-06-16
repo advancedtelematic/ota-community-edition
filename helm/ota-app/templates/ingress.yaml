@@ -3,6 +3,7 @@
 {{- $fullName := include "ota-app.fullname" . -}}
 {{- $servicePort := .Values.service.port -}}
 {{- $ingressPath := .Values.ingress.path -}}
+{{- $ingressHosts := .Values.ingress.hosts -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -21,10 +22,10 @@ spec:
   tls:
   {{- range .Values.ingress.tls }}
     - hosts:
-      {{- range .Values.ingress.hosts }}
+      {{- range $ingressHosts }}
         - {{ . }}
       {{- end }}
-      secretName: {{ .secretName }}
+    - secretName: {{ .secretName }}
   {{- end }}
 {{- end }}
   rules:
@@ -37,7 +38,7 @@ spec:
             backend:
               service:
                 name: {{ $fullName }}
-                port: 
+                port:
                   number: 80
   {{- end }}
 {{- end }}

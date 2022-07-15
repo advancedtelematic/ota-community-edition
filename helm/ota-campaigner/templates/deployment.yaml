@@ -50,6 +50,7 @@ spec:
           livenessProbe:
             initialDelaySeconds: 300
             periodSeconds: 30
+            timeoutSeconds: 3
             httpGet:
               path: "/health"
               port: {{ .Values.configMap.BIND_PORT }}
@@ -57,6 +58,7 @@ spec:
             failureThreshold: 6
             initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
             periodSeconds: 10
+            timeoutSeconds: 3
             httpGet:
               path: "/health"
               port: {{ .Values.configMap.BIND_PORT }}

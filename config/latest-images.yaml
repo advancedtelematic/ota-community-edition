@@ -4,5 +4,5 @@ director: hcr.data.here.com/ota_saas/director-v2:cbcba418f9e233f83831ef8619a18de
 tuf-keyserver: hcr.data.here.com/ota_saas/tuf-keyserver:436b49e7e7670909da5c414193d6fa969c69dd05
 app: hcr.data.here.com/ota_saas/ota-plus-web:b1e1f4e6156f0921ef4466567a6a0cc1525676ae
 campaigner: hcr.data.here.com/ota_saas/campaigner:8abcf58b526dc884fc3fe69efd9388cf402e9498
-device-registry: hcr.data.here.com/ota_saas/device-registry:b40cd8d675df2b57c0d521756bb496729fd227e7
+device-registry: hcr.data.here.com/ota_saas/device-registry:f19d83b8ebc5cef4848c93c014d4a3fc8e58613b
 treehub: hcr.data.here.com/ota_saas/treehub:f753e409bf9638dd2d6c13c79889ce599c167914

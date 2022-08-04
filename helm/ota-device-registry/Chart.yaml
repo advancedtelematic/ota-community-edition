@@ -1,5 +1,6 @@
-apiVersion: v1
+apiVersion: v2
 appVersion: "1.0"
 description: ota-device-registry chart
 name: ota-device-registry
-version: 0.4.0
+type: application
+version: 0.4.1

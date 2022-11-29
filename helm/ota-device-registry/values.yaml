@@ -8,8 +8,8 @@ image:
   pullPolicy: IfNotPresent
 
 lifecycle:
-  preStopTimeSec: 25
-  terminationGracePeriodSeconds: 30 # 30 sec is used by default
+  preStopTimeSec: 35
+  terminationGracePeriodSeconds: 40
 
 readinessProbe:
   initialDelaySeconds: 5

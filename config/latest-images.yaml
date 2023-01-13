@@ -1,7 +1,7 @@
 tuf-reposerver: hcr.data.here.com/ota_saas/tuf-reposerver:6bae7a4b32aa46cd851d6db4e4d1bb8368cf44c0
 web-events: hcr.data.here.com/ota_saas/web-events:1fb65702956ddf3e9efa3d0e0ae7d6b7f4dbd24d
 director: hcr.data.here.com/ota_saas/director-v2:8a1c6a948d2fba1498748de16889e4efbc2f8a1c
-tuf-keyserver: hcr.data.here.com/ota_saas/tuf-keyserver:d177372ccbcd8e8e23557e922c85d1959d75ce21
+tuf-keyserver: hcr.data.here.com/ota_saas/tuf-keyserver:f848d8fe5de22856bfb761e97dff941b984d20c7
 app: hcr.data.here.com/ota_saas/ota-plus-web:343877657639c868487489c2bb30ed586a597c4c
 campaigner: hcr.data.here.com/ota_saas/campaigner:d525347d91d5a414538990316f246d3054d54068
 device-registry: hcr.data.here.com/ota_saas/device-registry:043cc43cec2f4bdac979c1a1bd61d8d68c304d0d

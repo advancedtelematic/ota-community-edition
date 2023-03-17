@@ -9,7 +9,7 @@ image:
 
 lifecycle:
   preStopTimeSec: 35
-  terminationGracePeriodSeconds: 40
+  terminationGracePeriodSeconds: 30
 
 readinessProbe:
   initialDelaySeconds: 5
